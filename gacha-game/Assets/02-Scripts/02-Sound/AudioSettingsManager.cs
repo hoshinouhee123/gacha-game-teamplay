@@ -1,19 +1,24 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 
 public class AudioSettingsManager : MonoBehaviour
 {
-    [Header("Audio Mixer")]
+    [Title("오디오 믹서")]
+
     [SerializeField] private AudioMixer audioMixer;
 
-    [Header("Volume Sliders")]
+
+    [Title("볼륨 슬라이더")]
+
     [SerializeField] private Slider masterSlider;
     [SerializeField] private Slider bgmSlider;
     [SerializeField] private Slider sfxSlider;
     [SerializeField] private Slider voiceSlider;
 
-    [Header("Mute Toggles")]
+    [Title("음소거 토글")]
+
     [SerializeField] private Toggle masterMuteToggle;
     [SerializeField] private Toggle bgmMuteToggle;
     [SerializeField] private Toggle sfxMuteToggle;

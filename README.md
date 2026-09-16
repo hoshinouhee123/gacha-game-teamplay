@@ -15,7 +15,21 @@
 
 ### AudioManager를 통한 사운드 재생 방법 예시 코드
 ``` C#
-AudioManager.Instance.PlayBGM(bgmClip);		// BGM 재생
-AudioManager.Instance.PlaySFX(clickSound);		// SFX 재생
-AudioManager.Instance.PlayVoice(characterVoice);	// 캐릭터 보이스 재생
+// BGM 재생
+AudioManager.Instance.PlayBGM(bgmClip);
+
+// 효과음 재생
+AudioManager.Instance.PlaySFX(sfxClip);
+
+// 효과음 볼륨 50% 재생
+AudioManager.Instance.PlaySFX(sfxClip, 0.5f);
+
+// 보이스 재생
+AudioManager.Instance.PlayVoice(voiceClip);
+
+// 정지
+AudioManager.Instance.StopBGM();
+AudioManager.Instance.StopVoice();
+AudioManager.Instance.StopAllSFX();
+AudioManager.Instance.StopAllAudio();
 ```

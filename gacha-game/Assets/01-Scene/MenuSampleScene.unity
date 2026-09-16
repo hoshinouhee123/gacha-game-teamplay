@@ -4215,12 +4215,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 668c996f0bc4dd345abd7c2bc0162ff1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  bgmMixerGroup: {fileID: -2216604724784761520, guid: 15788000b16e0f742aa2a672f197f16e, type: 2}
+  sfxMixerGroup: {fileID: -1450776217138489269, guid: 15788000b16e0f742aa2a672f197f16e, type: 2}
+  voiceMixerGroup: {fileID: 2027888465873427052, guid: 15788000b16e0f742aa2a672f197f16e, type: 2}
   bgmSource: {fileID: 1557512760}
   sfxSource: {fileID: 824556895}
   voiceSource: {fileID: 1160257316}
-  bgmGroup: {fileID: -2216604724784761520, guid: 15788000b16e0f742aa2a672f197f16e, type: 2}
-  sfxGroup: {fileID: -1450776217138489269, guid: 15788000b16e0f742aa2a672f197f16e, type: 2}
-  voiceGroup: {fileID: 2027888465873427052, guid: 15788000b16e0f742aa2a672f197f16e, type: 2}
+  testBGM: {fileID: 8300000, guid: 8195b0849b0384747862759026087d94, type: 3}
+  testSFX: {fileID: 8300000, guid: feb991b782b2b8f4d95d8bbbb74039a2, type: 3}
+  testVoice: {fileID: 0}
 --- !u!4 &1058747208
 Transform:
   m_ObjectHideFlags: 0
