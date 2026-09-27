@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.Audio;
-using Sirenix.OdinInspector;
 
 public class AudioManager : MonoBehaviour
 {
@@ -10,17 +9,12 @@ public class AudioManager : MonoBehaviour
     // Mixer Groups
     // =========================================================
 
-    [Title("오디오 믹서 그룹")]
-
-    [Required]
     [SerializeField]
     private AudioMixerGroup bgmMixerGroup;
 
-    [Required]
     [SerializeField]
     private AudioMixerGroup sfxMixerGroup;
 
-    [Required]
     [SerializeField]
     private AudioMixerGroup voiceMixerGroup;
 
@@ -29,41 +23,14 @@ public class AudioManager : MonoBehaviour
     // Audio Sources
     // =========================================================
 
-    [Title("오디오 소스")]
-
-    [Required]
     [SerializeField]
     private AudioSource bgmSource;
 
-    [Required]
     [SerializeField]
     private AudioSource sfxSource;
 
-    [Required]
     [SerializeField]
     private AudioSource voiceSource;
-
-
-    // =========================================================
-    // Test Clips
-    // =========================================================
-
-    [Title("오디오 테스트")]
-
-    [BoxGroup("오디오 테스트/BGM")]
-    [LabelText("테스트 BGM")]
-    [SerializeField]
-    private AudioClip testBGM;
-
-    [BoxGroup("오디오 테스트/SFX")]
-    [LabelText("테스트 SFX")]
-    [SerializeField]
-    private AudioClip testSFX;
-
-    [BoxGroup("오디오 테스트/Voice")]
-    [LabelText("테스트 Voice")]
-    [SerializeField]
-    private AudioClip testVoice;
 
 
     // =========================================================
@@ -308,140 +275,5 @@ public class AudioManager : MonoBehaviour
         StopBGM();
         StopAllSFX();
         StopVoice();
-    }
-
-
-    // =========================================================
-    // Odin - BGM Test
-    // =========================================================
-
-    [BoxGroup("Audio Test/BGM")]
-    [ButtonGroup("Audio Test/BGM/Buttons")]
-    [Button("BGM 재생", ButtonSizes.Large)]
-    [EnableIf("@UnityEngine.Application.isPlaying")]
-    private void TestPlayBGM()
-    {
-        if (testBGM == null)
-        {
-            Debug.LogWarning(
-                "[AudioManager] Test BGM을 넣으란 데스와."
-            );
-
-            return;
-        }
-
-        PlayBGM(testBGM);
-    }
-
-
-    [BoxGroup("Audio Test/BGM")]
-    [ButtonGroup("Audio Test/BGM/Buttons")]
-    [Button("BGM 정지", ButtonSizes.Large)]
-    [EnableIf("@UnityEngine.Application.isPlaying")]
-    private void TestStopBGM()
-    {
-        StopBGM();
-    }
-
-
-    // =========================================================
-    // Odin - SFX Test
-    // =========================================================
-
-    [BoxGroup("Audio Test/SFX")]
-    [ButtonGroup("Audio Test/SFX/Buttons")]
-    [Button("효과음 재생", ButtonSizes.Large)]
-    [EnableIf("@UnityEngine.Application.isPlaying")]
-    private void TestPlaySFX()
-    {
-        if (testSFX == null)
-        {
-            Debug.LogWarning(
-                "[AudioManager] Test SFX를 넣으삼."
-            );
-
-            return;
-        }
-
-        PlaySFX(testSFX);
-    }
-
-
-    [BoxGroup("Audio Test/SFX")]
-    [ButtonGroup("Audio Test/SFX/Buttons")]
-    [Button("효과음 재생 x3", ButtonSizes.Large)]
-    [EnableIf("@UnityEngine.Application.isPlaying")]
-    private void TestPlaySFXMultiple()
-    {
-        if (testSFX == null)
-        {
-            Debug.LogWarning(
-                "[AudioManager] Test SFX를 넣어주세요."
-            );
-
-            return;
-        }
-
-        // 동시에 여러 효과음이 겹쳐지는지 테스트
-        PlaySFX(testSFX);
-        PlaySFX(testSFX);
-        PlaySFX(testSFX);
-    }
-
-
-    [BoxGroup("Audio Test/SFX")]
-    [ButtonGroup("Audio Test/SFX/Buttons")]
-    [Button("효과음 정지", ButtonSizes.Large)]
-    [EnableIf("@UnityEngine.Application.isPlaying")]
-    private void TestStopSFX()
-    {
-        StopAllSFX();
-    }
-
-
-    // =========================================================
-    // Odin - Voice Test
-    // =========================================================
-
-    [BoxGroup("Audio Test/Voice")]
-    [ButtonGroup("Audio Test/Voice/Buttons")]
-    [Button("보이스 재생", ButtonSizes.Large)]
-    [EnableIf("@UnityEngine.Application.isPlaying")]
-    private void TestPlayVoice()
-    {
-        if (testVoice == null)
-        {
-            Debug.LogWarning(
-                "[AudioManager] Test Voice를 넣어주세요."
-            );
-
-            return;
-        }
-
-        PlayVoice(testVoice);
-    }
-
-
-    [BoxGroup("Audio Test/Voice")]
-    [ButtonGroup("Audio Test/Voice/Buttons")]
-    [Button("보이스 정지", ButtonSizes.Large)]
-    [EnableIf("@UnityEngine.Application.isPlaying")]
-    private void TestStopVoice()
-    {
-        StopVoice();
-    }
-
-
-    // =========================================================
-    // Odin - All Stop
-    // =========================================================
-
-    [PropertySpace(15)]
-
-    [Button("모든 오디오 정지", ButtonSizes.Gigantic)]
-    [EnableIf("@UnityEngine.Application.isPlaying")]
-    private void TestStopAllAudio()
-    {
-        StopAllAudio();
     }
 }
