@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377a4c795f9d3b94a96ba4f5e4140388, type: 3}
   m_Name: TestAllyUnit_3
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnit
-  unitName: "\uD14C\uC2A4\uD2B8_1"
+  unitName: "\uD14C\uC2A4\uD2B8_3"
   team: 0
   maxHP: 150
   attackPower: 15
   speed: 30
-  sprite: {fileID: 1504287572, guid: e017ce59e37f8dc4dae32e52162dceb6, type: 3}
+  characterSprite: {fileID: 1504287572, guid: e017ce59e37f8dc4dae32e52162dceb6, type: 3}

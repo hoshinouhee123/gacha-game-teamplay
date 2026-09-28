@@ -17,4 +17,4 @@ MonoBehaviour:
   maxHP: 100
   attackPower: 20
   speed: 10
-  sprite: {fileID: -1329793363, guid: 3bd5ee2d88952e144b2e871712dfbb91, type: 3}
+  characterSprite: {fileID: -1329793363, guid: 3bd5ee2d88952e144b2e871712dfbb91, type: 3}

@@ -12559,12 +12559,12 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1426425775, guid: 87ec039278d2641438e5ed71d7c23a80, type: 3}
+  m_Sprite: {fileID: 1504287572, guid: e017ce59e37f8dc4dae32e52162dceb6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 4.68, y: 4.93}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -55670,7 +55670,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1588617061, guid: 8cad35ef39240974f9f628bcd30d3f3a, type: 3}
+  m_Sprite: {fileID: 1504287572, guid: e017ce59e37f8dc4dae32e52162dceb6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -55692,7 +55692,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c8e3578ccce0e043be2b5ff26c04eb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: bae0a3cd37e374e4bb7387561b8aa8e4, type: 2}
+  unitData: {fileID: 11400000, guid: b6854518abef35f4fadc15ccfb4359d2, type: 2}
   maxHp: 0
   currentHp: 0
   currentSpeed: 0

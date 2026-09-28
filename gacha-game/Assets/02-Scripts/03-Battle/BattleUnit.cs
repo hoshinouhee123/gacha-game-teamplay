@@ -19,5 +19,5 @@ public class BattleUnit : ScriptableObject
     public int speed= 10;       //스피드 (턴 순서 용)
 
     [Header("비주얼 정보")]
-    public Sprite sprite;
+    public Sprite characterSprite;
 }

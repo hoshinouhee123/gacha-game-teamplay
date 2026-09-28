@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(SpriteRenderer))]
 public class Unit : MonoBehaviour
 {
     [Header("데이터 에셋 (SO)")]
@@ -10,6 +11,10 @@ public class Unit : MonoBehaviour
     public int maxHp;
     public int currentHp;
     public int currentSpeed; // 버프/디버프로 스피드가 변동될 수 있으므로 분리
+
+    private SpriteRenderer spriteRenderer;
+    private Color originalColor;
+    private Vector3 originalScale;
 
     // SO의 기본 정보를 편하게 읽어오는 프로퍼티
     public string UnitName => unitData != null ? unitData.unitName : name;
@@ -25,6 +30,18 @@ public class Unit : MonoBehaviour
         }
     }
 
+    // 에디터에서 SO를 넣거나 바꿨을 때 '재생(Play)' 안 해도 즉시 스프라이트를 보여주는 함수
+    private void OnValidate()
+    {
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (unitData != null && unitData.characterSprite != null)
+        {
+            spriteRenderer.sprite = unitData.characterSprite;
+        }
+    }
+
     // 데이터 주입 함수 (동적으로 몬스터를 스폰할 때도 사용 가능)
     public void Initialize(BattleUnit data)
     {
@@ -32,6 +49,11 @@ public class Unit : MonoBehaviour
         maxHp = data.maxHP;
         currentHp = maxHp;
         currentSpeed = data.speed;
+
+        if (spriteRenderer != null && data.characterSprite != null)
+        {
+            spriteRenderer.sprite = data.characterSprite;
+        }
     }
 
     public void TakeDamage(int damage)
