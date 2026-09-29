@@ -2,73 +2,69 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro; // TextMeshPro 사용 시 (일반 Text를 쓴다면 UnityEngine.UI.Text 사용)
 
 public class TurnManager : MonoBehaviour
 {
-    [Header("전투 참가 유닛들")]
-    public List<Unit> allUnits = new List<Unit>();
+    [Header("전투 유닛들")]
+    public List<Unit> fieldUnits = new List<Unit>();
 
-    // 이번 라운드에 행동할 유닛 큐
+    [Header("SP 시스템")]
+    public int currentSP = 9;   // 첫 턴 시작 시 기본 9
+    public int maxSP = 10;
+
+    [Header("UI 연결")]
+    public GameObject skillPanel;           // 스킬 카드들을 감싸는 패널
+    public Button[] skillButtons;           // 3개의 스킬 버튼
+    public TextMeshProUGUI[] skillButtonTexts; // 각 버튼의 텍스트 (TMP)
+    public TextMeshProUGUI spText;          // 현재 SP 표시 텍스트
+
     private Queue<Unit> turnQueue = new Queue<Unit>();
-    private int roundCount = 0;
-    private bool isBattleOver = false;
+    private SkillDataSO selectedSkill = null; // 플레이어가 선택한 스킬 임시 저장
 
     private void Start()
     {
-        // 씬 시작 시 바로 턴 루프 가동
+        // 시작 시 스킬 UI는 숨김
+        if (skillPanel != null) skillPanel.SetActive(false);
+        UpdateSPUI();
+
         StartCoroutine(BattleRoutine());
+    }
+
+    private void UpdateSPUI()
+    {
+        if (spText != null)
+        {
+            spText.text = $"SP: {currentSP} / {maxSP}";
+        }
     }
 
     private IEnumerator BattleRoutine()
     {
-        while (!isBattleOver)
+        while (true)
         {
-            // ---------------- [ 1. 라운드 시작 및 스피드 정렬 ] ----------------
-            roundCount++;
-            Debug.Log($"\n<color=cyan>================ [ ROUND {roundCount} 시작 ] ================</color>");
-
-            // 살아있는 유닛만 골라서 스피드 내림차순(높은 순) 정렬
-            // 스피드가 같으면(동률) Random.value로 무작위 처리
-            var sortedList = allUnits
-            .Where(u => u.IsAlive)
-            .OrderByDescending(u => u.currentSpeed) // currentSpeed 기준으로 정렬!
-            .ThenBy(u => Random.value)
-            .ToList();
+            // 스피드 순 정렬
+            var sortedList = fieldUnits
+                .Where(u => u.IsAlive)
+                .OrderByDescending(u => u.currentSpeed)
+                .ThenBy(u => Random.value)
+                .ToList();
 
             turnQueue.Clear();
-            Debug.Log("--- 턴 순서 ---");
-            for (int i = 0; i < sortedList.Count; i++)
-            {
-                turnQueue.Enqueue(sortedList[i]);
-                Debug.Log($"{i + 1}위: [{sortedList[i].Team}] {sortedList[i].UnitName} (Spd: {sortedList[i].currentSpeed})");
-            }
+            foreach (var unit in sortedList) turnQueue.Enqueue(unit);
 
-            yield return new WaitForSeconds(1.0f); // 라운드 시작 연출 대기
-
-            // ---------------- [ 2. 라운드 내 턴 진행 ] ----------------
             while (turnQueue.Count > 0)
             {
                 Unit currentUnit = turnQueue.Dequeue();
-
-                // 차례가 오기 전에 이미 사망했으면 스킵
                 if (!currentUnit.IsAlive) continue;
 
-                Debug.Log($"<color=yellow> [{currentUnit.Team}] {currentUnit.UnitName}의 턴 시작!</color>");
-
-                // 유닛의 행동 처리 (플레이어 입력 or 적 AI 대기)
+                // 턴 행동 진행
                 yield return StartCoroutine(ExecuteUnitTurn(currentUnit));
 
-                // 행동 후 전투 종료 체크
-                if (CheckBattleEnd())
-                {
-                    isBattleOver = true;
-                    yield break; // 전투 루프 종료
-                }
-
-                yield return new WaitForSeconds(0.5f); // 턴과 턴 사이 딜레이
+                yield return new WaitForSeconds(0.3f);
             }
 
-            Debug.Log($"<color=cyan>=== [ ROUND {roundCount} 종료 ] ===</color>\n");
             yield return new WaitForSeconds(1.0f);
         }
     }
@@ -77,55 +73,106 @@ public class TurnManager : MonoBehaviour
     {
         if (actor.Team == Team.Ally)
         {
-            // ================= 플레이어 턴 =================
-            Debug.Log($"[{actor.UnitName}] 플레이어 조작 대기 중...");
+            // ================= 1. 플레이어 턴 =================
+            Debug.Log($"<color=yellow>[플레이어] {actor.UnitName}의 턴! 스킬을 선택하세요.</color>");
+            selectedSkill = null;
 
-            // ※ 나중에 UI 버튼을 누를 때까지 기다리려면:
-            // yield return new WaitUntil(() => isButtonPressed);
-            // 지금은 프로토타입이므로 1초 대기 후 가장 첫 번째 살아있는 적 공격
-            yield return new WaitForSeconds(1.0f);
+            // 스킬 버튼 세팅 & 패널 오픈
+            OpenSkillUI(actor);
 
-            Unit target = allUnits.FirstOrDefault(u => u.Team == Team.Enemy && u.IsAlive);
+            // ★ 플레이어가 스킬 버튼을 누를 때까지 코루틴 일시 정지(대기)
+            yield return new WaitUntil(() => selectedSkill != null);
+
+            // 선택 완료 후 패널 닫기
+            skillPanel.SetActive(false);
+
+            // SP 처리
+            currentSP += selectedSkill.spGain;
+            currentSP -= selectedSkill.spCost;
+            currentSP = Mathf.Clamp(currentSP, 0, maxSP);
+            UpdateSPUI();
+
+            // 데미지 계산: 공격력 * 퍼센트
+            int finalDamage = Mathf.RoundToInt(actor.unitData.attackPower * selectedSkill.damageMultiplier);
+
+            // 첫 번째 살아있는 적 공격
+            Unit target = fieldUnits.FirstOrDefault(u => u.Team == Team.Enemy && u.IsAlive);
             if (target != null)
             {
-                Debug.Log($"[{actor.UnitName}]이(가) [{target.UnitName}]을(를) 기본 공격!");
-                target.TakeDamage(25);
+                Debug.Log($"<color=cyan>[{actor.UnitName}]이(가) [{selectedSkill.skillName}] 사용! -> {target.UnitName}에게 {finalDamage} 피해!</color>");
+                target.TakeDamage(finalDamage);
             }
+
+            yield return new WaitForSeconds(1.0f); // 스킬 연출 대기
         }
         else
         {
-            // ================= 적(Enemy) 턴 (간단 AI) =================
-            Debug.Log($"[{actor.UnitName}] 적 AI가 행동을 결정하는 중...");
-            yield return new WaitForSeconds(1.0f); // 생각하는 척 딜레이
+            // ================= 2. 적 턴 (임시 기본 공격) =================
+            Debug.Log($"[적] {actor.UnitName}의 턴!");
+            yield return new WaitForSeconds(1.0f);
 
-            // 살아있는 아군 중 랜덤으로 한 명 타겟팅
-            var aliveAllies = allUnits.Where(u => u.Team == Team.Ally && u.IsAlive).ToList();
-            if (aliveAllies.Count > 0)
+            Unit target = fieldUnits.FirstOrDefault(u => u.Team == Team.Ally && u.IsAlive);
+            if (target != null)
             {
-                Unit target = aliveAllies[Random.Range(0, aliveAllies.Count)];
-                Debug.Log($"[{actor.UnitName}]이(가) [{target.UnitName}]을(를) 공격!");
-                target.TakeDamage(15);
+                target.TakeDamage(actor.unitData.attackPower);
             }
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
-    private bool CheckBattleEnd()
+    // 캐릭터의 스킬 3개를 UI 버튼에 주입
+    private void OpenSkillUI(Unit actor)
     {
-        bool anyAllyAlive = allUnits.Any(u => u.Team == Team.Ally && u.IsAlive);
-        bool anyEnemyAlive = allUnits.Any(u => u.Team == Team.Enemy && u.IsAlive);
-
-        if (!anyEnemyAlive)
+        if (skillPanel == null)
         {
-            Debug.Log("<color=green>  모든 적을 처치했습니다. </color>");
-            return true;
+            Debug.LogError("<color=red>[오류] TurnManager에 SkillPanel이 연결되지 않았습니다!</color>");
+            return;
         }
 
-        if (!anyAllyAlive)
-        {
-            Debug.Log("<color=red>아군이 전멸했습니다. </color>");
-            return true;
-        }
+        skillPanel.SetActive(true);
 
-        return false;
+        for (int i = 0; i < 3; i++)
+        {
+            // 인스펙터에 버튼이나 텍스트가 안 꽂혀 있으면 경고 출력
+            if (i >= skillButtons.Length || skillButtons[i] == null)
+            {
+                Debug.LogError($"<color=red>[오류] Skill Buttons의 {i}번 슬롯이 비어있습니다!</color>");
+                continue;
+            }
+
+            // 해당 캐릭터의 스킬 슬롯 확인
+            SkillDataSO skill = (actor.unitData != null && i < actor.unitData.skills.Length)
+                                ? actor.unitData.skills[i]
+                                : null;
+
+            if (skill != null)
+            {
+                skillButtons[i].gameObject.SetActive(true);
+
+                // 텍스트 컴포넌트가 연결되어 있을 때만 텍스트 변경
+                if (i < skillButtonTexts.Length && skillButtonTexts[i] != null)
+                {
+                    string spInfo = skill.spGain > 0 ? $"(+SP {skill.spGain})" : $"(-SP {skill.spCost})";
+                    skillButtonTexts[i].text = $"{skill.skillName}\n{spInfo}";
+                }
+
+                // SP 조건 체크
+                bool canUse = (currentSP >= skill.spCost);
+                skillButtons[i].interactable = canUse;
+
+                // 클릭 이벤트 등록
+                skillButtons[i].onClick.RemoveAllListeners();
+                skillButtons[i].onClick.AddListener(() => OnSkillSelected(skill));
+            }
+            else
+            {
+                // 스킬이 등록 안 된 버튼은 숨김 처리
+                skillButtons[i].gameObject.SetActive(false);
+            }
+        }
+    }
+    private void OnSkillSelected(SkillDataSO skill)
+    {
+        selectedSkill = skill; // 루프의 WaitUntil 조건을 만족시킴
     }
 }

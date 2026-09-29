@@ -14,7 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnit
   unitName: "\uD14C\uC2A4\uD2B8_3"
   team: 0
+  characterSprite: {fileID: 1504287572, guid: e017ce59e37f8dc4dae32e52162dceb6, type: 3}
   maxHP: 150
   attackPower: 15
   speed: 30
-  characterSprite: {fileID: 1504287572, guid: e017ce59e37f8dc4dae32e52162dceb6, type: 3}
+  skills:
+  - {fileID: 11400000, guid: 3367b40f714dfea42842c4cc067cf2cf, type: 2}
+  - {fileID: 11400000, guid: 0d063390dc119db4096af0a7879f4159, type: 2}
+  - {fileID: 11400000, guid: 350fdef95b8c5c04aa3131f031427f31, type: 2}

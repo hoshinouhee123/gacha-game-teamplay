@@ -4,7 +4,7 @@ using UnityEngine;
 public class Unit : MonoBehaviour
 {
     [Header("데이터 에셋 (SO)")]
-    [SerializeField] private BattleUnit unitData;
+    public BattleUnit unitData;
 
     // 인게임에서 실시간으로 변하는 상태값들
     [Header("런타임 상태 (읽기 전용 확인용)")]
