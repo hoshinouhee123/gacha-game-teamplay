@@ -107,14 +107,29 @@ public class TurnManager : MonoBehaviour
         }
         else
         {
-            // ================= 2. 적 턴 (임시 기본 공격) =================
+            // [적 턴 AI 예시]
             Debug.Log($"[적] {actor.UnitName}의 턴!");
             yield return new WaitForSeconds(1.0f);
+
+            // 스킬이 등록되어 있다면 스킬 중 랜덤 1개 선택, 없으면 평타(계수 1.0)
+            var availableSkills = actor.unitData.skills.Where(s => s != null).ToList();
+            float multiplier = 1.0f;
+            string skillName = "일반 공격";
+
+            if (availableSkills.Count > 0)
+            {
+                var randomSkill = availableSkills[Random.Range(0, availableSkills.Count)];
+                multiplier = randomSkill.damageMultiplier;
+                skillName = randomSkill.skillName;
+            }
+
+            int damage = Mathf.RoundToInt(actor.unitData.attackPower * multiplier);
 
             Unit target = fieldUnits.FirstOrDefault(u => u.Team == Team.Ally && u.IsAlive);
             if (target != null)
             {
-                target.TakeDamage(actor.unitData.attackPower);
+                Debug.Log($"<color=red>[적] {actor.UnitName}이(가) [{skillName}] 사용! -> {damage} 피해!</color>");
+                target.TakeDamage(damage);
             }
             yield return new WaitForSeconds(0.5f);
         }

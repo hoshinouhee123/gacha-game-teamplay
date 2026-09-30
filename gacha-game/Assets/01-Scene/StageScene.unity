@@ -5552,8 +5552,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 4
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -5584,7 +5584,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: -223.89209, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -23761,56 +23761,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 728703985}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &729530793
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 729530795}
-  - component: {fileID: 729530794}
-  m_Layer: 0
-  m_Name: TestManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &729530794
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 729530793}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e916a974190adc84bb44bfdf7d69c7c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpeedTurnTester
-  testUnits:
-  - {fileID: 11400000, guid: a46ebed107dad0a42aa49cd6e5513d2c, type: 2}
-  - {fileID: 11400000, guid: f994df7d06ff00848855446f18549717, type: 2}
-  - {fileID: 11400000, guid: b6854518abef35f4fadc15ccfb4359d2, type: 2}
-  - {fileID: 11400000, guid: bae0a3cd37e374e4bb7387561b8aa8e4, type: 2}
-  turnDelay: 0.8
---- !u!4 &729530795
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 729530793}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.67111, y: 0.48187, z: 20}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &730913242
 GameObject:
   m_ObjectHideFlags: 0
@@ -45286,7 +45236,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c482ed1c4e7f7745aba65e89444278d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TurnManager
-  fieldUnits: []
+  fieldUnits:
+  - {fileID: 2126616889}
+  - {fileID: 793552226}
+  - {fileID: 412646704}
+  - {fileID: 1825137758}
   currentSP: 9
   maxSP: 10
   skillPanel: {fileID: 491697699}
@@ -56907,7 +56861,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1504287572, guid: e017ce59e37f8dc4dae32e52162dceb6, type: 3}
+  m_Sprite: {fileID: -1588617061, guid: 8cad35ef39240974f9f628bcd30d3f3a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -56929,7 +56883,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c8e3578ccce0e043be2b5ff26c04eb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: b6854518abef35f4fadc15ccfb4359d2, type: 2}
+  unitData: {fileID: 11400000, guid: bae0a3cd37e374e4bb7387561b8aa8e4, type: 2}
   maxHp: 0
   currentHp: 0
   currentSpeed: 0
@@ -64791,7 +64745,6 @@ SceneRoots:
   - {fileID: 629056616}
   - {fileID: 299590105}
   - {fileID: 1442063346}
-  - {fileID: 729530795}
   - {fileID: 1671515316}
   - {fileID: 1503908301}
   - {fileID: 1678048457}
