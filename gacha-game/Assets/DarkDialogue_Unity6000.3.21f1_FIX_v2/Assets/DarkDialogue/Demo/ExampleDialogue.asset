@@ -1,0 +1,194 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 090b8e9c79618340e16d53663a92d12c, type: 3}
+  m_Name: ExampleDialogue
+  m_EditorClassIdentifier:
+  startLine: 0
+  lines:
+  - speaker: ""
+    side: 0
+    text: "열차가 멈췄다.\n창밖에는 불 꺼진 역만이 남아 있었다."
+    nextLine: -2
+    characterInterval: 0.035
+    autoDelay: 1.5
+    updateLeft: 0
+    leftPortrait: {fileID: 0}
+    updateRight: 0
+    rightPortrait: {fileID: 0}
+    updateBackground: 0
+    background: {fileID: 0}
+    updateBgm: 0
+    bgm: {fileID: 0}
+    soundEffect: {fileID: 0}
+    shakeSeconds: 0
+    shakeStrength: 14
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    choices: []
+  - speaker: "케이"
+    side: 1
+    text: "여기서부터는 조심해야 해.\n이 역에는 우리 말고도 누군가 있어."
+    nextLine: -2
+    characterInterval: 0.035
+    autoDelay: 1.5
+    updateLeft: 0
+    leftPortrait: {fileID: 0}
+    updateRight: 0
+    rightPortrait: {fileID: 0}
+    updateBackground: 0
+    background: {fileID: 0}
+    updateBgm: 0
+    bgm: {fileID: 0}
+    soundEffect: {fileID: 0}
+    shakeSeconds: 0
+    shakeStrength: 14
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    choices: []
+  - speaker: "아리스"
+    side: 2
+    text: "잠깐. 문 너머에서 소리가 들려.\n…직접 확인해 볼까?"
+    nextLine: -2
+    characterInterval: 0.035
+    autoDelay: 1.5
+    updateLeft: 0
+    leftPortrait: {fileID: 0}
+    updateRight: 0
+    rightPortrait: {fileID: 0}
+    updateBackground: 0
+    background: {fileID: 0}
+    updateBgm: 0
+    bgm: {fileID: 0}
+    soundEffect: {fileID: 0}
+    shakeSeconds: 0
+    shakeStrength: 14
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    choices: []
+  - speaker: ""
+    side: 0
+    text: "닫힌 문 앞에서 발걸음을 멈췄다.\n어떻게 할까?"
+    nextLine: -2
+    characterInterval: 0.035
+    autoDelay: 1.5
+    updateLeft: 0
+    leftPortrait: {fileID: 0}
+    updateRight: 0
+    rightPortrait: {fileID: 0}
+    updateBackground: 0
+    background: {fileID: 0}
+    updateBgm: 0
+    bgm: {fileID: 0}
+    soundEffect: {fileID: 0}
+    shakeSeconds: 0
+    shakeStrength: 14
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    choices:
+    - label: "문을 연다"
+      nextLine: 4
+      onSelected:
+        m_PersistentCalls:
+          m_Calls: []
+    - label: "소리를 더 들어본다"
+      nextLine: 6
+      onSelected:
+        m_PersistentCalls:
+          m_Calls: []
+  - speaker: "아리스"
+    side: 2
+    text: "좋아, 열게!\n…뭐야, 방금 저 그림자 봤어?"
+    nextLine: 5
+    characterInterval: 0.035
+    autoDelay: 1.5
+    updateLeft: 0
+    leftPortrait: {fileID: 0}
+    updateRight: 0
+    rightPortrait: {fileID: 0}
+    updateBackground: 0
+    background: {fileID: 0}
+    updateBgm: 0
+    bgm: {fileID: 0}
+    soundEffect: {fileID: 0}
+    shakeSeconds: 0.35
+    shakeStrength: 14
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    choices: []
+  - speaker: "케이"
+    side: 1
+    text: "내 뒤에 있어.\n무슨 일이 생겨도 혼자 움직이지 마."
+    nextLine: 7
+    characterInterval: 0.035
+    autoDelay: 1.5
+    updateLeft: 0
+    leftPortrait: {fileID: 0}
+    updateRight: 0
+    rightPortrait: {fileID: 0}
+    updateBackground: 0
+    background: {fileID: 0}
+    updateBgm: 0
+    bgm: {fileID: 0}
+    soundEffect: {fileID: 0}
+    shakeSeconds: 0
+    shakeStrength: 14
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    choices: []
+  - speaker: "케이"
+    side: 1
+    text: "서두르지 마. 발소리가 하나가 아니야.\n잠깐 기다렸다가 같이 움직이자."
+    nextLine: 7
+    characterInterval: 0.035
+    autoDelay: 1.5
+    updateLeft: 0
+    leftPortrait: {fileID: 0}
+    updateRight: 0
+    rightPortrait: {fileID: 0}
+    updateBackground: 0
+    background: {fileID: 0}
+    updateBgm: 0
+    bgm: {fileID: 0}
+    soundEffect: {fileID: 0}
+    shakeSeconds: 0
+    shakeStrength: 14
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    choices: []
+  - speaker: ""
+    side: 0
+    text: "두 사람은 어둠 속으로 걸어갔다.\n새로운 여정이 시작된다."
+    nextLine: -1
+    characterInterval: 0.035
+    autoDelay: 1.5
+    updateLeft: 0
+    leftPortrait: {fileID: 0}
+    updateRight: 0
+    rightPortrait: {fileID: 0}
+    updateBackground: 0
+    background: {fileID: 0}
+    updateBgm: 0
+    bgm: {fileID: 0}
+    soundEffect: {fileID: 0}
+    shakeSeconds: 0
+    shakeStrength: 14
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    choices: []

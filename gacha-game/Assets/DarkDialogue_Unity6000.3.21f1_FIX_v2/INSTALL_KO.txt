@@ -1,0 +1,20 @@
+Dark Dialogue — Unity 6000.3.21f1 직접 설치판
+
+1. Unity에서 현재 떠 있는 Import Unity Package 창을 닫으세요.
+2. 이 ZIP 파일을 압축 해제하세요.
+3. 압축을 푼 Assets 폴더 안의 DarkDialogue 폴더와 DarkDialogue.meta를
+   내 Unity 프로젝트의 Assets 폴더에 복사하세요.
+   예: 내프로젝트/Assets/DarkDialogue/Prefabs/DarkDialogue.prefab
+4. Unity로 돌아가 파일을 읽고 스크립트를 컴파일할 때까지 기다리세요.
+5. Project에서 DarkDialogue.prefab을 Hierarchy 최상위에 드래그하고 Play.
+
+이 설치 방식은 PackageImportTreeView 가져오기 창을 거치지 않습니다.
+이전 FIX 버전을 이미 설치했다면 새 Assets/DarkDialogue/Runtime 폴더만
+프로젝트의 같은 경로에 .meta와 함께 덮어쓰세요. 대사나 UI는 보존됩니다.
+v2는 Input System을 직접 참조하지 않아 CS0234 오류의 원인을 제거합니다.
+이미 DarkDialogue 폴더가 있다면 이름을 바꾸어 복제하지 말고 같은 경로에
+덮어쓰세요. 기존 대사를 편집해둔 경우 ExampleDialogue.asset은 보존하세요.
+자세한 사용법: Assets/DarkDialogue/README_KO.md
+
+실제 프리팹, 대사 데이터, 소스 코드, 이미지와 모든 .meta를 포함합니다.
+제작 환경에는 Unity Editor가 없어 실제 Import/Play 테스트는 하지 못했습니다.
