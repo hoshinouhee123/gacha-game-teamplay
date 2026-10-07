@@ -4,9 +4,13 @@
 
 ## 바로 실행
 
-**ZIP 직접 설치판:** `DarkDialogue_Unity6000.3.21f1_FIX_v2.zip`을 압축 해제하고, 그 안의 `Assets/DarkDialogue` 폴더와 `Assets/DarkDialogue.meta`를 내 프로젝트의 `Assets` 폴더에 복사하세요. Unity의 가져오기 창에서 `PackageImportTreeView` 오류가 발생한 경우에도 해당 창을 거치지 않고 파일을 설치할 수 있습니다. 설치 후 아래 2번부터 진행하세요.
+**전체 연결 완성본(v4):** `DarkDialogue_Unity6000.3.21f1_COMPLETE_v4.zip`을 압축 해제하고, `Assets/DarkDialogue` 폴더와 `Assets/DarkDialogue.meta`를 내 프로젝트의 `Assets` 폴더에 복사하세요. Unity에서 Play를 끄고 작업하세요. 이전 버전이 있다면 같은 위치에 폴더 전체를 덮어쓰세요. **Runtime/Editor만 교체하지 말고 Prefabs·Demo·Art·모든 .meta를 함께 복사해야 합니다.** 직접 편집한 대사·디자인은 프로젝트 밖에 먼저 백업하세요.
 
-**이미 이전 ZIP을 설치한 경우:** 새 ZIP의 `Assets/DarkDialogue/Runtime` 폴더만 기존 프로젝트의 같은 위치에 덮어쓰면 입력 호환성 수정이 반영됩니다. `.meta`도 함께 복사하세요. 대사 데이터·프리팹을 다시 교체할 필요는 없습니다. v2는 Input System 네임스페이스와 타입을 직접 참조하지 않으므로 해당 패키지가 없어도 컴파일할 수 있습니다.
+**새 프리팹으로 교체:** 씬에 남아 있는 이전 `DarkDialogue` 오브젝트를 지우고, 설치한 `Assets/DarkDialogue/Prefabs/DarkDialogue.prefab`을 Hierarchy 최상위에 다시 놓으세요. 새 프리팹에는 루트의 DialogueManager, UI 참조 25개, 샘플 대사 데이터, 배경·캐릭터 이미지가 미리 연결되어 있습니다. 버튼 동작은 Manager의 Awake에서 자동 등록됩니다. Inspector에서 UI 필드를 하나씩 연결할 필요가 없습니다.
+
+**가져오기 후 자동 복구:** 컴파일과 에셋 가져오기가 끝나면 프리팹의 누락된 스크립트·참조를 검사합니다. 누락이 있으면 프로젝트의 실제 GUID로 다시 연결하고 Unity를 통해 프리팹을 저장합니다. 정상 프리팹은 변경하지 않습니다. Runtime/Editor 어셈블리를 각각 포함하며 Input System을 컴파일 필수 의존성으로 사용하지 않습니다. uGUI는 필요합니다.
+
+**기존 씬 오브젝트를 유지할 경우:** 해당 `DarkDialogue` 루트를 선택하고 **Tools → Dark Dialogue → Repair Script Links**를 실행한 뒤 씬을 저장하세요. 이 메뉴는 정상 연결된 필드를 유지하면서 누락된 Manager와 UI 참조를 채웁니다. 수정 전 에셋 파일은 `Library/DarkDialogueRepair`에 백업합니다. 메뉴가 보이지 않으면 Console의 빨간 컴파일 오류부터 해결하세요. 자동 복구는 세션당 한 번 실행하므로 추가 문제가 생겼을 때도 이 메뉴를 사용할 수 있습니다.
 
 1. `DarkDialogue_Unity6000.3.21f1.unitypackage`를 더블클릭하거나 Unity의 **Assets → Import Package → Custom Package**로 가져옵니다. 항목을 모두 체크하고 Import 합니다.
 2. Project에서 `Assets/DarkDialogue/Prefabs/DarkDialogue.prefab`을 **Hierarchy의 최상위로** 드래그합니다. 자체 Canvas를 포함하므로 기존 Canvas 안에 넣을 필요가 없습니다.
