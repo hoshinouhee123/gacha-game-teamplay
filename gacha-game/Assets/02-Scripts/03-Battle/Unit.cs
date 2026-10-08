@@ -12,6 +12,10 @@ public class Unit : MonoBehaviour
     public int currentHp;
     public int currentSpeed; // 버프/디버프로 스피드가 변동될 수 있으므로 분리
 
+    // 스타성 계산을 위한 누적 카운터
+    [HideInInspector] public int skillUseCount = 0; // 스킬 사용 횟수
+    [HideInInspector] public int hitCount = 0;      // 피격 횟수
+
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
     private Vector3 originalScale;
@@ -20,6 +24,7 @@ public class Unit : MonoBehaviour
     public string UnitName => unitData != null ? unitData.unitName : name;
     public Team Team => unitData != null ? unitData.team : Team.Ally;
     public int BaseAttack => unitData != null ? unitData.attackPower : 10;
+    public int Performance => unitData != null ? unitData.performance : 1;
     public bool IsAlive => currentHp > 0;
 
     private void Awake()
@@ -49,6 +54,8 @@ public class Unit : MonoBehaviour
         maxHp = data.maxHP;
         currentHp = maxHp;
         currentSpeed = data.speed;
+        skillUseCount = 0;
+        hitCount = 0;
 
         if (spriteRenderer != null && data.characterSprite != null)
         {

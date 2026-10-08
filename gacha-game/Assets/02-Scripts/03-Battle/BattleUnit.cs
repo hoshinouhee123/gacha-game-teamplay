@@ -21,4 +21,7 @@ public class BattleUnit : ScriptableObject
 
     [Header("스킬 목록 (총 3개)")]
     public SkillDataSO[] skills = new SkillDataSO[3]; // 스킬 1, 2, 3
+
+    [Header("스타성 퍼포먼스 (1~5)")]
+    [Range(1, 5)] public int performance = 3; // 클리어 시 합산될 기본 퍼포먼스 점수
 }

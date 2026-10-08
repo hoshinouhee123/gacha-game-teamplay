@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377a4c795f9d3b94a96ba4f5e4140388, type: 3}
   m_Name: TestEnemy_1
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnit
-  unitName: "\uD14C\uC2A4\uD2B8_4"
+  unitName: "\uD14C\uC2A4\uD2B8_\uBCF4"
   team: 1
   characterSprite: {fileID: -1588617061, guid: 8cad35ef39240974f9f628bcd30d3f3a, type: 3}
   maxHP: 300
