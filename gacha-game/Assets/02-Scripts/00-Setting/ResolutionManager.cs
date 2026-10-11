@@ -9,7 +9,10 @@ public class ResolutionManager : MonoBehaviour
     [SerializeField] private TMP_Dropdown resolutionDropdown;
     [SerializeField] private Toggle windowModeToggle; // 체크 시 '창모드', 해제 시 '전체화면'
 
-    // 중복 제거된 해상도 목록
+    // PlayerPrefs에 사용할 키 이름
+    private const string ResKey = "SavedResolutionIndex";
+    private const string WindowKey = "SavedIsWindowed";
+
     private List<Resolution> resolutions = new List<Resolution>();
 
     private void Start()
@@ -19,17 +22,16 @@ public class ResolutionManager : MonoBehaviour
 
     private void InitSettings()
     {
-        // 1. 지원하는 해상도 목록 가져오기 및 가로/세로 중복 제거
+        // 1. 지원하는 해상도 목록 가져오기 및 중복 제거
         Resolution[] allResolutions = Screen.resolutions;
         resolutions.Clear();
         resolutionDropdown.ClearOptions();
 
         List<string> options = new List<string>();
-        int currentResolutionIndex = 0;
+        int defaultIndex = 0;
 
         for (int i = 0; i < allResolutions.Length; i++)
         {
-            // 주사율(Hz)만 다르고 크기가 같은 해상도 필터링
             bool isDuplicate = false;
             for (int j = 0; j < resolutions.Count; j++)
             {
@@ -46,29 +48,47 @@ public class ResolutionManager : MonoBehaviour
                 resolutions.Add(allResolutions[i]);
                 options.Add(allResolutions[i].width + " x " + allResolutions[i].height);
 
-                // 현재 게임 창 해상도와 일치하는 항목 찾기
+                // 현재 화면 해상도와 일치하는 기본 인덱스 탐색
                 if (allResolutions[i].width == Screen.width &&
                     allResolutions[i].height == Screen.height)
                 {
-                    currentResolutionIndex = resolutions.Count - 1;
+                    defaultIndex = resolutions.Count - 1;
                 }
             }
         }
 
-        // 2. 드롭다운 목록 추가 및 현재 해상도로 표시 (이벤트 발생 없이 값만 세팅)
         resolutionDropdown.AddOptions(options);
-        resolutionDropdown.SetValueWithoutNotify(currentResolutionIndex);
-        resolutionDropdown.RefreshShownValue();
 
-        // 3. 현재 창모드 여부 확인 후 토글 상태 세팅
-        if (windowModeToggle != null)
+        // 2. PlayerPrefs에서 저장된 값 불러오기
+        // (저장된 값이 있으면 불러오고, 없으면 위에서 찾은 기본값 사용)
+        int targetIndex = defaultIndex;
+        if (PlayerPrefs.HasKey(ResKey))
         {
-            // 현재 창모드 상태라면 토글을 켬(true)
-            bool isCurrentlyWindowed = (Screen.fullScreenMode == FullScreenMode.Windowed);
-            windowModeToggle.SetIsOnWithoutNotify(isCurrentlyWindowed);
+            targetIndex = PlayerPrefs.GetInt(ResKey);
+            // 해상도 목록 범위를 벗어나지 않도록 안전 제한
+            targetIndex = Mathf.Clamp(targetIndex, 0, resolutions.Count - 1);
         }
 
-        // 4. UI 변경 이벤트 리스너 등록
+        // 창모드 여부 불러오기 (1: 창모드, 0: 전체화면)
+        bool isWindowed = (Screen.fullScreenMode == FullScreenMode.Windowed);
+        if (PlayerPrefs.HasKey(WindowKey))
+        {
+            isWindowed = PlayerPrefs.GetInt(WindowKey) == 1;
+        }
+
+        // 3. UI에 표시 세팅 (이벤트 발생 없이 값만 세팅)
+        resolutionDropdown.SetValueWithoutNotify(targetIndex);
+        resolutionDropdown.RefreshShownValue();
+
+        if (windowModeToggle != null)
+        {
+            windowModeToggle.SetIsOnWithoutNotify(isWindowed);
+        }
+
+        // 4. 저장되어 있던 설정값으로 실제 게임 화면 즉시 적용
+        ApplyResolution(targetIndex, isWindowed);
+
+        // 5. 사용자가 바꿀 때 감지할 이벤트 리스너 등록
         resolutionDropdown.onValueChanged.AddListener(SetResolution);
         if (windowModeToggle != null)
         {
@@ -77,33 +97,39 @@ public class ResolutionManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 드롭다운에서 해상도를 변경했을 때 호출
+    /// 드롭다운 선택 시 실행 & 저장
     /// </summary>
     public void SetResolution(int resolutionIndex)
     {
-        Resolution selectedResolution = resolutions[resolutionIndex];
+        bool isWindowed = (windowModeToggle != null && windowModeToggle.isOn);
+        ApplyResolution(resolutionIndex, isWindowed);
 
-        // 창모드 토글이 켜져 있으면 Windowed, 꺼져 있으면 FullScreenWindow(전체화면)
-        FullScreenMode mode = (windowModeToggle != null && windowModeToggle.isOn)
-            ? FullScreenMode.Windowed
-            : FullScreenMode.FullScreenWindow;
-
-        Screen.SetResolution(selectedResolution.width, selectedResolution.height, mode);
+        // PlayerPrefs에 저장
+        PlayerPrefs.SetInt(ResKey, resolutionIndex);
+        PlayerPrefs.Save();
     }
 
     /// <summary>
-    /// 창모드 토글 상태가 변경되었을 때 호출
+    /// 창모드 토글 누를 때 실행 & 저장
     /// </summary>
     public void SetWindowedMode(bool isWindowed)
     {
-        // 현재 드롭다운에서 선택되어 있는 해상도 가져오기
-        Resolution currentResolution = resolutions[resolutionDropdown.value];
+        int currentResolutionIndex = resolutionDropdown.value;
+        ApplyResolution(currentResolutionIndex, isWindowed);
 
-        // true = 창모드 / false = 전체화면
-        FullScreenMode mode = isWindowed
-            ? FullScreenMode.Windowed
-            : FullScreenMode.FullScreenWindow;
+        // PlayerPrefs에 저장 (true는 1, false는 0)
+        PlayerPrefs.SetInt(WindowKey, isWindowed ? 1 : 0);
+        PlayerPrefs.Save();
+    }
 
-        Screen.SetResolution(currentResolution.width, currentResolution.height, mode);
+    /// <summary>
+    /// 실제 화면 해상도 적용 함수
+    /// </summary>
+    private void ApplyResolution(int resolutionIndex, bool isWindowed)
+    {
+        Resolution selectedResolution = resolutions[resolutionIndex];
+        FullScreenMode mode = isWindowed ? FullScreenMode.Windowed : FullScreenMode.FullScreenWindow;
+
+        Screen.SetResolution(selectedResolution.width, selectedResolution.height, mode);
     }
 }
