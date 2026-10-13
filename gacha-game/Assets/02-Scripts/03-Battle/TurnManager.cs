@@ -164,9 +164,8 @@ public class TurnManager : MonoBehaviour
             // 첫 번째 살아있는 적 공격
             Unit target = fieldUnits.FirstOrDefault(u => u.Team == Team.Enemy && u.IsAlive);
 
-            // 3번째 스킬(스킬 3)을 썼고, 대기 중인 유닛이 살아있다면 교대 진행!
+            // 스킬 3 사용 시 교대 처리
             bool isSkill3 = (actor.unitData.skills.Length >= 3 && selectedSkill == actor.unitData.skills[2]);
-            
 
             if (target != null)
             {
@@ -213,9 +212,12 @@ public class TurnManager : MonoBehaviour
             yield return new WaitForSeconds(1.0f); // 스킬 연출 대기
 
 
+            // 적이 전멸했는지 먼저 확인
+            bool isAllEnemiesDead = CheckAllEnemiesDead();
             bool hasAliveReserves = reserveUnits.Any(u => u != null && u.IsAlive);
 
-            if (isSkill3 && hasAliveReserves)
+            // 대기 유닛이 있고 + 적이 아직 살아있을 때만 교대창을 띄움
+            if (isSkill3 && hasAliveReserves && !isAllEnemiesDead)
             {
                 yield return StartCoroutine(SwapProcessRoutine(actor));
             }
