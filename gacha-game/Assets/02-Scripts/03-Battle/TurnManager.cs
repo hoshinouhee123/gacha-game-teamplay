@@ -319,7 +319,9 @@ public class TurnManager : MonoBehaviour
 
         // ================= [ 4. 명성 재화 정산 및 저장 ] =================
         int finalStarPower = (int)currentStarPower; // 소수점 제외 최종 스타성
-        int earnedRenown = finalStarPower * 3;     // 스타성의 3배
+
+        // 스타성 x 3을 하되, 최대 300까지만 획득하도록 제한 (100% 초과해도 300 고정)
+        int earnedRenown = Mathf.Min(finalStarPower * 3, 300);
 
         // 명성 지급 및 PlayerPrefs 영구 저장
         CurrencyManager.AddRenown(earnedRenown);
