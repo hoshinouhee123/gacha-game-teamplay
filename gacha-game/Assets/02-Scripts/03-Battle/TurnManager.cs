@@ -341,6 +341,9 @@ public class TurnManager : MonoBehaviour
 
         resultPanel.SetActive(true);
 
+        // 좌측 상단에서 중앙으로 스르륵 나오는 애니메이션 실행
+        StartCoroutine(SlideInResultPanelRoutine());
+
         // 1. 상단 요약 정보
         if (resultSummaryText != null)
         {
@@ -385,6 +388,38 @@ public class TurnManager : MonoBehaviour
                 resultPanel.SetActive(false);
             });
         }
+    }
+
+    // 좌측 상단 -> 중앙으로 스르륵 슬라이드되는 애니메이션
+    private IEnumerator SlideInResultPanelRoutine()
+    {
+        RectTransform rect = resultPanel.GetComponent<RectTransform>();
+        if (rect == null) yield break;
+
+        // 800x1000 패널이 화면 밖 좌측 하단에 완전히 숨겨진 시작 위치
+        Vector2 startPos = new Vector2(-1500f, -1200f);
+        Vector2 targetPos = Vector2.zero; // 화면 정중앙 (Pos X: 0, Pos Y: 0)
+
+        float duration = 1f; // 스르륵 들어오는 시간 (1초)
+        float elapsed = 0f;
+
+        // 시작 위치로 먼저 이동
+        rect.anchoredPosition = startPos;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            // Ease-Out Cubic: 처음에 빠르게 나오다가 끝에서 부드럽게 감속
+            float ease = 1f - Mathf.Pow(1f - t, 3f);
+
+            rect.anchoredPosition = Vector2.Lerp(startPos, targetPos, ease);
+            yield return null;
+        }
+
+        // 마지막 오차 방지용으로 정확히 중앙 배치
+        rect.anchoredPosition = targetPos;
     }
 
 
