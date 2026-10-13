@@ -12,6 +12,12 @@ public class Unit : MonoBehaviour
     public int currentHp;
     public int currentSpeed; // 버프/디버프로 스피드가 변동될 수 있으므로 분리
 
+    // ================= [ 전투 통계 데이터 ] =================
+    [Header("전투 통계")]
+    public int totalDamageDealt = 0; // 적에게 입힌 총 피해량
+    public int totalDamageTaken = 0; // 받은 총 피해량
+    public int totalHealing = 0;     // 총 회복량
+
     // 스타성 계산을 위한 누적 카운터
     [HideInInspector] public int skillUseCount = 0; // 스킬 사용 횟수
     [HideInInspector] public int hitCount = 0;      // 피격 횟수
@@ -66,6 +72,7 @@ public class Unit : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHp = Mathf.Max(0, currentHp - damage);
+        totalDamageTaken += damage; // 받은 피해량 누적 기록
         Debug.Log($"<color=orange>{UnitName}</color>이 {damage} 피해를 입음 (남은 HP: {currentHp}/{maxHp})");
 
         if (!IsAlive)
@@ -79,5 +86,16 @@ public class Unit : MonoBehaviour
     {
         currentSpeed += amount;
         Debug.Log($"{UnitName}의 스피드 변경: {currentSpeed}");
+    }
+
+    // 나중에 회복 스킬을 쓸 때 호출할 함수
+    public void Heal(int amount)
+    {
+        int prevHp = currentHp;
+        currentHp = Mathf.Min(maxHp, currentHp + amount);
+        int actualHeal = currentHp - prevHp;
+
+        totalHealing += actualHeal; // 회복량 누적 기록
+        Debug.Log($"<color=green>{UnitName}</color>이(가) {actualHeal} 회복! (현재 HP: {currentHp}/{maxHp})");
     }
 }

@@ -9,6 +9,15 @@ EditorBuildSettings:
     path: Assets/01-Scene/MenuSampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
+    path: Assets/01-Scene/GachaScene.unity
+    guid: 4ae57cc3bdf2e2f45bfeb9130cfdc41a
+  - enabled: 1
+    path: Assets/01-Scene/QuestScene.unity
+    guid: 681615b30e28d2d4db5cd4ee430782fe
+  - enabled: 1
+    path: Assets/01-Scene/StoryScene.unity
+    guid: 99826d01ae006af48b06d3cb79496aa1
+  - enabled: 1
     path: Assets/01-Scene/StageScene.unity
     guid: c1a53081d5e8b5a48ab6d38ac6a6cbf9
   m_configObjects:

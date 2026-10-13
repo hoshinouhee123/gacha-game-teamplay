@@ -34,6 +34,12 @@ public class TurnManager : MonoBehaviour
     public Button[] swapButtons;                     // 대기 유닛 선택 버튼 2개
     public TextMeshProUGUI[] swapButtonTexts;        // 버튼 위 텍스트 2개
 
+    [Header("전투 결과 통계 UI 연결")]
+    public GameObject resultPanel;               // 결과창 팝업 패널
+    public TextMeshProUGUI resultSummaryText;    // 클리어 턴, 스타성, 명성 요약 텍스트
+    public TextMeshProUGUI statsTableText;       // 캐릭터별 상세 통계 텍스트
+    public Button confirmButton;                 // 확인/닫기 버튼
+
     private Queue<Unit> turnQueue = new Queue<Unit>();
     private SkillDataSO selectedSkill = null; // 플레이어가 선택한 스킬 임시 저장
     private Unit selectedSwapUnit = null;            // 플레이어가 고른 교대 유닛
@@ -42,6 +48,10 @@ public class TurnManager : MonoBehaviour
 
     private void Start()
     {
+        if (skillPanel != null) skillPanel.SetActive(false);
+        if (swapPanel != null) swapPanel.SetActive(false);
+        if (resultPanel != null) resultPanel.SetActive(false); // 결과창 숨김
+
         // 시작 시 스킬 UI는 숨김
         if (skillPanel != null) skillPanel.SetActive(false);
         if (swapPanel != null) swapPanel.SetActive(false);
@@ -167,6 +177,9 @@ public class TurnManager : MonoBehaviour
                 {
                     bool targetWasAlive = target.IsAlive;
                     target.TakeDamage(finalDamage);
+
+                    // 공격한 캐릭터의 누적 딜량 기록
+                    actor.totalDamageDealt += finalDamage;
 
                     // 스타성 스킬 데미지 적립
                     actor.skillUseCount++;
@@ -314,6 +327,64 @@ public class TurnManager : MonoBehaviour
         Debug.Log($"<color=#00FFFF>획득 명성: {finalStarPower} x 3 = +{earnedRenown}</color>");
         Debug.Log($"<color=#00FFFF>누적 총 보유 명성: {CurrencyManager.GetRenown()}</color>");
         Debug.Log($"<color=#FFD700>==================================================</color>");
+
+        yield return new WaitForSeconds(1.0f);
+
+        // 5. 전투 통계표 화면에 표시
+        ShowBattleResultUI(finalStarPower, earnedRenown);
+    }
+
+    // 통계창 UI 오픈 및 텍스트 작성 함수
+    private void ShowBattleResultUI(int starPower, int renown)
+    {
+        if (resultPanel == null) return;
+
+        resultPanel.SetActive(true);
+
+        // 1. 상단 요약 정보
+        if (resultSummaryText != null)
+        {
+            resultSummaryText.text = $"<b>[ STAGE CLEAR ]</b>\n" +
+                                     $"소요 턴: <color=#D97706>{currentRound}턴</color> | " +
+                                     $"최종 스타성: <color=#B45309>{starPower}%</color> | " +
+                                     $"획득 명성: <color=#0284C7>+{renown}</color>";
+        }
+
+        // 2. 캐릭터별 상세 통계표 (특수 공백 제거 & 가독성 개선)
+        if (statsTableText != null)
+        {
+            var allAllies = fieldUnits.Concat(reserveUnits)
+                .Where(u => u != null && u.Team == Team.Ally)
+                .Distinct()
+                .ToList();
+
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            foreach (var ally in allAllies)
+            {
+                string status = ally.IsAlive ? "" : " <color=red>(사망)</color>";
+
+                // 캐릭터 이름 (검은색 굵게)
+                sb.AppendLine($"<b><color=#222222>{ally.UnitName}</color></b>{status}");
+
+                // 상세 수치 (색상 대비를 높여 흰 배경에서도 또렷하게 보이도록 조정)
+                sb.AppendLine($"   <color=#DC2626>입힌 피해: {ally.totalDamageDealt}</color>  |  " +
+                              $"<color=#2563EB>받은 피해: {ally.totalDamageTaken}</color>  |  " +
+                              $"<color=#16A34A>회복량: {ally.totalHealing}</color>");
+                sb.AppendLine(); // 줄바꿈
+            }
+
+            statsTableText.text = sb.ToString();
+        }
+
+        // 확인 버튼
+        if (confirmButton != null)
+        {
+            confirmButton.onClick.RemoveAllListeners();
+            confirmButton.onClick.AddListener(() => {
+                resultPanel.SetActive(false);
+            });
+        }
     }
 
 

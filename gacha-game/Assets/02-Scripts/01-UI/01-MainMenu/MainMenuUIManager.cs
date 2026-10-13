@@ -16,4 +16,9 @@ public class MainMenuUIManager : MonoBehaviour
             SceneManager.LoadScene("StageScene");
         }
     }
+
+    public void ClickGachaBT()
+    {
+        SceneManager.LoadScene("GachaScene");
+    }
 }
