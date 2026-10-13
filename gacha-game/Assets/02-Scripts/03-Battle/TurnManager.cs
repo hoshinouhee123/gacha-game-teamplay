@@ -301,6 +301,19 @@ public class TurnManager : MonoBehaviour
         AddStarPower(totalPerformance, $"아군 전체 퍼포먼스 스탯 합산 보너스 (+{totalPerformance}%)");
 
         Debug.Log($"<color=cyan> 최종 클리어 스타성: {(int)currentStarPower}% </color>");
+
+        // ================= [ 4. 명성 재화 정산 및 저장 ] =================
+        int finalStarPower = (int)currentStarPower; // 소수점 제외 최종 스타성
+        int earnedRenown = finalStarPower * 3;     // 스타성의 3배
+
+        // 명성 지급 및 PlayerPrefs 영구 저장
+        CurrencyManager.AddRenown(earnedRenown);
+
+        Debug.Log($"<color=#FFD700>==================================================</color>");
+        Debug.Log($"<color=#FFD700>최종 스타성: {finalStarPower}%</color>");
+        Debug.Log($"<color=#00FFFF>획득 명성: {finalStarPower} x 3 = +{earnedRenown}</color>");
+        Debug.Log($"<color=#00FFFF>누적 총 보유 명성: {CurrencyManager.GetRenown()}</color>");
+        Debug.Log($"<color=#FFD700>==================================================</color>");
     }
 
 
