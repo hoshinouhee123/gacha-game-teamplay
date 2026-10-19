@@ -8459,6 +8459,7 @@ GameObject:
   - component: {fileID: 283537047}
   - component: {fileID: 283537046}
   - component: {fileID: 283537049}
+  - component: {fileID: 283537050}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -8507,7 +8508,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 30
+  field of view: 40
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -8533,13 +8534,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 283537045}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.026176924, y: 0, z: 0, w: 0.99965733}
-  m_LocalPosition: {x: 0, y: 1.5, z: -12}
+  m_LocalRotation: {x: 0.13052616, y: 0, z: 0, w: 0.9914449}
+  m_LocalPosition: {x: 0, y: 4.5, z: -12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2093864785}
-  m_LocalEulerAnglesHint: {x: 3, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 15, y: 0, z: 0}
 --- !u!114 &283537049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8584,6 +8585,19 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &283537050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283537045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32fc875c08e328047ab42fa79defb1d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCamera
+  followSmoothTime: 0.15
 --- !u!1 &284894988
 GameObject:
   m_ObjectHideFlags: 0
@@ -10887,6 +10901,7 @@ GameObject:
   - component: {fileID: 347951005}
   - component: {fileID: 347951004}
   - component: {fileID: 347951003}
+  - component: {fileID: 347951006}
   m_Layer: 0
   m_Name: Ally_05
   m_TagString: Untagged
@@ -10903,7 +10918,7 @@ Transform:
   m_GameObject: {fileID: 347951001}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.1300001, y: 5.14912, z: -6}
+  m_LocalPosition: {x: -4.13, y: 5.14912, z: -6}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -10942,6 +10957,7 @@ MonoBehaviour:
   totalHealing: 0
   skillUseCount: 0
   hitCount: 0
+  originPos: {x: 0, y: 0, z: 0}
 --- !u!212 &347951005
 SpriteRenderer:
   serializedVersion: 2
@@ -11001,6 +11017,18 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &347951006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 347951001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
 --- !u!1 &348805071
 GameObject:
   m_ObjectHideFlags: 0
@@ -13012,6 +13040,7 @@ GameObject:
   - component: {fileID: 412646702}
   - component: {fileID: 412646704}
   - component: {fileID: 412646705}
+  - component: {fileID: 412646706}
   m_Layer: 0
   m_Name: Ally_03
   m_TagString: Untagged
@@ -13087,7 +13116,7 @@ Transform:
   m_GameObject: {fileID: 412646701}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.1300001, y: 5.14912, z: -6}
+  m_LocalPosition: {x: -4.13, y: 5.14912, z: -6}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -13114,6 +13143,7 @@ MonoBehaviour:
   totalHealing: 0
   skillUseCount: 0
   hitCount: 0
+  originPos: {x: 0, y: 0, z: 0}
 --- !u!114 &412646705
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13126,6 +13156,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e2664f1264c80948805db8240824908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Billboard
+--- !u!114 &412646706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 412646701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
 --- !u!1 &417064956
 GameObject:
   m_ObjectHideFlags: 0
@@ -27804,6 +27846,7 @@ GameObject:
   - component: {fileID: 793552224}
   - component: {fileID: 793552226}
   - component: {fileID: 793552227}
+  - component: {fileID: 793552228}
   m_Layer: 0
   m_Name: Ally_02
   m_TagString: Untagged
@@ -27879,7 +27922,7 @@ Transform:
   m_GameObject: {fileID: 793552223}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.49, y: 5.14912, z: -5}
+  m_LocalPosition: {x: -6.49, y: 5.14912, z: -5}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -27906,6 +27949,7 @@ MonoBehaviour:
   totalHealing: 0
   skillUseCount: 0
   hitCount: 0
+  originPos: {x: 0, y: 0, z: 0}
 --- !u!114 &793552227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27918,6 +27962,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e2664f1264c80948805db8240824908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Billboard
+--- !u!114 &793552228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 793552223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
 --- !u!1 &795022044
 GameObject:
   m_ObjectHideFlags: 0
@@ -58210,6 +58266,7 @@ GameObject:
   - component: {fileID: 1825137757}
   - component: {fileID: 1825137758}
   - component: {fileID: 1825137759}
+  - component: {fileID: 1825137760}
   m_Layer: 0
   m_Name: Enemy_01
   m_TagString: Untagged
@@ -58226,7 +58283,7 @@ Transform:
   m_GameObject: {fileID: 1825137755}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.29, y: 5.14912, z: -7}
+  m_LocalPosition: {x: 9, y: 5.14912, z: -7}
   m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -58312,6 +58369,7 @@ MonoBehaviour:
   totalHealing: 0
   skillUseCount: 0
   hitCount: 0
+  originPos: {x: 0, y: 0, z: 0}
 --- !u!114 &1825137759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58324,6 +58382,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e2664f1264c80948805db8240824908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Billboard
+--- !u!114 &1825137760
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1825137755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
 --- !u!1 &1833945282
 GameObject:
   m_ObjectHideFlags: 0
@@ -58562,6 +58632,7 @@ GameObject:
   - component: {fileID: 1838359824}
   - component: {fileID: 1838359823}
   - component: {fileID: 1838359822}
+  - component: {fileID: 1838359825}
   m_Layer: 0
   m_Name: Ally_04
   m_TagString: Untagged
@@ -58578,7 +58649,7 @@ Transform:
   m_GameObject: {fileID: 1838359820}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.49, y: 5.14912, z: -5}
+  m_LocalPosition: {x: -6.49, y: 5.14912, z: -5}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -58617,6 +58688,7 @@ MonoBehaviour:
   totalHealing: 0
   skillUseCount: 0
   hitCount: 0
+  originPos: {x: 0, y: 0, z: 0}
 --- !u!212 &1838359824
 SpriteRenderer:
   serializedVersion: 2
@@ -58676,6 +58748,18 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1838359825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1838359820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
 --- !u!1 &1840036707
 GameObject:
   m_ObjectHideFlags: 0
@@ -65952,6 +66036,7 @@ GameObject:
   - component: {fileID: 2126616887}
   - component: {fileID: 2126616889}
   - component: {fileID: 2126616890}
+  - component: {fileID: 2126616891}
   m_Layer: 0
   m_Name: Ally_01
   m_TagString: Untagged
@@ -66027,7 +66112,7 @@ Transform:
   m_GameObject: {fileID: 2126616886}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.63, y: 5.14912, z: -7}
+  m_LocalPosition: {x: -6.63, y: 5.14912, z: -7}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -66054,6 +66139,7 @@ MonoBehaviour:
   totalHealing: 0
   skillUseCount: 0
   hitCount: 0
+  originPos: {x: 0, y: 0, z: 0}
 --- !u!114 &2126616890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -66066,6 +66152,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e2664f1264c80948805db8240824908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Billboard
+--- !u!114 &2126616891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2126616886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
 --- !u!1 &2129342803
 GameObject:
   m_ObjectHideFlags: 0

@@ -33,8 +33,12 @@ public class Unit : MonoBehaviour
     public int Performance => unitData != null ? unitData.performance : 1;
     public bool IsAlive => currentHp > 0;
 
+    [HideInInspector] public Vector3 originPos;
+
     private void Awake()
     {
+        originPos = transform.position; // 시작할 때 자기 원래 자리 기억
+
         if (unitData != null)
         {
             Initialize(unitData);

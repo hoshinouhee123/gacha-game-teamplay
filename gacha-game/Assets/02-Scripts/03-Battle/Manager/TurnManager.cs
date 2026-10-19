@@ -175,7 +175,9 @@ public class TurnManager : MonoBehaviour
                 if (target != null)
                 {
                     bool targetWasAlive = target.IsAlive;
-                    target.TakeDamage(finalDamage);
+
+                    // 여기서 연출 시퀀스 실행 (카메라 줌 -> 이동 -> 공격 -> 복귀)
+                    yield return StartCoroutine(PerformAttackSequence(actor, target, finalDamage, isSkill3));
 
                     // 공격한 캐릭터의 누적 딜량 기록
                     actor.totalDamageDealt += finalDamage;
@@ -550,4 +552,82 @@ public class TurnManager : MonoBehaviour
     {
         selectedSkill = skill; // 루프의 WaitUntil 조건을 만족시킴
     }
+
+    // 연출 시퀀스 (속도 템포를 여유롭고 부드럽게 개선)
+    private IEnumerator PerformAttackSequence(Unit attacker, Unit target, int damage, bool isSkill3)
+    {
+        UnitAnimator attackerAnim = attacker.GetComponent<UnitAnimator>();
+        UnitAnimator targetAnim = target.GetComponent<UnitAnimator>();
+
+        // 1. 카메라 줌인 시작 (0.78배율의 은은한 줌)
+        if (BattleCamera.Instance != null)
+        {
+            BattleCamera.Instance.StartFollowing(attacker.transform, 0.78f);
+        }
+        yield return new WaitForSeconds(0.25f); // 줌인 호흡 대기
+
+        // 2. 적 앞으로 대시 이동 (0.35초 동안 가속/감속하며 자연스럽게 돌진)
+        float stopOffset = (attacker.Team == Team.Ally) ? -1.8f : 1.8f;
+        Vector3 attackPos = new Vector3(target.transform.position.x + stopOffset, target.transform.position.y, attacker.transform.position.z);
+
+        yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, attackPos, 0.35f));
+
+        // 3. 공격 모션 및 실제 타격
+        string animName = isSkill3 ? "Skill_3" : "Attack";
+
+        if (attackerAnim != null)
+        {
+            yield return StartCoroutine(attackerAnim.PlayAttackAnimation(animName, () =>
+            {
+                target.TakeDamage(damage);
+                attacker.totalDamageDealt += damage;
+
+                // 타격 순간 셰이크
+                if (BattleCamera.Instance != null) BattleCamera.Instance.Shake(0.12f, 0.12f);
+                if (targetAnim != null) StartCoroutine(targetAnim.PlayHitAnimation());
+            }));
+        }
+        else
+        {
+            target.TakeDamage(damage);
+            attacker.totalDamageDealt += damage;
+            if (BattleCamera.Instance != null) BattleCamera.Instance.Shake(0.12f, 0.12f);
+            yield return new WaitForSeconds(0.35f);
+        }
+
+        yield return new WaitForSeconds(0.1f); // 타격 직후 잠시 멈칫하는 여운
+
+        // 4. 복귀 및 카메라 원복 (서서히 멀어짐)
+        if (BattleCamera.Instance != null)
+        {
+            BattleCamera.Instance.ResetCamera(0.45f);
+        }
+
+        Vector3 returnPos = (attacker.originPos != Vector3.zero) ? attacker.originPos : attacker.transform.position;
+        yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, returnPos, 0.32f));
+
+        yield return new WaitForSeconds(0.2f);
+    }
+
+    // 가속/감속(Ease-In-Out)이 적용된 부드러운 위치 이동 보조 코루틴
+    private IEnumerator MoveToPositionRoutine(Transform targetTransform, Vector3 endPos, float duration)
+    {
+        Vector3 startPos = targetTransform.position;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            // Ease-In-Out Cubic: 천천히 부드럽게 출발 -> 중간에서 가속 -> 끝에서 스르륵 감속
+            float ease = t < 0.5f ? 4f * t * t * t : 1f - Mathf.Pow(-2f * t + 2f, 3f) / 2f;
+
+            targetTransform.position = Vector3.Lerp(startPos, endPos, ease);
+            yield return null;
+        }
+        targetTransform.position = endPos;
+    }
+
+    
 }
