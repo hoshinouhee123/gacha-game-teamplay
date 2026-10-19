@@ -40,11 +40,32 @@ public class TurnManager : MonoBehaviour
     public TextMeshProUGUI statsTableText;       // 캐릭터별 상세 통계 텍스트
     public Button confirmButton;                 // 확인/닫기 버튼
 
+    [Header("연출 속도 및 텀 조절 (초)")]
+    [Tooltip("카메라가 줌인되며 시전자를 비추는 시간")]
+    public float zoomTime = 0.4f;
+
+    [Tooltip("카메라 줌 완료 후 돌진하기 전 뜸 들이는 시간 (기 모으기)")]
+    public float preDashDelay = 0.25f;
+
+    [Tooltip("적 앞으로 돌진해 다가가는 시간")]
+    public float dashTime = 0.45f;
+
+    [Tooltip("공격 타격 후 그 자리에서 폼 잡고 머무는 시간 (여운/후딜)")]
+    public float postAttackWait = 0.35f;
+
+    [Tooltip("원래 자기 자리로 복귀하는 시간")]
+    public float returnTime = 0.4f;
+
+    [Tooltip("한 턴이 완전히 끝나고 다음 턴으로 넘어가기 전 휴식 텀")]
+    public float postTurnDelay = 0.5f;
+
     private Queue<Unit> turnQueue = new Queue<Unit>();
     private SkillDataSO selectedSkill = null; // 플레이어가 선택한 스킬 임시 저장
     private Unit selectedSwapUnit = null;            // 플레이어가 고른 교대 유닛
     private int currentRound = 0;
     private bool isBattleCleared = false;
+
+
 
     private void Start()
     {
@@ -552,26 +573,29 @@ public class TurnManager : MonoBehaviour
         selectedSkill = skill; // 루프의 WaitUntil 조건을 만족시킴
     }
 
-    // 연출 시퀀스 (속도 템포를 여유롭고 부드럽게 개선)
+    // 여유롭고 묵직한 템포가 적용된 연출 시퀀스
     private IEnumerator PerformAttackSequence(Unit attacker, Unit target, int damage, bool isSkill3)
     {
         UnitAnimator attackerAnim = attacker.GetComponent<UnitAnimator>();
         UnitAnimator targetAnim = target.GetComponent<UnitAnimator>();
 
-        // 1. 카메라 줌인 시작 (0.78배율의 은은한 줌)
+        // 1. 카메라 줌인 (시전자에게 부드럽게 다가감)
         if (BattleCamera.Instance != null)
         {
             BattleCamera.Instance.StartFollowing(attacker.transform, 0.78f);
         }
-        yield return new WaitForSeconds(0.25f); // 줌인 호흡 대기
+        yield return new WaitForSeconds(zoomTime);
 
-        // 2. 적 앞으로 대시 이동 (0.35초 동안 가속/감속하며 자연스럽게 돌진)
+        // [텀 1] 돌진 직전 기 모으는 정적 (호흡 가다듬기)
+        yield return new WaitForSeconds(preDashDelay);
+
+        // 2. 적 앞으로 묵직하게 가감속 돌진
         float stopOffset = (attacker.Team == Team.Ally) ? -1.8f : 1.8f;
         Vector3 attackPos = new Vector3(target.transform.position.x + stopOffset, target.transform.position.y, attacker.transform.position.z);
 
-        yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, attackPos, 0.35f));
+        yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, attackPos, dashTime));
 
-        // 3. 공격 모션 및 실제 타격
+        // 3. 공격 모션 및 타격
         string animName = isSkill3 ? "Skill_3" : "Attack";
 
         if (attackerAnim != null)
@@ -581,7 +605,6 @@ public class TurnManager : MonoBehaviour
                 target.TakeDamage(damage);
                 attacker.totalDamageDealt += damage;
 
-                // 타격 순간 셰이크
                 if (BattleCamera.Instance != null) BattleCamera.Instance.Shake(0.12f, 0.12f);
                 if (targetAnim != null) StartCoroutine(targetAnim.PlayHitAnimation());
             }));
@@ -594,18 +617,20 @@ public class TurnManager : MonoBehaviour
             yield return new WaitForSeconds(0.35f);
         }
 
-        yield return new WaitForSeconds(0.1f); // 타격 직후 잠시 멈칫하는 여운
+        // [텀 2] 타격 후 바로 도망치듯 돌아가지 않고 공격 자세 유지 (후딜레이)
+        yield return new WaitForSeconds(postAttackWait);
 
-        // 4. 복귀 및 카메라 원복 (서서히 멀어짐)
+        // 4. 원래 자리로 복귀 & 카메라 전체 시점 복구
         if (BattleCamera.Instance != null)
         {
-            BattleCamera.Instance.ResetCamera(0.45f);
+            BattleCamera.Instance.ResetCamera(returnTime + 0.1f);
         }
 
         Vector3 returnPos = (attacker.originPos != Vector3.zero) ? attacker.originPos : attacker.transform.position;
-        yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, returnPos, 0.32f));
+        yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, returnPos, returnTime));
 
-        yield return new WaitForSeconds(0.2f);
+        // [텀 3] 자기 자리에 서서 다음 턴으로 넘어가기 전 숨고르기
+        yield return new WaitForSeconds(postTurnDelay);
     }
 
     // 가속/감속(Ease-In-Out)이 적용된 부드러운 위치 이동 보조 코루틴

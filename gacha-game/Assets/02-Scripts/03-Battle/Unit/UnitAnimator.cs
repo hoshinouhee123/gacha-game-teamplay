@@ -20,15 +20,16 @@ public class UnitAnimator : MonoBehaviour
         // ================================================================
         Vector3 originScale = transform.localScale;
 
-        // 칼 휘두르는 준비 동작 (0.15초)
+        // 1. 공격 준비 자세 (몸을 살짝 뒤로 젖히며 커짐: 0.2초)
         transform.localScale = originScale * 1.15f;
-        yield return new WaitForSeconds(0.15f);
+        yield return new WaitForSeconds(0.2f);
 
-        // ★ 타격 시점! (적에게 데미지 전달)
+        // 2. 타격 순간! (데미지 전달)
         onHit?.Invoke();
 
-        // 타격 후 딜레이 (0.25초)
-        yield return new WaitForSeconds(0.25f);
+        // 3. 타격 후 포즈 유지 (칼을 벤 채로 멈춰있는 여운: 0.3초)
+        yield return new WaitForSeconds(0.3f);
+
         transform.localScale = originScale;
 
         /* ================================================================

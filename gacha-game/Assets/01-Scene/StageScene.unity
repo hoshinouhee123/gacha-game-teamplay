@@ -12458,7 +12458,7 @@ Transform:
   m_GameObject: {fileID: 398257603}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0, z: 20}
+  m_LocalPosition: {x: 0, y: 23.1, z: 20}
   m_LocalScale: {x: 100, y: 56.25, z: 7.8125}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -46470,6 +46470,12 @@ MonoBehaviour:
   resultSummaryText: {fileID: 903990771}
   statsTableText: {fileID: 1592722700}
   confirmButton: {fileID: 816167447}
+  zoomTime: 0.4
+  preDashDelay: 0.25
+  dashTime: 0.45
+  postAttackWait: 0.35
+  returnTime: 0.4
+  postTurnDelay: 0.5
 --- !u!4 &1442063346
 Transform:
   m_ObjectHideFlags: 0
