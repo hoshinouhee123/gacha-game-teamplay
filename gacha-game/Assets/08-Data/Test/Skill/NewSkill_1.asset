@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffdf103275bac394d8fda8f54140d777, type: 3}
   m_Name: NewSkill_1
   m_EditorClassIdentifier: Assembly-CSharp::SkillDataSO
-  skillName: "\uC2A4\uD0AC1"
+  skillName: "\uC2A4\uD0AC1 \uC785\uB2C8\uB465"
   description: 
   damageMultiplier: 1
   spCost: 0

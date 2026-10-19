@@ -40,6 +40,12 @@ public class TurnManager : MonoBehaviour
     public TextMeshProUGUI statsTableText;       // 캐릭터별 상세 통계 텍스트
     public Button confirmButton;                 // 확인/닫기 버튼
 
+    [Header("스킬 연출 배너 UI 연결")]
+    public GameObject skillBannerPanel;              // 배너 전체 패널
+    public TextMeshProUGUI bannerCharacterNameText;  // 캐릭터 이름 텍스트
+    public TextMeshProUGUI bannerSkillNameText;      // 스킬 이름 텍스트
+    public CanvasGroup bannerCanvasGroup;            // 부드러운 투명도 조절용
+
     [Header("연출 속도 및 텀 조절 (초)")]
     [Tooltip("카메라가 줌인되며 시전자를 비추는 시간")]
     public float zoomTime = 0.4f;
@@ -198,7 +204,7 @@ public class TurnManager : MonoBehaviour
                     bool targetWasAlive = target.IsAlive;
 
                     // 여기서 연출 시퀀스 실행 (카메라 줌 -> 이동 -> 공격 -> 복귀)
-                    yield return StartCoroutine(PerformAttackSequence(actor, target, finalDamage, isSkill3));
+                    yield return StartCoroutine(PerformAttackSequence(actor, target, finalDamage, isSkill3, selectedSkill.skillName));
 
                     // 공격한 캐릭터의 누적 딜량 기록
                     actor.totalDamageDealt += finalDamage;
@@ -275,7 +281,7 @@ public class TurnManager : MonoBehaviour
 
                 // 아군과 똑같은 연출 시퀀스 실행
                 // 카메라가 적에게 줌인 -> 아군 앞으로 돌진 -> 타격 & 셰이크 -> 복귀
-                yield return StartCoroutine(PerformAttackSequence(actor, target, damage, false));
+                yield return StartCoroutine(PerformAttackSequence(actor, target, damage, false, skillName));
 
                 // 아군 피격 스타성 처리
                 target.hitCount++;
@@ -574,20 +580,26 @@ public class TurnManager : MonoBehaviour
     }
 
     // 여유롭고 묵직한 템포가 적용된 연출 시퀀스
-    private IEnumerator PerformAttackSequence(Unit attacker, Unit target, int damage, bool isSkill3)
+    // PerformAttackSequence 매개변수에 string skillName 추가
+    private IEnumerator PerformAttackSequence(Unit attacker, Unit target, int damage, bool isSkill3, string skillName)
     {
         UnitAnimator attackerAnim = attacker.GetComponent<UnitAnimator>();
         UnitAnimator targetAnim = target.GetComponent<UnitAnimator>();
 
-        // 1. 카메라 줌인 (시전자에게 부드럽게 다가감)
+        // 1. 카메라 줌인 & 스킬 컷인 배너 등장!
         if (BattleCamera.Instance != null)
         {
             BattleCamera.Instance.StartFollowing(attacker.transform, 0.78f);
         }
-        yield return new WaitForSeconds(zoomTime);
 
-        // [텀 1] 돌진 직전 기 모으는 정적 (호흡 가다듬기)
+        // ★ [추가] 줌인과 동시에 화면에 캐릭터명과 스킬명 출력
+        ShowSkillBanner(attacker.UnitName, skillName);
+
+        yield return new WaitForSeconds(zoomTime);
         yield return new WaitForSeconds(preDashDelay);
+
+        // ★ [추가] 돌진 시작할 때 배너를 부드럽게 페이드아웃
+        HideSkillBanner();
 
         // 2. 적 앞으로 묵직하게 가감속 돌진
         float stopOffset = (attacker.Team == Team.Ally) ? -1.8f : 1.8f;
@@ -617,10 +629,9 @@ public class TurnManager : MonoBehaviour
             yield return new WaitForSeconds(0.35f);
         }
 
-        // [텀 2] 타격 후 바로 도망치듯 돌아가지 않고 공격 자세 유지 (후딜레이)
         yield return new WaitForSeconds(postAttackWait);
 
-        // 4. 원래 자리로 복귀 & 카메라 전체 시점 복구
+        // 4. 복귀 및 카메라 원복
         if (BattleCamera.Instance != null)
         {
             BattleCamera.Instance.ResetCamera(returnTime + 0.1f);
@@ -629,7 +640,6 @@ public class TurnManager : MonoBehaviour
         Vector3 returnPos = (attacker.originPos != Vector3.zero) ? attacker.originPos : attacker.transform.position;
         yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, returnPos, returnTime));
 
-        // [텀 3] 자기 자리에 서서 다음 턴으로 넘어가기 전 숨고르기
         yield return new WaitForSeconds(postTurnDelay);
     }
 
@@ -653,5 +663,47 @@ public class TurnManager : MonoBehaviour
         targetTransform.position = endPos;
     }
 
-    
+    // 스킬 배너 표시 (페이드인)
+    public void ShowSkillBanner(string charName, string skillName)
+    {
+        if (skillBannerPanel == null) return;
+
+        if (bannerCharacterNameText != null) bannerCharacterNameText.text = charName;
+        if (bannerSkillNameText != null) bannerSkillNameText.text = skillName;
+
+        skillBannerPanel.SetActive(true);
+        StopCoroutine("FadeBannerRoutine");
+        StartCoroutine(FadeBannerRoutine(1f, 0.15f)); // 0.15초 만에 선명하게 페이드인
+    }
+
+    // 스킬 배너 숨김 (페이드아웃)
+    public void HideSkillBanner()
+    {
+        if (skillBannerPanel == null || !skillBannerPanel.activeSelf) return;
+
+        StopCoroutine("FadeBannerRoutine");
+        StartCoroutine(FadeBannerRoutine(0f, 0.2f, () => skillBannerPanel.SetActive(false)));
+    }
+
+    private IEnumerator FadeBannerRoutine(float targetAlpha, float duration, System.Action onComplete = null)
+    {
+        if (bannerCanvasGroup == null)
+        {
+            onComplete?.Invoke();
+            yield break;
+        }
+
+        float startAlpha = bannerCanvasGroup.alpha;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            bannerCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
+            yield return null;
+        }
+
+        bannerCanvasGroup.alpha = targetAlpha;
+        onComplete?.Invoke();
+    }
 }
