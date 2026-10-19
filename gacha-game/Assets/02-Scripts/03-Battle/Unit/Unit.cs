@@ -25,6 +25,7 @@ public class Unit : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
     private Vector3 originalScale;
+    private UnitHealthUI healthUI;
 
     // SO의 기본 정보를 편하게 읽어오는 프로퍼티
     public string UnitName => unitData != null ? unitData.unitName : name;
@@ -37,6 +38,7 @@ public class Unit : MonoBehaviour
 
     private void Awake()
     {
+        healthUI = GetComponentInChildren<UnitHealthUI>(); // 자식에서 UI 컴포넌트 자동 탐색
         originPos = transform.position; // 시작할 때 자기 원래 자리 기억
 
         if (unitData != null)
@@ -71,6 +73,8 @@ public class Unit : MonoBehaviour
         {
             spriteRenderer.sprite = data.characterSprite;
         }
+
+        if (healthUI != null) healthUI.UpdateHP(currentHp, maxHp);
     }
 
     public void TakeDamage(int damage)
@@ -78,6 +82,13 @@ public class Unit : MonoBehaviour
         currentHp = Mathf.Max(0, currentHp - damage);
         totalDamageTaken += damage; // 받은 피해량 누적 기록
         Debug.Log($"<color=orange>{UnitName}</color>이 {damage} 피해를 입음 (남은 HP: {currentHp}/{maxHp})");
+
+        // 머리 위 체력바 깎고 데미지 숫자 띄우기
+        if (healthUI != null)
+        {
+            healthUI.UpdateHP(currentHp, maxHp);
+            healthUI.ShowDamage(damage);
+        }
 
         if (!IsAlive)
         {
@@ -101,5 +112,12 @@ public class Unit : MonoBehaviour
 
         totalHealing += actualHeal; // 회복량 누적 기록
         Debug.Log($"<color=green>{UnitName}</color>이(가) {actualHeal} 회복! (현재 HP: {currentHp}/{maxHp})");
+
+        // 머리 위 체력바 채우고 초록색 힐 숫자 띄우기!
+        if (healthUI != null)
+        {
+            healthUI.UpdateHP(currentHp, maxHp);
+            healthUI.ShowHeal(actualHeal);
+        }
     }
 }

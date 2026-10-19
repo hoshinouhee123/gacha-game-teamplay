@@ -197,7 +197,6 @@ public class TurnManager : MonoBehaviour
             if (target != null)
             {
                 Debug.Log($"<color=cyan>[{actor.UnitName}]이(가) [{selectedSkill.skillName}] 사용! -> {target.UnitName}에게 {finalDamage} 피해!</color>");
-                target.TakeDamage(finalDamage);
 
                 if (target != null)
                 {
