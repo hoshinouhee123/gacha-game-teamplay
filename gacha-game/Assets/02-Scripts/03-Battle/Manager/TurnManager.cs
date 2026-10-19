@@ -226,11 +226,11 @@ public class TurnManager : MonoBehaviour
         }
         else
         {
-            // [적 턴 AI 예시]
-            Debug.Log($"[적] {actor.UnitName}의 턴!");
-            yield return new WaitForSeconds(1.0f);
+            // ================= 2. 적(Enemy) 턴 =================
+            Debug.Log($"<color=red>[적] {actor.UnitName}의 턴!</color>");
+            yield return new WaitForSeconds(0.4f); // 생각하는 척 딜레이
 
-            // 스킬이 등록되어 있다면 스킬 중 랜덤 1개 선택, 없으면 평타(계수 1.0)
+            // 스킬 중 무작위 1개 선택 (없으면 평타 계수 1.0)
             var availableSkills = actor.unitData.skills.Where(s => s != null).ToList();
             float multiplier = 1.0f;
             string skillName = "일반 공격";
@@ -244,34 +244,30 @@ public class TurnManager : MonoBehaviour
 
             int damage = Mathf.RoundToInt(actor.unitData.attackPower * multiplier);
 
-            Unit target = fieldUnits.FirstOrDefault(u => u.Team == Team.Ally && u.IsAlive);
+            // 살아있는 아군 중 랜덤으로 1명 타겟팅 (다양한 아군 공격)
+            var aliveAllies = fieldUnits.Where(u => u.Team == Team.Ally && u.IsAlive).ToList();
+            Unit target = (aliveAllies.Count > 0) ? aliveAllies[Random.Range(0, aliveAllies.Count)] : null;
+
             if (target != null)
             {
-                Debug.Log($"<color=red>[적] {actor.UnitName}이(가) [{skillName}] 사용! -> {damage} 피해!</color>");
-                target.TakeDamage(damage);
+                Debug.Log($"<color=red>[적] {actor.UnitName}이(가) [{skillName}] 사용! -> 타겟: {target.UnitName}</color>");
+
+                // 아군과 똑같은 연출 시퀀스 실행
+                // 카메라가 적에게 줌인 -> 아군 앞으로 돌진 -> 타격 & 셰이크 -> 복귀
+                yield return StartCoroutine(PerformAttackSequence(actor, target, damage, false));
 
                 // 아군 피격 스타성 처리
                 target.hitCount++;
                 if (target.hitCount >= 3)
-                {
-                    // 3번 이상 피격 시 2% 감소
                     AddStarPower(-2f, $"{target.UnitName} 누적 3회 이상 피격 감점");
-                }
                 else
-                {
-                    // 1, 2번째 피격은 1% 증가
                     AddStarPower(1f, $"{target.UnitName} 피격 획득");
-                }
 
-                // 사망 시 8% 감소
                 if (!target.IsAlive)
-                {
                     AddStarPower(-8f, $"{target.UnitName} 사망 감점");
-                }
-
-
             }
-            yield return new WaitForSeconds(0.5f);
+
+            yield return new WaitForSeconds(0.3f);
         }
     }
 
@@ -449,6 +445,9 @@ public class TurnManager : MonoBehaviour
         // 1. 위치 맞바꾸기
         Vector3 fieldPos = currentActor.transform.position;
         selectedSwapUnit.transform.position = fieldPos;
+
+        // 들어온 캐릭터의 원래 자리(originPos)를 이 필드 자리로 새로 기억시킵니다!
+        selectedSwapUnit.originPos = fieldPos;
 
         // 2. 오브젝트 켜고 끄기
         currentActor.gameObject.SetActive(false);

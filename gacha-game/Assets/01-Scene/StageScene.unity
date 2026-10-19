@@ -8598,6 +8598,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleCamera
   followSmoothTime: 0.15
+  defaultZoomRatio: 0.78
 --- !u!1 &284894988
 GameObject:
   m_ObjectHideFlags: 0
@@ -27922,7 +27923,7 @@ Transform:
   m_GameObject: {fileID: 793552223}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.49, y: 5.14912, z: -5}
+  m_LocalPosition: {x: -6.49, y: 5.14912, z: -4}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -58284,7 +58285,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 9, y: 5.14912, z: -7}
-  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1678048457}
@@ -58649,7 +58650,7 @@ Transform:
   m_GameObject: {fileID: 1838359820}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.49, y: 5.14912, z: -5}
+  m_LocalPosition: {x: -6.49, y: 5.14912, z: -4}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -66112,7 +66113,7 @@ Transform:
   m_GameObject: {fileID: 2126616886}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.63, y: 5.14912, z: -7}
+  m_LocalPosition: {x: -6.63, y: 5.14912, z: -8}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
