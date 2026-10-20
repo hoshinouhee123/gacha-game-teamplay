@@ -189,6 +189,15 @@ public class TurnManager : MonoBehaviour
             if (EnvironmentDimmer.Instance != null) EnvironmentDimmer.Instance.SetDim(true, 0.3f);
             if (BattleCamera.Instance != null) BattleCamera.Instance.StartCinematicFocus(actor.transform, 0.95f, 0.35f);
 
+            // 시전자(actor)를 제외한 나머지 아군들만 어둡게 처리
+            foreach (var unit in fieldUnits)
+            {
+                if (unit.Team == Team.Ally && unit != actor && unit.IsAlive)
+                {
+                    unit.SetDimmed(true);
+                }
+            }
+
             // 적이 1명이면 자동으로 그 적 타겟팅
             if (aliveEnemies.Count == 1)
             {
@@ -202,6 +211,15 @@ public class TurnManager : MonoBehaviour
 
             // 타겟 선택 완료 -> 배경 밝기 원복
             if (EnvironmentDimmer.Instance != null) EnvironmentDimmer.Instance.SetDim(false, 0.3f);
+
+            // 어두워졌던 다른 아군들의 밝기 정상 복구
+            foreach (var unit in fieldUnits)
+            {
+                if (unit.Team == Team.Ally && unit != actor)
+                {
+                    unit.SetDimmed(false);
+                }
+            }
 
             // 타겟이 확정된 후 SP 차감 (잘못 누르는 상황 방지)
             currentSP += selectedSkill.spGain;

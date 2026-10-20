@@ -162,4 +162,22 @@ public class Unit : MonoBehaviour
             spriteRenderer.color = originalColor;
         }
     }
+
+    // 다른 아군 톤다운(어둡게) 처리
+    public void SetDimmed(bool isDimmed)
+    {
+        if (spriteRenderer == null) return;
+
+        if (isDimmed)
+        {
+            // 색상을 어두운 회색(밝기 약 25%)으로 낮춤
+            spriteRenderer.color = new Color(0.25f, 0.25f, 0.25f, 1f);
+        }
+        else
+        {
+            // 원래 밝기로 복구
+            if (originalColor.a == 0f) originalColor = Color.white;
+            spriteRenderer.color = originalColor;
+        }
+    }
 }
