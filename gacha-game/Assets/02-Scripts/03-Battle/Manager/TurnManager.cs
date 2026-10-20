@@ -179,7 +179,24 @@ public class TurnManager : MonoBehaviour
             // 선택 완료 후 패널 닫기
             skillPanel.SetActive(false);
 
-            // SP 처리
+            // 살아있는 적 목록 가져오기
+            var aliveEnemies = fieldUnits.Where(u => u.Team == Team.Enemy && u.IsAlive).ToList();
+            if (aliveEnemies.Count == 0) yield break;
+
+            Unit target = null;
+
+            // 적이 1명이면 자동으로 그 적 타겟팅
+            if (aliveEnemies.Count == 1)
+            {
+                target = aliveEnemies[0];
+            }
+            else
+            {
+                // 적이 2명 이상이면 마우스 클릭을 받을 때까지 대기!
+                yield return StartCoroutine(WaitForTargetSelection(aliveEnemies, (chosen) => target = chosen));
+            }
+
+            // 타겟이 확정된 후 SP 차감 (잘못 누르는 상황 방지)
             currentSP += selectedSkill.spGain;
             currentSP -= selectedSkill.spCost;
             currentSP = Mathf.Clamp(currentSP, 0, maxSP);
@@ -187,9 +204,6 @@ public class TurnManager : MonoBehaviour
 
             // 데미지 계산: 공격력 * 퍼센트
             int finalDamage = Mathf.RoundToInt(actor.unitData.attackPower * selectedSkill.damageMultiplier);
-
-            // 첫 번째 살아있는 적 공격
-            Unit target = fieldUnits.FirstOrDefault(u => u.Team == Team.Enemy && u.IsAlive);
 
             // 스킬 3 사용 시 교대 처리
             bool isSkill3 = (actor.unitData.skills.Length >= 3 && selectedSkill == actor.unitData.skills[2]);
@@ -201,6 +215,9 @@ public class TurnManager : MonoBehaviour
                 if (target != null)
                 {
                     bool targetWasAlive = target.IsAlive;
+                    string displayName = !string.IsNullOrEmpty(selectedSkill.skillName) ? selectedSkill.skillName : selectedSkill.name;
+
+                    Debug.Log($"<color=cyan>[{actor.UnitName}]이(가) [{displayName}] 사용! -> 타겟: [{target.UnitName}]</color>");
 
                     // 여기서 연출 시퀀스 실행 (카메라 줌 -> 이동 -> 공격 -> 복귀)
                     yield return StartCoroutine(PerformAttackSequence(actor, target, finalDamage, isSkill3, selectedSkill.skillName));
@@ -704,5 +721,62 @@ public class TurnManager : MonoBehaviour
 
         bannerCanvasGroup.alpha = targetAlpha;
         onComplete?.Invoke();
+    }
+
+    // 플레이어가 마우스로 적을 클릭할 때까지 대기하는 코루틴
+    private IEnumerator WaitForTargetSelection(List<Unit> enemies, System.Action<Unit> onTargetSelected)
+    {
+        Debug.Log("<color=yellow>▶ 공격할 적을 마우스로 클릭하세요!</color>");
+
+        // 살아있는 모든 적에게 타겟팅 모드 켜기 (마우스 올리면 붉게 반응)
+        foreach (var enemy in enemies)
+        {
+            enemy.SetTargetable(true);
+        }
+
+        Unit selectedUnit = null;
+
+        while (selectedUnit == null)
+        {
+            // 마우스 좌클릭 감지
+            if (Input.GetMouseButtonDown(0))
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                // 1. 3D 레이캐스트 검사 (BoxCollider 등)
+                if (Physics.Raycast(ray, out RaycastHit hit))
+                {
+                    Unit hitUnit = hit.collider.GetComponentInParent<Unit>();
+                    if (hitUnit != null && enemies.Contains(hitUnit))
+                    {
+                        selectedUnit = hitUnit;
+                    }
+                }
+
+                // 2. 2D 레이캐스트 검사 (BoxCollider2D 대비)
+                if (selectedUnit == null)
+                {
+                    RaycastHit2D hit2D = Physics2D.GetRayIntersection(ray);
+                    if (hit2D.collider != null)
+                    {
+                        Unit hitUnit = hit2D.collider.GetComponentInParent<Unit>();
+                        if (hitUnit != null && enemies.Contains(hitUnit))
+                        {
+                            selectedUnit = hitUnit;
+                        }
+                    }
+                }
+            }
+
+            yield return null;
+        }
+
+        // 타겟 선택 완료 -> 모든 적 타겟팅 모드 해제
+        foreach (var enemy in enemies)
+        {
+            enemy.SetTargetable(false);
+        }
+
+        onTargetSelected?.Invoke(selectedUnit);
     }
 }

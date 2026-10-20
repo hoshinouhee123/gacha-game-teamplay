@@ -36,9 +36,20 @@ public class Unit : MonoBehaviour
 
     [HideInInspector] public Vector3 originPos;
 
+    [Header("타겟팅 선택 강조용")]
+    private bool isTargetable = false;
+
     private void Awake()
     {
+
         healthUI = GetComponentInChildren<UnitHealthUI>(); // 자식에서 UI 컴포넌트 자동 탐색
+
+        // 1. 스프라이트 렌더러와 기본 색상/크기 안전하게 기억
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+
+        originalColor = (spriteRenderer != null) ? spriteRenderer.color : Color.white;
+        originalScale = (transform.localScale != Vector3.zero) ? transform.localScale : Vector3.one;
+
         originPos = transform.position; // 시작할 때 자기 원래 자리 기억
 
         if (unitData != null)
@@ -118,6 +129,37 @@ public class Unit : MonoBehaviour
         {
             healthUI.UpdateHP(currentHp, maxHp);
             healthUI.ShowHeal(actualHeal);
+        }
+    }
+
+    // 타겟팅 선택 모드 켜고 끄기
+    public void SetTargetable(bool enable)
+    {
+        isTargetable = enable;
+        if (!enable && spriteRenderer != null)
+        {
+            // 원래 색상으로 복구 
+            if (originalColor.a == 0f) originalColor = Color.white;
+            spriteRenderer.color = originalColor;
+        }
+    }
+
+    // 마우스 올렸을 때: 색상만 붉은색으로 변경
+    private void OnMouseEnter()
+    {
+        if (isTargetable && IsAlive && spriteRenderer != null)
+        {
+            spriteRenderer.color = new Color(1f, 0.4f, 0.4f);
+        }
+    }
+
+    // 마우스 나갔을 때: 원래 색상으로 복구
+    private void OnMouseExit()
+    {
+        if (isTargetable && IsAlive && spriteRenderer != null)
+        {
+            if (originalColor.a == 0f) originalColor = Color.white;
+            spriteRenderer.color = originalColor;
         }
     }
 }
