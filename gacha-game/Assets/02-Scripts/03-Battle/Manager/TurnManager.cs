@@ -185,6 +185,10 @@ public class TurnManager : MonoBehaviour
 
             Unit target = null;
 
+            // 배경을 어둡게 암전시키고 시전자 쪽으로 3D 틸트 줌인
+            if (EnvironmentDimmer.Instance != null) EnvironmentDimmer.Instance.SetDim(true, 0.3f);
+            if (BattleCamera.Instance != null) BattleCamera.Instance.StartCinematicFocus(actor.transform, 0.95f, 0.35f);
+
             // 적이 1명이면 자동으로 그 적 타겟팅
             if (aliveEnemies.Count == 1)
             {
@@ -195,6 +199,9 @@ public class TurnManager : MonoBehaviour
                 // 적이 2명 이상이면 마우스 클릭을 받을 때까지 대기!
                 yield return StartCoroutine(WaitForTargetSelection(aliveEnemies, (chosen) => target = chosen));
             }
+
+            // 타겟 선택 완료 -> 배경 밝기 원복
+            if (EnvironmentDimmer.Instance != null) EnvironmentDimmer.Instance.SetDim(false, 0.3f);
 
             // 타겟이 확정된 후 SP 차감 (잘못 누르는 상황 방지)
             currentSP += selectedSkill.spGain;
