@@ -17,11 +17,14 @@ public class BattleUnit : ScriptableObject
     [Header("기본 스탯")]
     public int maxHP = 100;       //최대 HP
     public int attackPower = 10; //공격력
-    public int speed= 10;       //스피드 (턴 순서 용)
+    public int speed = 10;       //스피드 (턴 순서 용)
 
     [Header("스킬 목록 (총 3개)")]
     public SkillDataSO[] skills = new SkillDataSO[3]; // 스킬 1, 2, 3
 
     [Header("스타성 퍼포먼스 (1~5)")]
     [Range(1, 5)] public int performance = 3; // 클리어 시 합산될 기본 퍼포먼스 점수
+
+    [Header("대사 목록")]
+    public string[] mainMenuDialogue;
 }
