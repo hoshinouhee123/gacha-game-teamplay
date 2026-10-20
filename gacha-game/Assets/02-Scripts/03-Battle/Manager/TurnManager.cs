@@ -65,16 +65,32 @@ public class TurnManager : MonoBehaviour
     [Tooltip("한 턴이 완전히 끝나고 다음 턴으로 넘어가기 전 휴식 텀")]
     public float postTurnDelay = 0.5f;
 
+    // 다른 씬이나 UI에서 넘겨받을 정적 변수 (선택된 스테이지)
+    public static StageDataSO SelectedStageData = null;
+
+    [Header("스테이지 세팅")]
+    public StageDataSO defaultStageData;         // 에디터에서 바로 재생할 때 쓸 기본 스테이지
+    public GameObject enemyBasePrefab;           // 적 공용 프리팹 (Unit, SpriteRenderer, Collider 등이 붙은 프리팹)
+    public Transform[] enemySpawnPoints;         // 적들이 서 있을 위치 (예: 1~3번 자리)
+
     private Queue<Unit> turnQueue = new Queue<Unit>();
     private SkillDataSO selectedSkill = null; // 플레이어가 선택한 스킬 임시 저장
     private Unit selectedSwapUnit = null;            // 플레이어가 고른 교대 유닛
     private int currentRound = 0;
     private bool isBattleCleared = false;
 
+    private StageDataSO currentStage;
+
 
 
     private void Start()
     {
+        // 선택된 스테이지가 없으면 기본 스테이지 사용 (에디터 테스트용)
+        currentStage = SelectedStageData != null ? SelectedStageData : defaultStageData;
+
+        // 스테이지의 적 목록을 읽어와서 필드에 자동 스폰
+        SpawnStageEnemies();
+
         if (skillPanel != null) skillPanel.SetActive(false);
         if (swapPanel != null) swapPanel.SetActive(false);
         if (resultPanel != null) resultPanel.SetActive(false); // 결과창 숨김
@@ -93,6 +109,34 @@ public class TurnManager : MonoBehaviour
         UpdateStarPowerUI();
 
         StartCoroutine(BattleRoutine());
+    }
+
+    // 적 자동 스폰 함수
+    private void SpawnStageEnemies()
+    {
+        if (currentStage == null || enemyBasePrefab == null) return;
+
+        // 기존에 씬에 남아있던 적(Enemy) 제거
+        fieldUnits.RemoveAll(u => u == null || u.Team == Team.Enemy);
+
+        for (int i = 0; i < currentStage.enemies.Count; i++)
+        {
+            if (i >= enemySpawnPoints.Length) break;
+
+            BattleUnit enemyData = currentStage.enemies[i];
+            if (enemyData == null) continue;
+
+            // 스폰 위치에 적 생성
+            GameObject enemyObj = Instantiate(enemyBasePrefab, enemySpawnPoints[i].position, Quaternion.identity);
+            Unit enemyUnit = enemyObj.GetComponent<Unit>();
+
+            if (enemyUnit != null)
+            {
+                enemyUnit.Initialize(enemyData);
+                enemyUnit.originPos = enemySpawnPoints[i].position;
+                fieldUnits.Add(enemyUnit); // 전투 목록에 추가
+            }
+        }
     }
 
     // ================= [ 스타성 관리 함수 ] =================
@@ -397,6 +441,12 @@ public class TurnManager : MonoBehaviour
         Debug.Log($"<color=#00FFFF>획득 명성: {finalStarPower} x 3 = +{earnedRenown}</color>");
         Debug.Log($"<color=#00FFFF>누적 총 보유 명성: {CurrencyManager.GetRenown()}</color>");
         Debug.Log($"<color=#FFD700>==================================================</color>");
+
+        // 현재 스테이지의 스타성 신기록을 JSON에 저장
+        if (currentStage != null)
+        {
+            CurrencyManager.SaveStageRecord(currentStage.stageId, finalStarPower);
+        }
 
         yield return new WaitForSeconds(1.0f);
 

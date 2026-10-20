@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -7,7 +8,21 @@ public class PlayerData
 {
     public int renown = 0; // 명성 재화
     // public List<string> ownedCharacters = new List<string>(); // <- 추후 가챠 캐릭터 저장 확장용
+
+    // 스테이지별 기록 리스트
+    public List<StageRecord> stageRecords = new List<StageRecord>();
 }
+
+// 2. 스테이지별 기록 데이터 클래스
+[System.Serializable]
+public class StageRecord
+{
+    public int stageId;          // 스테이지 번호 (예: 1, 2, 3...)
+    public int bestStarPower;     // 기록된 최고 스타성 (0~120%)
+    public bool isCleared;        // 클리어 여부
+}
+
+
 
 public static class CurrencyManager
 {
@@ -96,5 +111,43 @@ public static class CurrencyManager
         cachedData = new PlayerData();
         SaveToFile();
         Debug.Log("<color=yellow>[초기화] JSON 파일의 명성이 0으로 초기화되었습니다.</color>");
+    }
+
+
+    // 스테이지 클리어 시 스타성 기록 저장 (신기록 갱신)
+    public static void SaveStageRecord(int stageId, int starPower)
+    {
+        EnsureLoaded();
+
+        // 기존 기록이 있는지 확인
+        StageRecord record = cachedData.stageRecords.Find(r => r.stageId == stageId);
+
+        if (record == null)
+        {
+            // 첫 클리어
+            record = new StageRecord { stageId = stageId, bestStarPower = starPower, isCleared = true };
+            cachedData.stageRecords.Add(record);
+            Debug.Log($"<color=#00FF7F>[JSON 저장] 스테이지 {stageId} 첫 클리어! 스타성: {starPower}%</color>");
+        }
+        else
+        {
+            // 신기록일 때만 스타성 갱신
+            if (starPower > record.bestStarPower)
+            {
+                Debug.Log($"<color=#00FF7F>[JSON 신기록!] 스테이지 {stageId} 스타성 갱신: {record.bestStarPower}% > {starPower}%</color>");
+                record.bestStarPower = starPower;
+            }
+            record.isCleared = true;
+        }
+
+        SaveToFile();
+    }
+
+    // 특정 스테이지의 최고 스타성 불러오기
+    public static int GetBestStarPower(int stageId)
+    {
+        EnsureLoaded();
+        StageRecord record = cachedData.stageRecords.Find(r => r.stageId == stageId);
+        return record != null ? record.bestStarPower : 0;
     }
 }
