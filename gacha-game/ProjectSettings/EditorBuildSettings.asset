@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/01-Scene/MenuSampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
+    path: Assets/01-Scene/StageScene.unity
+    guid: 934fee60b01f52149933ceef521dbc17
+  - enabled: 1
     path: Assets/01-Scene/GachaScene.unity
     guid: 4ae57cc3bdf2e2f45bfeb9130cfdc41a
   - enabled: 1
@@ -18,7 +21,7 @@ EditorBuildSettings:
     path: Assets/01-Scene/StoryScene.unity
     guid: 99826d01ae006af48b06d3cb79496aa1
   - enabled: 1
-    path: Assets/01-Scene/StageScene.unity
+    path: Assets/01-Scene/BattleScene.unity
     guid: c1a53081d5e8b5a48ab6d38ac6a6cbf9
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
