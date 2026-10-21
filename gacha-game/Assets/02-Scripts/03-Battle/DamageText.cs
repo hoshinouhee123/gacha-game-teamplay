@@ -5,8 +5,8 @@ using TMPro;
 public class DamageText : MonoBehaviour
 {
     private TextMeshProUGUI textMesh;
-    public float moveSpeed = 60f;    // 위로 떠오르는 속도
-    public float lifeTime = 0.7f;     // 화면에 머무는 시간
+    public float moveSpeed = 80f;     // 위로 떠오르는 속도
+    public float lifeTime = 0.9f;     // 유지 시간 (넉넉하게 0.9초)
 
     private void Awake()
     {
@@ -18,7 +18,8 @@ public class DamageText : MonoBehaviour
         if (textMesh == null) textMesh = GetComponent<TextMeshProUGUI>();
 
         textMesh.text = amount.ToString();
-        textMesh.color = textColor;
+        // 알파값을 100%(1.0f)로 강제 고정하여 또렷하게 만듦
+        textMesh.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
 
         StartCoroutine(FloatAndFadeRoutine());
     }
@@ -27,32 +28,32 @@ public class DamageText : MonoBehaviour
     {
         float elapsed = 0f;
         Color startColor = textMesh.color;
-        Vector3 startScale = transform.localScale;
+        Vector3 startScale = Vector3.one;
 
-        // 처음에 살짝 퐁 커졌다가 원래대로 돌아오는 팝(Pop) 효과
-        transform.localScale = startScale * 1.3f;
+        // 시작할 때 1.4배로 팡 튀어오름
+        transform.localScale = startScale * 1.4f;
 
         while (elapsed < lifeTime)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / lifeTime;
 
-            // 1. 위로 둥둥 떠오름
-            transform.localPosition += Vector3.up * (moveSpeed * Time.deltaTime);
+            // 1. 화면 위로 둥둥 떠오름
+            transform.position += Vector3.up * (moveSpeed * Time.deltaTime);
 
-            // 2. 크기 복구
-            transform.localScale = Vector3.Lerp(startScale * 1.3f, startScale, t * 3f);
+            // 2. 크기는 원래대로 복구
+            transform.localScale = Vector3.Lerp(startScale * 1.4f, startScale, t * 4f);
 
-            // 3. 수명의 절반 이후부터 서서히 페이드아웃
-            if (t > 0.4f)
+            // 수명의 70%가 지날 때까지는 알파값 100% 유지 (흐려짐 방지)
+            if (t > 0.7f)
             {
-                float alpha = Mathf.Lerp(1f, 0f, (t - 0.4f) / 0.6f);
+                float alpha = Mathf.Lerp(1f, 0f, (t - 0.7f) / 0.3f);
                 textMesh.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
             }
 
             yield return null;
         }
 
-        Destroy(gameObject); // 애니메이션 종료 후 오브젝트 파괴
+        Destroy(gameObject);
     }
 }
