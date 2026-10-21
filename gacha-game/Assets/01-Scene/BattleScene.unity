@@ -4462,6 +4462,8 @@ MonoBehaviour:
   damageTextPrefab: {fileID: 3645439414006850556, guid: 936778aac3e543c449ee8bdeb829ba06, type: 3}
   textSpawnPoint: {fileID: 0}
   headMargin: 0.3
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  healColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &156873470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4512,7 +4514,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 283537047}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -4522,8 +4524,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 5
+  m_SortingLayerID: 691429753
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!1 &160729983
 GameObject:
@@ -19487,6 +19489,8 @@ MonoBehaviour:
   damageTextPrefab: {fileID: 3645439414006850556, guid: 936778aac3e543c449ee8bdeb829ba06, type: 3}
   textSpawnPoint: {fileID: 0}
   headMargin: 0.3
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  healColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &542753325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19537,7 +19541,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 283537047}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -19547,8 +19551,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 5
+  m_SortingLayerID: 691429753
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!1 &551241075
 GameObject:
@@ -28653,7 +28657,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!224 &790322072
 RectTransform:
@@ -29914,6 +29918,8 @@ MonoBehaviour:
   damageTextPrefab: {fileID: 3645439414006850556, guid: 936778aac3e543c449ee8bdeb829ba06, type: 3}
   textSpawnPoint: {fileID: 0}
   headMargin: 0.3
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  healColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &824846083
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29964,7 +29970,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 283537047}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -29974,8 +29980,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 5
+  m_SortingLayerID: 691429753
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!1 &826249880
 GameObject:
@@ -32301,6 +32307,8 @@ MonoBehaviour:
   damageTextPrefab: {fileID: 3645439414006850556, guid: 936778aac3e543c449ee8bdeb829ba06, type: 3}
   textSpawnPoint: {fileID: 0}
   headMargin: 0.3
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  healColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &900312247
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32351,7 +32359,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 283537047}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -32361,8 +32369,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 5
+  m_SortingLayerID: 691429753
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!1 &903990769
 GameObject:
@@ -63815,6 +63823,8 @@ MonoBehaviour:
   damageTextPrefab: {fileID: 3645439414006850556, guid: 936778aac3e543c449ee8bdeb829ba06, type: 3}
   textSpawnPoint: {fileID: 0}
   headMargin: 0.3
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  healColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1977507748
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63865,7 +63875,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 283537047}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -63875,8 +63885,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 5
+  m_SortingLayerID: 691429753
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!1 &1982690752
 GameObject:
