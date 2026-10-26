@@ -10,6 +10,7 @@ public class BattleUIManager : MonoBehaviour
     {
         if (resultCloseBT != null)
         {
+            AudioManager.Instance.StopBGM();
             SceneManager.LoadScene("MainMenuScene");
         }
     }

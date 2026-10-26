@@ -576,6 +576,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: cba53e386b641604da2b2b700a1d6b4d, type: 2}
   stageNameText: {fileID: 1231849238}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &236897985
 GameObject:
   m_ObjectHideFlags: 0
@@ -1076,6 +1077,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 9b572f1dd92f3f24e911b5c738c4a3fc, type: 2}
   stageNameText: {fileID: 1608099119}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &479051423
 GameObject:
   m_ObjectHideFlags: 0
@@ -1750,6 +1752,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: c1a7417556dc2954a840394f6ab1fa32, type: 2}
   stageNameText: {fileID: 479051425}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &848041978
 GameObject:
   m_ObjectHideFlags: 0
@@ -1886,6 +1889,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 0868ac544aecf654bba36a0e96b452d6, type: 2}
   stageNameText: {fileID: 504197045}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &874373683
 GameObject:
   m_ObjectHideFlags: 0
@@ -2022,6 +2026,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 10ced513316c8f74c87d3dd1c5e99f42, type: 2}
   stageNameText: {fileID: 1109356951}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &888663404
 GameObject:
   m_ObjectHideFlags: 0
@@ -2402,6 +2407,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 672a9b2da54589e4f80bf571437ff819, type: 2}
   stageNameText: {fileID: 1770047319}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &986409038
 GameObject:
   m_ObjectHideFlags: 0
@@ -2613,6 +2619,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: e6711c42b624fe5418bd33ad3063540f, type: 2}
   stageNameText: {fileID: 1167444843}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &1102171162
 GameObject:
   m_ObjectHideFlags: 0
@@ -2749,6 +2756,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 6c68b6d58d069574c8061410296145d3, type: 2}
   stageNameText: {fileID: 332413535}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &1109356949
 GameObject:
   m_ObjectHideFlags: 0
@@ -3296,6 +3304,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 652323bfd6892cb4ba4808ebe7f97d87, type: 2}
   stageNameText: {fileID: 2005924680}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &1458310857
 GameObject:
   m_ObjectHideFlags: 0
@@ -3432,6 +3441,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 4a56b7e0b8d20e247b56ae208e5fb90a, type: 2}
   stageNameText: {fileID: 1872652984}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &1543261412
 GameObject:
   m_ObjectHideFlags: 0
@@ -3568,6 +3578,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 805cbc6fdb8661d4db428b69b1d31442, type: 2}
   stageNameText: {fileID: 283917333}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &1590838589
 GameObject:
   m_ObjectHideFlags: 0
@@ -3716,6 +3727,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: a0736cbf3d40d014ea255c68ec3f8f1c, type: 2}
   stageNameText: {fileID: 2014368313}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &1607641980
 GameObject:
   m_ObjectHideFlags: 0
@@ -3852,6 +3864,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 8be6bdf58c2173743a7831b6cabb2a41, type: 2}
   stageNameText: {fileID: 75881895}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &1608099117
 GameObject:
   m_ObjectHideFlags: 0
@@ -4228,6 +4241,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: c6724dad35f87414d847e652e3f357d8, type: 2}
   stageNameText: {fileID: 552479821}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &1770047317
 GameObject:
   m_ObjectHideFlags: 0
@@ -4638,6 +4652,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectButton
   stageData: {fileID: 11400000, guid: 0432c421c2602fc42ad6bbcfc542b60a, type: 2}
   stageNameText: {fileID: 888663406}
+  stageBgmClip: {fileID: 8300000, guid: e0378716e4de12d42abd384da89e9a42, type: 3}
 --- !u!1 &2005924678
 GameObject:
   m_ObjectHideFlags: 0

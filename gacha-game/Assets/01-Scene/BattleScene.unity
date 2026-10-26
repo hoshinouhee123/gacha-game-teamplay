@@ -60903,6 +60903,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleUIManager
   resultCloseBT: {fileID: 816167447}
+  mainMenuBGMClip: {fileID: 8300000, guid: 8195b0849b0384747862759026087d94, type: 3}
 --- !u!4 &1844882677
 Transform:
   m_ObjectHideFlags: 0

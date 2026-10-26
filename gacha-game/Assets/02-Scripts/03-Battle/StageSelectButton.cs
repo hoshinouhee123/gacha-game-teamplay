@@ -11,6 +11,8 @@ public class StageSelectButton : MonoBehaviour
     [Header("스테이지 이름 텍스트")]
     public TextMeshProUGUI stageNameText;
 
+    public AudioClip stageBgmClip;
+
     private void Start()
     {
         UpdateUI();
@@ -39,6 +41,7 @@ public class StageSelectButton : MonoBehaviour
         TurnManager.SelectedStageData = stageData;
 
         // 전투 씬(StageScene)으로 이동
+        AudioManager.Instance.PlayBGM(stageBgmClip);    //스테이지 전용 bgm 재생
         SceneManager.LoadScene("BattleScene");
     }
 }

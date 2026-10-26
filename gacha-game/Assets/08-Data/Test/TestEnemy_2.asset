@@ -15,7 +15,7 @@ MonoBehaviour:
   unitName: "\uD14C\uC2A4\uD2B8_\uC8012"
   team: 1
   characterSprite: {fileID: -1652422479, guid: 3aa2e15bcb9533341bb79f9c15a328ce, type: 3}
-  maxHP: 300
+  maxHP: 30
   attackPower: 30
   speed: 5
   skills:
