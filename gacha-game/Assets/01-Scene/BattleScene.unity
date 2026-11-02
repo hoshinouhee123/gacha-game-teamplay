@@ -11530,6 +11530,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
+  hitDuration: 0.8
+  takeDamageDuration: 0.5
 --- !u!1 &348805071
 GameObject:
   m_ObjectHideFlags: 0
@@ -13598,7 +13600,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1652422479, guid: 3aa2e15bcb9533341bb79f9c15a328ce, type: 3}
+  m_Sprite: {fileID: 499897896, guid: 423904f2094644f4398e8c0d9924fbe0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -13636,7 +13638,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c8e3578ccce0e043be2b5ff26c04eb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: b6854518abef35f4fadc15ccfb4359d2, type: 2}
+  unitData: {fileID: 11400000, guid: a46ebed107dad0a42aa49cd6e5513d2c, type: 2}
   maxHp: 0
   currentHp: 0
   currentSpeed: 0
@@ -13670,6 +13672,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
+  hitDuration: 0.8
+  takeDamageDuration: 0.5
 --- !u!1 &417064956
 GameObject:
   m_ObjectHideFlags: 0
@@ -21056,8 +21060,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &596996712
 GameObject:
@@ -22654,8 +22658,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &643583387
 GameObject:
@@ -28866,7 +28870,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 537743763, guid: 3e4b78922124d0d43b83ba6830e3086c, type: 3}
+  m_Sprite: {fileID: 499897896, guid: 423904f2094644f4398e8c0d9924fbe0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -28904,7 +28908,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c8e3578ccce0e043be2b5ff26c04eb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: f994df7d06ff00848855446f18549717, type: 2}
+  unitData: {fileID: 11400000, guid: a46ebed107dad0a42aa49cd6e5513d2c, type: 2}
   maxHp: 0
   currentHp: 0
   currentSpeed: 0
@@ -28938,6 +28942,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
+  hitDuration: 0.8
+  takeDamageDuration: 0.5
 --- !u!1 &795022044
 GameObject:
   m_ObjectHideFlags: 0
@@ -29899,7 +29905,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 4}
+  m_AnchoredPosition: {x: 0, y: 7.4800005}
   m_SizeDelta: {x: 120, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &824846082
@@ -32288,7 +32294,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 4.7599993}
+  m_AnchoredPosition: {x: 0, y: 7.4800005}
   m_SizeDelta: {x: 120, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &900312246
@@ -35103,8 +35109,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &987506909
 GameObject:
@@ -42922,8 +42928,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1294209836
 GameObject:
@@ -48217,6 +48223,7 @@ MonoBehaviour:
   - {fileID: 990818116}
   - {fileID: 180863791}
   - {fileID: 275876854}
+  hitSFX: {fileID: 8300000, guid: 61840bf4794eda3489d6a091380713ac, type: 3}
 --- !u!4 &1442063346
 Transform:
   m_ObjectHideFlags: 0
@@ -60760,6 +60767,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
+  hitDuration: 0.8
+  takeDamageDuration: 0.5
 --- !u!1 &1840036707
 GameObject:
   m_ObjectHideFlags: 0
@@ -60903,7 +60912,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleUIManager
   resultCloseBT: {fileID: 816167447}
-  mainMenuBGMClip: {fileID: 8300000, guid: 8195b0849b0384747862759026087d94, type: 3}
 --- !u!4 &1844882677
 Transform:
   m_ObjectHideFlags: 0
@@ -63805,7 +63813,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 3.9099998}
+  m_AnchoredPosition: {x: 0, y: 7.4800005}
   m_SizeDelta: {x: 120, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1977507747
@@ -65052,8 +65060,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2045461140
 GameObject:
@@ -68480,7 +68488,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1329793363, guid: 3bd5ee2d88952e144b2e871712dfbb91, type: 3}
+  m_Sprite: {fileID: 499897896, guid: 423904f2094644f4398e8c0d9924fbe0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -68499,7 +68507,7 @@ Transform:
   m_GameObject: {fileID: 2126616886}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.63, y: 5.14912, z: -8}
+  m_LocalPosition: {x: -7, y: 5.14912, z: -8}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -68552,6 +68560,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
+  hitDuration: 0.8
+  takeDamageDuration: 0.5
 --- !u!1 &2129342803
 GameObject:
   m_ObjectHideFlags: 0

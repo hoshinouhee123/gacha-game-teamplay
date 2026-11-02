@@ -1,56 +1,55 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(UnitAnimator))] // 애니메이터 필수 요구
 public class Unit : MonoBehaviour
 {
     [Header("데이터 에셋 (SO)")]
     public BattleUnit unitData;
 
-    // 인게임에서 실시간으로 변하는 상태값들
     [Header("런타임 상태 (읽기 전용 확인용)")]
     public int maxHp;
     public int currentHp;
-    public int currentSpeed; // 버프/디버프로 스피드가 변동될 수 있으므로 분리
+    public int currentSpeed;
 
-    // ================= [ 전투 통계 데이터 ] =================
     [Header("전투 통계")]
-    public int totalDamageDealt = 0; // 적에게 입힌 총 피해량
-    public int totalDamageTaken = 0; // 받은 총 피해량
-    public int totalHealing = 0;     // 총 회복량
+    public int totalDamageDealt = 0;
+    public int totalDamageTaken = 0;
+    public int totalHealing = 0;
 
-    // 스타성 계산을 위한 누적 카운터
-    [HideInInspector] public int skillUseCount = 0; // 스킬 사용 횟수
-    [HideInInspector] public int hitCount = 0;      // 피격 횟수
+    [HideInInspector] public int skillUseCount = 0;
+    [HideInInspector] public int hitCount = 0;
 
     private SpriteRenderer spriteRenderer;
+    private UnitAnimator unitAnimator; // 애니메이터 컴포넌트 캐싱
     private Color originalColor;
     private Vector3 originalScale;
     private UnitHealthUI healthUI;
 
-    // SO의 기본 정보를 편하게 읽어오는 프로퍼티
     public string UnitName => unitData != null ? unitData.unitName : name;
     public Team Team => unitData != null ? unitData.team : Team.Ally;
     public int BaseAttack => unitData != null ? unitData.attackPower : 10;
     public int Performance => unitData != null ? unitData.performance : 1;
-    public bool IsAlive => currentHp > 0;
+
+    public bool IsAlive => currentHp > 0 && !isDead; // 사망 여부 반영
 
     [HideInInspector] public Vector3 originPos;
 
     [Header("타겟팅 선택 강조용")]
     private bool isTargetable = false;
 
+    private bool isDead = false; // 중복 사망 방지용 플래그
+
     private void Awake()
     {
-
-        healthUI = GetComponentInChildren<UnitHealthUI>(); // 자식에서 UI 컴포넌트 자동 탐색
-
-        // 1. 스프라이트 렌더러와 기본 색상/크기 안전하게 기억
+        healthUI = GetComponentInChildren<UnitHealthUI>();
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        unitAnimator = GetComponent<UnitAnimator>(); // 애니메이터 가져오기
 
         originalColor = (spriteRenderer != null) ? spriteRenderer.color : Color.white;
         originalScale = (transform.localScale != Vector3.zero) ? transform.localScale : Vector3.one;
-
-        originPos = transform.position; // 시작할 때 자기 원래 자리 기억
+        originPos = transform.position;
 
         if (unitData != null)
         {
@@ -58,7 +57,6 @@ public class Unit : MonoBehaviour
         }
     }
 
-    // 에디터에서 SO를 넣거나 바꿨을 때 '재생(Play)' 안 해도 즉시 스프라이트를 보여주는 함수
     private void OnValidate()
     {
         if (spriteRenderer == null)
@@ -70,7 +68,6 @@ public class Unit : MonoBehaviour
         }
     }
 
-    // 데이터 주입 함수 (동적으로 몬스터를 스폰할 때도 사용 가능)
     public void Initialize(BattleUnit data)
     {
         unitData = data;
@@ -80,9 +77,11 @@ public class Unit : MonoBehaviour
         skillUseCount = 0;
         hitCount = 0;
 
-        if (spriteRenderer != null && data.characterSprite != null)
+        // SO에 있는 기본 스프라이트와 피격 스프라이트를 애니메이터에 주입
+        if (unitAnimator == null) unitAnimator = GetComponent<UnitAnimator>();
+        if (unitAnimator != null)
         {
-            spriteRenderer.sprite = data.characterSprite;
+            unitAnimator.SetupSprites(data.characterSprite, data.hitSprite, data.attackSprite);
         }
 
         if (healthUI != null) healthUI.UpdateHP(currentHp, maxHp);
@@ -91,10 +90,17 @@ public class Unit : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHp = Mathf.Max(0, currentHp - damage);
-        totalDamageTaken += damage; // 받은 피해량 누적 기록
+        totalDamageTaken += damage;
+        hitCount++; // 피격 횟수 카운트
+
+        // 데미지를 입었을 때 피격 스프라이트 모션 실행
+        if (unitAnimator != null)
+        {
+            unitAnimator.PlayHit();
+        }
+
         Debug.Log($"<color=orange>{UnitName}</color>이 {damage} 피해를 입음 (남은 HP: {currentHp}/{maxHp})");
 
-        // 머리 위 체력바 깎고 데미지 숫자 띄우기
         if (healthUI != null)
         {
             healthUI.UpdateHP(currentHp, maxHp);
@@ -105,26 +111,84 @@ public class Unit : MonoBehaviour
         {
             Debug.Log($"<color=red>{UnitName} 사망</color>");
         }
+
+        // 사망 처리
+        if (currentHp <= 0 && !isDead)
+        {
+            Die();
+        }
+    }
+    // 사망 처리 함수
+    public void Die()
+    {
+        isDead = true;
+        SetTargetable(false);
+        Debug.Log($"<color=red>{UnitName} 사망</color>");
+
+        // 1. 머리 위 체력바 즉시 숨김
+        if (healthUI != null)
+        {
+            healthUI.gameObject.SetActive(false);
+        }
+
+        // 2. 마우스 클릭 타겟팅에 걸리지 않도록 콜라이더 비활성화
+        Collider col3D = GetComponent<Collider>();
+        if (col3D != null) col3D.enabled = false;
+
+        Collider2D col2D = GetComponent<Collider2D>();
+        if (col2D != null) col2D.enabled = false;
+
+        // 3. 서서히 페이드아웃 후 비활성화
+        StartCoroutine(FadeOutAndDisableRoutine());
     }
 
-    // 추후 속도 증가/감소 버프를 처리할 때
+    private IEnumerator FadeOutAndDisableRoutine()
+    {
+        // 타격 리액션(피격 스프라이트)을 잠시 보여준 뒤 사라지기 시작
+        yield return new WaitForSeconds(0.35f);
+
+        // UnitAnimator가 스프라이트를 다시 기본으로 되돌리지 못하도록 중지
+        if (unitAnimator != null)
+        {
+            unitAnimator.StopAllCoroutines();
+        }
+
+        float fadeDuration = 0.5f; // 0.5초 동안 서서히 사라짐
+        float elapsed = 0f;
+        Color startColor = spriteRenderer != null ? spriteRenderer.color : Color.white;
+
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsed / fadeDuration);
+
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+            }
+            yield return null;
+        }
+
+        // 완전히 투명해진 후 게임오브젝트 끄기
+        gameObject.SetActive(false);
+    }
+
+
     public void ModifySpeed(int amount)
     {
         currentSpeed += amount;
         Debug.Log($"{UnitName}의 스피드 변경: {currentSpeed}");
     }
 
-    // 나중에 회복 스킬을 쓸 때 호출할 함수
     public void Heal(int amount)
     {
         int prevHp = currentHp;
         currentHp = Mathf.Min(maxHp, currentHp + amount);
         int actualHeal = currentHp - prevHp;
 
-        totalHealing += actualHeal; // 회복량 누적 기록
+        totalHealing += actualHeal;
         Debug.Log($"<color=green>{UnitName}</color>이(가) {actualHeal} 회복! (현재 HP: {currentHp}/{maxHp})");
 
-        // 머리 위 체력바 채우고 초록색 힐 숫자 띄우기!
         if (healthUI != null)
         {
             healthUI.UpdateHP(currentHp, maxHp);
@@ -132,19 +196,16 @@ public class Unit : MonoBehaviour
         }
     }
 
-    // 타겟팅 선택 모드 켜고 끄기
     public void SetTargetable(bool enable)
     {
         isTargetable = enable;
         if (!enable && spriteRenderer != null)
         {
-            // 원래 색상으로 복구 
             if (originalColor.a == 0f) originalColor = Color.white;
             spriteRenderer.color = originalColor;
         }
     }
 
-    // 마우스 올렸을 때: 색상만 붉은색으로 변경
     private void OnMouseEnter()
     {
         if (isTargetable && IsAlive && spriteRenderer != null)
@@ -153,7 +214,6 @@ public class Unit : MonoBehaviour
         }
     }
 
-    // 마우스 나갔을 때: 원래 색상으로 복구
     private void OnMouseExit()
     {
         if (isTargetable && IsAlive && spriteRenderer != null)
@@ -163,19 +223,16 @@ public class Unit : MonoBehaviour
         }
     }
 
-    // 다른 아군 톤다운(어둡게) 처리
     public void SetDimmed(bool isDimmed)
     {
         if (spriteRenderer == null) return;
 
         if (isDimmed)
         {
-            // 색상을 어두운 회색(밝기 약 25%)으로 낮춤
             spriteRenderer.color = new Color(0.25f, 0.25f, 0.25f, 1f);
         }
         else
         {
-            // 원래 밝기로 복구
             if (originalColor.a == 0f) originalColor = Color.white;
             spriteRenderer.color = originalColor;
         }

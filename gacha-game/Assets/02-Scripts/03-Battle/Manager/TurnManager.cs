@@ -73,6 +73,10 @@ public class TurnManager : MonoBehaviour
     public GameObject enemyBasePrefab;           // 적 공용 프리팹 (Unit, SpriteRenderer, Collider 등이 붙은 프리팹)
     public Transform[] enemySpawnPoints;         // 적들이 서 있을 위치 (예: 1~3번 자리)
 
+
+    [Header("사운드들")]
+    public AudioClip hitSFX;                // 스킬 타격 효과음
+
     private Queue<Unit> turnQueue = new Queue<Unit>();
     private SkillDataSO selectedSkill = null; // 플레이어가 선택한 스킬 임시 저장
     private Unit selectedSwapUnit = null;            // 플레이어가 고른 교대 유닛
@@ -672,10 +676,10 @@ public class TurnManager : MonoBehaviour
 
     // 여유롭고 묵직한 템포가 적용된 연출 시퀀스
     // PerformAttackSequence 매개변수에 string skillName 추가
+    // 여유롭고 묵직한 템포가 적용된 연출 시퀀스
     private IEnumerator PerformAttackSequence(Unit attacker, Unit target, int damage, bool isSkill3, string skillName)
     {
         UnitAnimator attackerAnim = attacker.GetComponent<UnitAnimator>();
-        UnitAnimator targetAnim = target.GetComponent<UnitAnimator>();
 
         // 1. 카메라 줌인 & 스킬 컷인 배너 등장!
         if (BattleCamera.Instance != null)
@@ -683,13 +687,11 @@ public class TurnManager : MonoBehaviour
             BattleCamera.Instance.StartFollowing(attacker.transform, 0.78f);
         }
 
-        // ★ [추가] 줌인과 동시에 화면에 캐릭터명과 스킬명 출력
         ShowSkillBanner(attacker.UnitName, skillName);
 
         yield return new WaitForSeconds(zoomTime);
         yield return new WaitForSeconds(preDashDelay);
 
-        // ★ [추가] 돌진 시작할 때 배너를 부드럽게 페이드아웃
         HideSkillBanner();
 
         // 2. 적 앞으로 묵직하게 가감속 돌진
@@ -705,17 +707,17 @@ public class TurnManager : MonoBehaviour
         {
             yield return StartCoroutine(attackerAnim.PlayAttackAnimation(animName, () =>
             {
+                // 데미지 전달 (TakeDamage 내부에서 피격 스프라이트 연출이 자동으로 실행됨!)
                 target.TakeDamage(damage);
-                attacker.totalDamageDealt += damage;
+
+                AudioManager.Instance.PlaySFX(hitSFX);        // 타격 사운드 재생
 
                 if (BattleCamera.Instance != null) BattleCamera.Instance.Shake(0.12f, 0.12f);
-                if (targetAnim != null) StartCoroutine(targetAnim.PlayHitAnimation());
             }));
         }
         else
         {
             target.TakeDamage(damage);
-            attacker.totalDamageDealt += damage;
             if (BattleCamera.Instance != null) BattleCamera.Instance.Shake(0.12f, 0.12f);
             yield return new WaitForSeconds(0.35f);
         }

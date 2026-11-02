@@ -183,8 +183,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &5433437478991351143
 GameObject:
@@ -214,7 +214,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5433437478991351143}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.0000009536743}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -305,6 +305,8 @@ MonoBehaviour:
   damageTextPrefab: {fileID: 3645439414006850556, guid: 936778aac3e543c449ee8bdeb829ba06, type: 3}
   textSpawnPoint: {fileID: 0}
   headMargin: 0.3
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  healColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!1 &6347374434042580928
 GameObject:
   m_ObjectHideFlags: 0
@@ -536,6 +538,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e2e0135e2cbf2b48b93e75219b7dba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
+  hitDuration: 0.8
+  takeDamageDuration: 0.5
 --- !u!65 &7136943780481157272
 BoxCollider:
   m_ObjectHideFlags: 0

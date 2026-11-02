@@ -12,7 +12,11 @@ public class BattleUnit : ScriptableObject
     [Header("기본 캐릭터 정보")]
     public string unitName; //유닛 이름 
     public Team team;       //진영
-    public Sprite characterSprite;  //스프라이트
+
+    [Header("스프라이트 연출")]
+    public Sprite characterSprite; // 기본 스프라이트
+    public Sprite hitSprite;       // 피격 시 교체될 스프라이트
+    public Sprite attackSprite;    // 공격 시 교체될 스프라이트
 
     [Header("기본 스탯")]
     public int maxHP = 100;       //최대 HP
