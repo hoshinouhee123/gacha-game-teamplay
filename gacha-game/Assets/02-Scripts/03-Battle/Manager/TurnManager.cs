@@ -176,6 +176,18 @@ public class TurnManager : MonoBehaviour
     {
         while (true)
         {
+            // 라운드 시작 전 승리/패배 상태 즉시 점검
+            if (CheckAllEnemiesDead())
+            {
+                yield return StartCoroutine(BattleClearRoutine());
+                yield break;
+            }
+            if (CheckAllAlliesDead())
+            {
+                yield return StartCoroutine(BattleDefeatRoutine());
+                yield break;
+            }
+
             currentRound++;
 
             // 스피드 순 정렬
@@ -196,10 +208,17 @@ public class TurnManager : MonoBehaviour
                 // 턴 행동 진행
                 yield return StartCoroutine(ExecuteUnitTurn(currentUnit));
 
-                // 행동 직후 승리 조건 체크
+                // 1. 행동 직후 승리 조건 체크 (적 전멸)
                 if (CheckAllEnemiesDead())
                 {
                     yield return StartCoroutine(BattleClearRoutine());
+                    yield break;
+                }
+
+                // 2. 행동 직후 패배 조건 체크 (아군 전멸)
+                if (CheckAllAlliesDead())
+                {
+                    yield return StartCoroutine(BattleDefeatRoutine());
                     yield break;
                 }
 
@@ -209,6 +228,33 @@ public class TurnManager : MonoBehaviour
             yield return new WaitForSeconds(1.0f);
         }
     }
+
+    // ================= [ 승리 / 패배 판정 함수 ] =================
+
+    // 적 전멸 체크
+    private bool CheckAllEnemiesDead()
+    {
+        return !fieldUnits.Any(u => u.Team == Team.Enemy && u.IsAlive);
+    }
+
+    // 아군 전멸 체크 (필드에 싸울 수 있는 아군이 한 명도 없는지 확인)
+    private bool CheckAllAlliesDead()
+    {
+        // 필드에 살아있는 아군이 단 1명도 없으면 패배!
+        bool hasAliveFieldAlly = fieldUnits.Any(u => u != null && u.Team == Team.Ally && u.IsAlive);
+        return !hasAliveFieldAlly;
+    }
+    // ================= [ 패배 루틴 ] =================
+    private IEnumerator BattleDefeatRoutine()
+    {
+        Debug.Log("<color=red>================ DEFEAT (전멸) ================</color>");
+        yield return new WaitForSeconds(0.8f);
+
+        // 패배 시에는 클리어 보너스나 명성 재화 저장을 진행하지 않고,
+        // 현재까지 쌓인 통계표만 결과창으로 띄워줌
+        ShowBattleResultUI(isVictory: false, starPower: (int)currentStarPower, renown: 0);
+    }
+
 
     private IEnumerator ExecuteUnitTurn(Unit actor)
     {
@@ -343,10 +389,19 @@ public class TurnManager : MonoBehaviour
         else
         {
             // ================= 2. 적(Enemy) 턴 =================
-            Debug.Log($"<color=red>[적] {actor.UnitName}의 턴!</color>");
-            yield return new WaitForSeconds(0.4f); // 생각하는 척 딜레이
+            // 살아있는 아군 목록 확인
+            var aliveAllies = fieldUnits.Where(u => u.Team == Team.Ally && u.IsAlive).ToList();
 
-            // 스킬 중 무작위 1개 선택 (없으면 평타 계수 1.0)
+            // 만약 이미 아군이 전멸했다면 행동하지 않고 즉시 루틴 종료
+            if (aliveAllies.Count == 0)
+            {
+                yield break;
+            }
+
+            Debug.Log($"<color=red>[적] {actor.UnitName}의 턴!</color>");
+            yield return new WaitForSeconds(0.4f);
+
+            // 스킬 중 무작위 1개 선택
             var availableSkills = actor.unitData.skills.Where(s => s != null).ToList();
             float multiplier = 1.0f;
             string skillName = "일반 공격";
@@ -360,19 +415,15 @@ public class TurnManager : MonoBehaviour
 
             int damage = Mathf.RoundToInt(actor.unitData.attackPower * multiplier);
 
-            // 살아있는 아군 중 랜덤으로 1명 타겟팅 (다양한 아군 공격)
-            var aliveAllies = fieldUnits.Where(u => u.Team == Team.Ally && u.IsAlive).ToList();
-            Unit target = (aliveAllies.Count > 0) ? aliveAllies[Random.Range(0, aliveAllies.Count)] : null;
+            // 살아있는 아군 중 랜덤 1명 타겟팅
+            Unit target = aliveAllies[Random.Range(0, aliveAllies.Count)];
 
             if (target != null)
             {
                 Debug.Log($"<color=red>[적] {actor.UnitName}이(가) [{skillName}] 사용! -> 타겟: {target.UnitName}</color>");
 
-                // 아군과 똑같은 연출 시퀀스 실행
-                // 카메라가 적에게 줌인 -> 아군 앞으로 돌진 -> 타격 & 셰이크 -> 복귀
                 yield return StartCoroutine(PerformAttackSequence(actor, target, damage, false, skillName));
 
-                // 아군 피격 스타성 처리
                 target.hitCount++;
                 if (target.hitCount >= 3)
                     AddStarPower(-2f, $"{target.UnitName} 누적 3회 이상 피격 감점");
@@ -388,11 +439,7 @@ public class TurnManager : MonoBehaviour
     }
 
     // ================= [ 클리어 판정 및 보너스 정산 ] =================
-    private bool CheckAllEnemiesDead()
-    {
-        return !fieldUnits.Any(u => u.Team == Team.Enemy && u.IsAlive);
-    }
-
+    
     private IEnumerator BattleClearRoutine()
     {
         isBattleCleared = true;
@@ -454,30 +501,39 @@ public class TurnManager : MonoBehaviour
 
         yield return new WaitForSeconds(1.0f);
 
-        // 5. 전투 통계표 화면에 표시
-        ShowBattleResultUI(finalStarPower, earnedRenown);
+        // 5. 전투 통계표 화면에 표시 (isVictory: true 전달)
+        ShowBattleResultUI(isVictory: true, starPower: finalStarPower, renown: earnedRenown);
     }
 
     // 통계창 UI 오픈 및 텍스트 작성 함수
-    private void ShowBattleResultUI(int starPower, int renown)
+    private void ShowBattleResultUI(bool isVictory, int starPower, int renown)
     {
         if (resultPanel == null) return;
 
         resultPanel.SetActive(true);
 
-        // 좌측 상단에서 중앙으로 스르륵 나오는 애니메이션 실행
+        // 좌측 하단에서 중앙으로 스르륵 나오는 애니메이션 실행
         StartCoroutine(SlideInResultPanelRoutine());
 
-        // 1. 상단 요약 정보
+        // 1. 상단 요약 정보 (승리 / 패배에 따라 문구 변경)
         if (resultSummaryText != null)
         {
-            resultSummaryText.text = $"<b>[ STAGE CLEAR ]</b>\n" +
-                                     $"소요 턴: <color=#D97706>{currentRound}턴</color> | " +
-                                     $"최종 스타성: <color=#B45309>{starPower}%</color> | " +
-                                     $"획득 명성: <color=#0284C7>+{renown}</color>";
+            if (isVictory)
+            {
+                resultSummaryText.text = $"<b><color=#16A34A>[ STAGE CLEAR ]</color></b>\n" +
+                                         $"소요 턴: <color=#D97706>{currentRound}턴</color> | " +
+                                         $"최종 스타성: <color=#B45309>{starPower}%</color> | " +
+                                         $"획득 명성: <color=#0284C7>+{renown}</color>";
+            }
+            else
+            {
+                resultSummaryText.text = $"<b><color=#DC2626>[ STAGE DEFEAT ]</color></b>\n" +
+                                         $"진행 턴: <color=#D97706>{currentRound}턴</color> | " +
+                                         $"<color=#6B7280>모든 아군이 쓰러졌습니다.</color>";
+            }
         }
 
-        // 2. 캐릭터별 상세 통계표 (특수 공백 제거 & 가독성 개선)
+        // 2. 캐릭터별 상세 통계표 (승리/패배 상관없이 딜량/받은피해/힐량 동일 출력)
         if (statsTableText != null)
         {
             var allAllies = fieldUnits.Concat(reserveUnits)
@@ -491,14 +547,14 @@ public class TurnManager : MonoBehaviour
             {
                 string status = ally.IsAlive ? "" : " <color=red>(사망)</color>";
 
-                // 캐릭터 이름 (검은색 굵게)
+                // 캐릭터 이름
                 sb.AppendLine($"<b><color=#222222>{ally.UnitName}</color></b>{status}");
 
-                // 상세 수치 (색상 대비를 높여 흰 배경에서도 또렷하게 보이도록 조정)
+                // 상세 수치
                 sb.AppendLine($"   <color=#DC2626>입힌 피해: {ally.totalDamageDealt}</color>  |  " +
                               $"<color=#2563EB>받은 피해: {ally.totalDamageTaken}</color>  |  " +
                               $"<color=#16A34A>회복량: {ally.totalHealing}</color>");
-                sb.AppendLine(); // 줄바꿈
+                sb.AppendLine();
             }
 
             statsTableText.text = sb.ToString();
