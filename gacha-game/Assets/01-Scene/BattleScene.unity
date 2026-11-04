@@ -11449,10 +11449,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c8e3578ccce0e043be2b5ff26c04eb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: 58d80aeafe6cd684d94b44875ce90f35, type: 2}
+  unitData: {fileID: 11400000, guid: e8e74caecef6be046adab5b7a06f0bcf, type: 2}
   maxHp: 0
   currentHp: 0
   currentSpeed: 0
+  hasWarrant: 0
+  originalSpeed: 0
+  hasUsedFirstDodge: 0
   totalDamageDealt: 0
   totalDamageTaken: 0
   totalHealing: 0
@@ -11508,7 +11511,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1426425775, guid: 87ec039278d2641438e5ed71d7c23a80, type: 3}
+  m_Sprite: {fileID: 499897896, guid: 423904f2094644f4398e8c0d9924fbe0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -11532,6 +11535,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
   hitDuration: 0.8
   takeDamageDuration: 0.5
+  dodgeDuration: 0.6
 --- !u!1 &348805071
 GameObject:
   m_ObjectHideFlags: 0
@@ -13638,10 +13642,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c8e3578ccce0e043be2b5ff26c04eb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: a46ebed107dad0a42aa49cd6e5513d2c, type: 2}
+  unitData: {fileID: 11400000, guid: e8e74caecef6be046adab5b7a06f0bcf, type: 2}
   maxHp: 0
   currentHp: 0
   currentSpeed: 0
+  hasWarrant: 0
+  originalSpeed: 0
+  hasUsedFirstDodge: 0
   totalDamageDealt: 0
   totalDamageTaken: 0
   totalHealing: 0
@@ -13674,6 +13681,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
   hitDuration: 0.8
   takeDamageDuration: 0.5
+  dodgeDuration: 0.6
 --- !u!1 &417064956
 GameObject:
   m_ObjectHideFlags: 0
@@ -28908,10 +28916,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c8e3578ccce0e043be2b5ff26c04eb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: a46ebed107dad0a42aa49cd6e5513d2c, type: 2}
+  unitData: {fileID: 11400000, guid: e8e74caecef6be046adab5b7a06f0bcf, type: 2}
   maxHp: 0
   currentHp: 0
   currentSpeed: 0
+  hasWarrant: 0
+  originalSpeed: 0
+  hasUsedFirstDodge: 0
   totalDamageDealt: 0
   totalDamageTaken: 0
   totalHealing: 0
@@ -28944,6 +28955,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
   hitDuration: 0.8
   takeDamageDuration: 0.5
+  dodgeDuration: 0.6
 --- !u!1 &795022044
 GameObject:
   m_ObjectHideFlags: 0
@@ -60686,10 +60698,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c8e3578ccce0e043be2b5ff26c04eb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: 276b77f3066254c4bb060b5ae08fab24, type: 2}
+  unitData: {fileID: 11400000, guid: e8e74caecef6be046adab5b7a06f0bcf, type: 2}
   maxHp: 0
   currentHp: 0
   currentSpeed: 0
+  hasWarrant: 0
+  originalSpeed: 0
+  hasUsedFirstDodge: 0
   totalDamageDealt: 0
   totalDamageTaken: 0
   totalHealing: 0
@@ -60745,7 +60760,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1504287572, guid: e017ce59e37f8dc4dae32e52162dceb6, type: 3}
+  m_Sprite: {fileID: 499897896, guid: 423904f2094644f4398e8c0d9924fbe0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -60769,6 +60784,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
   hitDuration: 0.8
   takeDamageDuration: 0.5
+  dodgeDuration: 0.6
 --- !u!1 &1840036707
 GameObject:
   m_ObjectHideFlags: 0
@@ -68526,10 +68542,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c8e3578ccce0e043be2b5ff26c04eb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: a46ebed107dad0a42aa49cd6e5513d2c, type: 2}
+  unitData: {fileID: 11400000, guid: e8e74caecef6be046adab5b7a06f0bcf, type: 2}
   maxHp: 0
   currentHp: 0
   currentSpeed: 0
+  hasWarrant: 0
+  originalSpeed: 0
+  hasUsedFirstDodge: 0
   totalDamageDealt: 0
   totalDamageTaken: 0
   totalHealing: 0
@@ -68562,6 +68581,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitAnimator
   hitDuration: 0.8
   takeDamageDuration: 0.5
+  dodgeDuration: 0.6
 --- !u!1 &2129342803
 GameObject:
   m_ObjectHideFlags: 0
