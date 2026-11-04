@@ -18,12 +18,13 @@ MonoBehaviour:
   hitSprite: {fileID: -1588617061, guid: 8cad35ef39240974f9f628bcd30d3f3a, type: 3}
   attackSprite: {fileID: 0}
   dodgeSprite: {fileID: 0}
-  maxHP: 50
+  maxHP: 1
   attackPower: 10
   speed: 1
   skills:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  passiveSkill: {fileID: 0}
   performance: 3
   mainMenuDialogue: []
