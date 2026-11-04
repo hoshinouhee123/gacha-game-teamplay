@@ -17,6 +17,7 @@ public class BattleUnit : ScriptableObject
     public Sprite characterSprite; // 기본 스프라이트
     public Sprite hitSprite;       // 피격 시 교체될 스프라이트
     public Sprite attackSprite;    // 공격 시 교체될 스프라이트
+    public Sprite dodgeSprite;     // 회피 시 교체될 스프라이트
 
     [Header("기본 스탯")]
     public int maxHP = 100;       //최대 HP

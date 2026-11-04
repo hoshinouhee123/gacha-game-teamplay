@@ -7,72 +7,90 @@ public class UnitAnimator : MonoBehaviour
     private Sprite defaultSprite;
     private Sprite hitSprite;
     private Sprite attackSprite;
-    private Unit unit;
+    private Sprite dodgeSprite;
 
     [Header("피격 연출 설정")]
     [SerializeField] private float hitDuration = 1f;
-    private Coroutine hitCoroutine;
 
     [Header("타격 연출 설정")]
     [SerializeField] private float takeDamageDuration = 0.5f;
+
+    [Header("회피 연출 설정")]
+    [SerializeField] private float dodgeDuration = 0.6f;
+
+    // 피격과 회피가 동시에 실행되어 스프라이트가 꼬이는 것을 방지
+    private Coroutine reactionCoroutine;
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    // SO로부터 기본/피격 스프라이트를 주입받는 함수
-    public void SetupSprites(Sprite defSprite, Sprite hSprite, Sprite aSprite)
+    // SO에서 기본/피격/공격/회피 스프라이트를 전달받음
+    public void SetupSprites(
+        Sprite defSprite,
+        Sprite hSprite,
+        Sprite aSprite,
+        Sprite dSprite = null)
     {
-        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponent<SpriteRenderer>();
 
         defaultSprite = defSprite;
         hitSprite = hSprite;
         attackSprite = aSprite;
+        dodgeSprite = dSprite;
 
-        if (defaultSprite != null)
-        {
+        if (defaultSprite != null && spriteRenderer != null)
             spriteRenderer.sprite = defaultSprite;
-        }
     }
 
     // 피격 모션 실행
     public void PlayHit()
     {
-        // 피격 스프라이트가 등록되어 있지 않으면 무시
-        if (hitSprite == null) return;
+        if (hitSprite == null || spriteRenderer == null)
+            return;
 
-        if (hitCoroutine != null)
-        {
-            StopCoroutine(hitCoroutine);
-        }
-        hitCoroutine = StartCoroutine(PlayHitAnimation());
+        PlayReaction(hitSprite, hitDuration);
     }
 
-    private IEnumerator PlayHitAnimation()
+    // 회피 모션 실행
+    public void PlayDodge()
     {
-        if (spriteRenderer != null && hitSprite != null)
+        if (dodgeSprite == null || spriteRenderer == null)
         {
-            spriteRenderer.sprite = hitSprite;
-            yield return new WaitForSeconds(hitDuration);
-
-            spriteRenderer.sprite = defaultSprite;
+            Debug.LogWarning($"[{name}] 회피 스프라이트가 등록되지 않았습니다.");
+            return;
         }
-        hitCoroutine = null;
+
+        PlayReaction(dodgeSprite, dodgeDuration);
     }
 
+    private void PlayReaction(Sprite reactionSprite, float duration)
+    {
+        if (reactionCoroutine != null)
+            StopCoroutine(reactionCoroutine);
+
+        reactionCoroutine = StartCoroutine(PlayReactionRoutine(reactionSprite, duration));
+    }
+
+    private IEnumerator PlayReactionRoutine(Sprite reactionSprite, float duration)
+    {
+        spriteRenderer.sprite = reactionSprite;
+        yield return new WaitForSeconds(duration);
+
+        if (spriteRenderer != null)
+            spriteRenderer.sprite = defaultSprite;
+
+        reactionCoroutine = null;
+    }
 
     // 공격 애니메이션 코루틴
     public IEnumerator PlayAttackAnimation(string animName, System.Action onHit)
     {
         Vector3 originScale = transform.localScale;
 
-        // transform.localScale = originScale * 1.15f;      //공격시 이미지 스케일 키우는 코드
-        // yield return new WaitForSeconds(0.2f);
-
-
-        
-
+        // 실제 타격 시점에 전달된 콜백 실행
         onHit?.Invoke();
 
         if (spriteRenderer != null && attackSprite != null)

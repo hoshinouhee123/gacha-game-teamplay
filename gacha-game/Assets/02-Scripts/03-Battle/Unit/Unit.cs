@@ -81,7 +81,12 @@ public class Unit : MonoBehaviour
         if (unitAnimator == null) unitAnimator = GetComponent<UnitAnimator>();
         if (unitAnimator != null)
         {
-            unitAnimator.SetupSprites(data.characterSprite, data.hitSprite, data.attackSprite);
+            unitAnimator.SetupSprites(
+                data.characterSprite,
+                data.hitSprite,
+                data.attackSprite,
+                data.dodgeSprite
+            );
         }
 
         if (healthUI != null) healthUI.UpdateHP(currentHp, maxHp);

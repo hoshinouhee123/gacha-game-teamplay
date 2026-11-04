@@ -418,37 +418,46 @@ public class TurnManager : MonoBehaviour
 
                     Debug.Log($"<color=cyan>[{actor.UnitName}]이(가) [{displayName}] 사용! -> 타겟: [{target.UnitName}]</color>");
 
-                    // 여기서 연출 시퀀스 실행 (카메라 줌 -> 이동 -> 공격 -> 복귀)
-                    yield return StartCoroutine(PerformAttackSequence(actor, target, finalDamage, isSkill3, selectedSkill.skillName));
+                    // 공격 연출 실행 및 명중/회피 결과 확인
+                    bool attackHit = false;
+                    yield return StartCoroutine(PerformAttackSequence(
+                        actor, target, finalDamage, isSkill3, selectedSkill.skillName,
+                        hit => attackHit = hit
+                    ));
 
-                    // 공격한 캐릭터의 누적 딜량 기록
-                    actor.totalDamageDealt += finalDamage;
-
-                    // 스타성 스킬 데미지 적립
+                    // 스킬은 사용한 것으로 기록하되, 피해/피해 기반 스타성은 명중했을 때만 적립
                     actor.skillUseCount++;
 
-                    if (isSkill3)
+                    if (attackHit)
                     {
-                        // 3스킬 태그: 입힌 데미지의 20%
-                        float starGain = finalDamage * 0.20f;
-                        AddStarPower(starGain, $"3스킬 사용 ({finalDamage} 피해의 20%)");
+                        actor.totalDamageDealt += finalDamage;
+
+                        if (isSkill3)
+                        {
+                            // 3스킬: 실제 입힌 피해의 20%
+                            float starGain = finalDamage * 0.20f;
+                            AddStarPower(starGain, $"3스킬 사용 ({finalDamage} 피해의 20%)");
+                        }
+                        else
+                        {
+                            // 일반 스킬: 첫 스킬 2배, 2번째 1배, 3번째 이상 0.5배
+                            float multiplier = 1.0f;
+                            if (actor.skillUseCount == 1) multiplier = 2.0f;
+                            else if (actor.skillUseCount >= 3) multiplier = 0.5f;
+
+                            float starGain = (finalDamage * 0.10f) * multiplier;
+                            AddStarPower(starGain, $"{actor.UnitName} {actor.skillUseCount}번째 스킬 데미지 적립");
+                        }
+
+                        // 적 처치 시 5% 추가
+                        if (targetWasAlive && !target.IsAlive)
+                        {
+                            AddStarPower(5f, $"적 [{target.UnitName}] 처치 보너스");
+                        }
                     }
                     else
                     {
-                        // 일반 스킬: 기본 10%
-                        // 첫 스킬 -> 2배(20%), 2번째 -> 1배(10%), 3번째 이상 -> 0.5배(5%)
-                        float multiplier = 1.0f;
-                        if (actor.skillUseCount == 1) multiplier = 2.0f;
-                        else if (actor.skillUseCount >= 3) multiplier = 0.5f;
-
-                        float starGain = (finalDamage * 0.10f) * multiplier;
-                        AddStarPower(starGain, $"{actor.UnitName} {actor.skillUseCount}번째 스킬 데미지 적립");
-                    }
-
-                    // 적 처치 시 5% 추가
-                    if (targetWasAlive && !target.IsAlive)
-                    {
-                        AddStarPower(5f, $"적 [{target.UnitName}] 처치 보너스");
+                        Debug.Log($"<color=yellow>[공격 무효] {target.UnitName}이(가) 회피하여 피해를 받지 않았습니다.</color>");
                     }
                 }
             }
@@ -502,16 +511,27 @@ public class TurnManager : MonoBehaviour
             {
                 Debug.Log($"<color=red>[적] {actor.UnitName}이(가) [{skillName}] 사용! -> 타겟: {target.UnitName}</color>");
 
-                yield return StartCoroutine(PerformAttackSequence(actor, target, damage, false, skillName));
+                bool attackHit = false;
+                yield return StartCoroutine(PerformAttackSequence(
+                    actor, target, damage, false, skillName,
+                    hit => attackHit = hit
+                ));
 
-                target.hitCount++;
-                if (target.hitCount >= 3)
-                    AddStarPower(-2f, $"{target.UnitName} 누적 3회 이상 피격 감점");
+                // TakeDamage()가 실제 명중 시 hitCount를 1 증가시키므로 여기서 중복 증가시키지 않음
+                if (attackHit)
+                {
+                    if (target.hitCount >= 3)
+                        AddStarPower(-2f, $"{target.UnitName} 누적 3회 이상 피격 감점");
+                    else
+                        AddStarPower(1f, $"{target.UnitName} 피격 획득");
+
+                    if (!target.IsAlive)
+                        AddStarPower(-8f, $"{target.UnitName} 사망 감점");
+                }
                 else
-                    AddStarPower(1f, $"{target.UnitName} 피격 획득");
-
-                if (!target.IsAlive)
-                    AddStarPower(-8f, $"{target.UnitName} 사망 감점");
+                {
+                    Debug.Log($"<color=yellow>[공격 무효] {target.UnitName}이(가) 회피하여 피해를 받지 않았습니다.</color>");
+                }
             }
 
             yield return new WaitForSeconds(0.3f);
@@ -519,7 +539,7 @@ public class TurnManager : MonoBehaviour
     }
 
     // ================= [ 클리어 판정 및 보너스 정산 ] =================
-    
+
     private IEnumerator BattleClearRoutine()
     {
         isBattleCleared = true;
@@ -813,11 +833,18 @@ public class TurnManager : MonoBehaviour
     // 여유롭고 묵직한 템포가 적용된 연출 시퀀스
     // PerformAttackSequence 매개변수에 string skillName 추가
     // 여유롭고 묵직한 템포가 적용된 연출 시퀀스
-    private IEnumerator PerformAttackSequence(Unit attacker, Unit target, int damage, bool isSkill3, string skillName)
+    private IEnumerator PerformAttackSequence(
+        Unit attacker,
+        Unit target,
+        int damage,
+        bool isSkill3,
+        string skillName,
+        System.Action<bool> onAttackResolved = null)
     {
         UnitAnimator attackerAnim = attacker.GetComponent<UnitAnimator>();
+        bool attackHit = false;
 
-        // 1. 카메라 줌인 & 스킬 컷인 배너 등장!
+        // 1. 카메라 줌인 & 스킬 컷인 배너 등장
         if (BattleCamera.Instance != null)
         {
             BattleCamera.Instance.StartFollowing(attacker.transform, 0.78f);
@@ -830,31 +857,31 @@ public class TurnManager : MonoBehaviour
 
         HideSkillBanner();
 
-        // 2. 적 앞으로 묵직하게 가감속 돌진
+        // 2. 적 앞으로 돌진
         float stopOffset = (attacker.Team == Team.Ally) ? -1.8f : 1.8f;
-        Vector3 attackPos = new Vector3(target.transform.position.x + stopOffset, target.transform.position.y, attacker.transform.position.z);
+        Vector3 attackPos = new Vector3(
+            target.transform.position.x + stopOffset,
+            target.transform.position.y,
+            attacker.transform.position.z
+        );
 
         yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, attackPos, dashTime));
 
-        // 3. 공격 모션 및 타격
+        // 3. 공격 모션의 타격 시점에 회피 판정 후 명중 처리
         string animName = isSkill3 ? "Skill_3" : "Attack";
+        System.Action resolveAttack = () =>
+        {
+            attackHit = TryResolveAttack(attacker, target, damage);
+            onAttackResolved?.Invoke(attackHit);
+        };
 
         if (attackerAnim != null)
         {
-            yield return StartCoroutine(attackerAnim.PlayAttackAnimation(animName, () =>
-            {
-                // 데미지 전달 (TakeDamage 내부에서 피격 스프라이트 연출이 자동으로 실행됨!)
-                target.TakeDamage(damage);
-
-                AudioManager.Instance.PlaySFX(hitSFX);        // 타격 사운드 재생
-
-                if (BattleCamera.Instance != null) BattleCamera.Instance.Shake(0.12f, 0.12f);
-            }));
+            yield return StartCoroutine(attackerAnim.PlayAttackAnimation(animName, resolveAttack));
         }
         else
         {
-            target.TakeDamage(damage);
-            if (BattleCamera.Instance != null) BattleCamera.Instance.Shake(0.12f, 0.12f);
+            resolveAttack();
             yield return new WaitForSeconds(0.35f);
         }
 
@@ -866,10 +893,59 @@ public class TurnManager : MonoBehaviour
             BattleCamera.Instance.ResetCamera(returnTime + 0.1f);
         }
 
-        Vector3 returnPos = (attacker.originPos != Vector3.zero) ? attacker.originPos : attacker.transform.position;
-        yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, returnPos, returnTime));
+        Vector3 returnPos = (attacker.originPos != Vector3.zero)
+            ? attacker.originPos
+            : attacker.transform.position;
 
+        yield return StartCoroutine(MoveToPositionRoutine(attacker.transform, returnPos, returnTime));
         yield return new WaitForSeconds(postTurnDelay);
+    }
+
+    /// <summary>
+    /// 방어자 이속이 공격자보다 높은 차이의 절반(%)으로 회피 판정
+    /// 예: 방어자 이속이 10 높으면 회피율 5%
+    /// </summary>
+    private bool TryResolveAttack(Unit attacker, Unit defender, int damage)
+    {
+        int speedDifference = defender.currentSpeed - attacker.currentSpeed;
+        float dodgeChance = Mathf.Clamp(speedDifference / 2f, 0f, 100f);
+        float roll = Random.Range(0f, 100f);
+        bool dodged = dodgeChance >= 100f || (dodgeChance > 0f && roll < dodgeChance);
+
+        if (dodged)
+        {
+            UnitAnimator defenderAnimator = defender.GetComponent<UnitAnimator>();
+            if (defenderAnimator != null)
+                defenderAnimator.PlayDodge();
+
+            // 아군이 적의 공격을 회피하면 +3, 적이 아군의 공격을 회피하면 -1
+            if (defender.Team == Team.Ally)
+            {
+                AddStarPower(3f, $"{defender.UnitName} 공격 회피");
+            }
+            else
+            {
+                AddStarPower(-1f, $"적 {defender.UnitName} 공격 회피");
+            }
+
+            Debug.Log(
+                $"<color=cyan>[회피 성공] {defender.UnitName}이(가) {attacker.UnitName}의 공격을 회피! " +
+                $"회피율: {dodgeChance:F1}% / 주사위: {roll:F1}</color>"
+            );
+
+            return false;
+        }
+
+        // 회피 실패: 정상적으로 피해 적용
+        defender.TakeDamage(damage);
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(hitSFX);
+
+        if (BattleCamera.Instance != null)
+            BattleCamera.Instance.Shake(0.12f, 0.12f);
+
+        return true;
     }
 
     // 가속/감속(Ease-In-Out)이 적용된 부드러운 위치 이동 보조 코루틴
