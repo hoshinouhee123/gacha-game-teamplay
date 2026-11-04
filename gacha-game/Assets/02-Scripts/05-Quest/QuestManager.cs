@@ -18,21 +18,17 @@ public class QuestManager : MonoBehaviour
     [Header("Settings")]
     public float completeMessageDuration = 3f;
 
-    private int starPoint;
     private bool isCompleted;
     private int grantedReward;
     private Coroutine messageCoroutine;
 
-    private const string StarKey = "StarPoint";
     private const string QuestKey = "QuestCompleted";
     private const string RewardKey = "QuestGrantedReward";
 
     void Start()
     {
-        starPoint = PlayerPrefs.GetInt(StarKey, 0);
         isCompleted = PlayerPrefs.GetInt(QuestKey, 0) == 1;
 
-        // 이전 버전에서 완료한 퀘스트도 되돌릴 수 있도록 처리
         grantedReward = PlayerPrefs.GetInt(
             RewardKey,
             isCompleted ? rewardStarPoint : 0
@@ -49,13 +45,15 @@ public class QuestManager : MonoBehaviour
 
     public void CompleteQuest()
     {
-        if (isCompleted) return;
+        if (isCompleted)
+            return;
 
         isCompleted = true;
         grantedReward = rewardStarPoint;
-        starPoint += grantedReward;
 
-        PlayerPrefs.SetInt(StarKey, starPoint);
+        // CurrencyManager에 명성 지급
+        CurrencyManager.AddRenown(grantedReward);
+
         PlayerPrefs.SetInt(QuestKey, 1);
         PlayerPrefs.SetInt(RewardKey, grantedReward);
         PlayerPrefs.Save();
@@ -84,16 +82,22 @@ public class QuestManager : MonoBehaviour
 
     public void ResetQuest()
     {
-        // 완료하지 않은 퀘스트는 보상을 차감하지 않음
+        // 퀘스트 완료 상태일 때만 보상 회수
         if (isCompleted)
         {
-            starPoint = Mathf.Max(0, starPoint - grantedReward);
+            int currentRenown = CurrencyManager.GetRenown();
+
+            int removeAmount = Mathf.Min(
+                currentRenown,
+                grantedReward
+            );
+
+            CurrencyManager.AddRenown(-removeAmount);
         }
 
         isCompleted = false;
         grantedReward = 0;
 
-        PlayerPrefs.SetInt(StarKey, starPoint);
         PlayerPrefs.SetInt(QuestKey, 0);
         PlayerPrefs.SetInt(RewardKey, 0);
         PlayerPrefs.Save();
@@ -112,25 +116,37 @@ public class QuestManager : MonoBehaviour
 
     void UpdateStarUI()
     {
-        starPointText.text = "스타성 : " + starPoint;
+        if (starPointText != null)
+        {
+            starPointText.text =
+                "스타성 : " + CurrencyManager.GetRenown();
+        }
     }
 
+    // 현재 명성 확인
     public int GetStarPoint()
     {
-        return starPoint;
+        return CurrencyManager.GetRenown();
     }
 
+    // 명성 사용
     public bool SpendStarPoint(int amount)
     {
-        if (amount < 0 || starPoint < amount)
+        if (amount < 0)
             return false;
 
-        starPoint -= amount;
+        if (CurrencyManager.GetRenown() < amount)
+            return false;
 
-        PlayerPrefs.SetInt(StarKey, starPoint);
-        PlayerPrefs.Save();
+        CurrencyManager.AddRenown(-amount);
 
         UpdateStarUI();
         return true;
+    }
+
+    void OnEnable()
+    {
+        if (starPointText != null)
+            UpdateStarUI();
     }
 }

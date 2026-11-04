@@ -1,18 +1,25 @@
+
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using UnityEngine.UI;
 
 public class GachaManager : MonoBehaviour
 {
-    [Header("명성")]
-    public int fame = 0;
-
     [Header("가챠 가격")]
     public int singleDrawCost = 120;
     public int tenDrawCost = 1200;
 
     [Header("10뽑 연출")]
     public float drawDelay = 0.7f;
+
+    [Header("가챠 버튼")]
+    public GameObject singleDrawButton;
+    public GameObject tenDrawButton;
+
+    [Header("가챠 가격 UI")]
+    public GameObject singlePriceText;
+    public GameObject tenPriceText;
 
     [Header("UI")]
     public TMP_Text fameText;
@@ -23,6 +30,7 @@ public class GachaManager : MonoBehaviour
     private void Start()
     {
         UpdateUI();
+        SetGachaUI(true);
     }
 
     // 1회 뽑기
@@ -31,19 +39,37 @@ public class GachaManager : MonoBehaviour
         if (isDrawing)
             return;
 
+        int fame = CurrencyManager.GetRenown();
+
         if (fame < singleDrawCost)
         {
             resultText.text = "명성이 부족합니다!";
             return;
         }
 
-        fame -= singleDrawCost;
+        // 명성 차감
+        CurrencyManager.AddRenown(-singleDrawCost);
+
+        StartCoroutine(DrawOneCoroutine());
+    }
+
+    private IEnumerator DrawOneCoroutine()
+    {
+        isDrawing = true;
+        SetGachaUI(false);
+
+        resultText.text = "";
 
         int star = GetRandomStar();
 
         resultText.text = $"{star}성 획득!";
 
         UpdateUI();
+
+        yield return new WaitForSeconds(drawDelay);
+
+        isDrawing = false;
+        SetGachaUI(true);
     }
 
     // 10회 뽑기
@@ -52,14 +78,16 @@ public class GachaManager : MonoBehaviour
         if (isDrawing)
             return;
 
+        int fame = CurrencyManager.GetRenown();
+
         if (fame < tenDrawCost)
         {
             resultText.text = "명성이 부족합니다!";
             return;
         }
 
-        fame -= tenDrawCost;
-        UpdateUI();
+        // 명성 차감
+        CurrencyManager.AddRenown(-tenDrawCost);
 
         StartCoroutine(DrawTenCoroutine());
     }
@@ -67,27 +95,42 @@ public class GachaManager : MonoBehaviour
     private IEnumerator DrawTenCoroutine()
     {
         isDrawing = true;
+        SetGachaUI(false);
 
         resultText.text = "";
+        UpdateUI();
 
         for (int i = 0; i < 10; i++)
         {
             int star = GetRandomStar();
 
-            // 이번 결과 하나만 표시
             resultText.text = $"{star}성";
 
-            // 0.7초 동안 보여주기
             yield return new WaitForSeconds(drawDelay);
 
-            // 지우기
             resultText.text = "";
 
-            // 다음 결과 나오기 전 약간 텀
             yield return new WaitForSeconds(0.15f);
         }
 
         isDrawing = false;
+        SetGachaUI(true);
+    }
+
+    // 버튼 및 가격 표시 설정
+    private void SetGachaUI(bool show)
+    {
+        if (singleDrawButton != null)
+            singleDrawButton.SetActive(show);
+
+        if (tenDrawButton != null)
+            tenDrawButton.SetActive(show);
+
+        if (singlePriceText != null)
+            singlePriceText.SetActive(show);
+
+        if (tenPriceText != null)
+            tenPriceText.SetActive(show);
     }
 
     // 등급 확률
@@ -95,33 +138,21 @@ public class GachaManager : MonoBehaviour
     {
         float random = Random.Range(0f, 100f);
 
-        // 3성 5%
         if (random < 5f)
-        {
             return 3;
-        }
 
-        // 2성 25%
         if (random < 30f)
-        {
             return 2;
-        }
 
-        // 1성 70%
         return 1;
-    }
-
-    public void AddFame(int amount)
-    {
-        fame += amount;
-        UpdateUI();
     }
 
     private void UpdateUI()
     {
         if (fameText != null)
         {
-            fameText.text = $"명성 : {fame}";
+            fameText.text =
+                $"명성 : {CurrencyManager.GetRenown()}";
         }
     }
 }
