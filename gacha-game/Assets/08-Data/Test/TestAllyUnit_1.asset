@@ -18,7 +18,7 @@ MonoBehaviour:
   hitSprite: {fileID: -872936783, guid: 23adbf906a365384b955c6ac10a809d4, type: 3}
   attackSprite: {fileID: -872936783, guid: 23adbf906a365384b955c6ac10a809d4, type: 3}
   maxHP: 10
-  attackPower: 20
+  attackPower: 1
   speed: 10
   skills:
   - {fileID: 11400000, guid: 3367b40f714dfea42842c4cc067cf2cf, type: 2}

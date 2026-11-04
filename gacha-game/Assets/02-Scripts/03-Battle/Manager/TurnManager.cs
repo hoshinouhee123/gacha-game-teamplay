@@ -176,7 +176,7 @@ public class TurnManager : MonoBehaviour
     {
         while (true)
         {
-            // 라운드 시작 전 승리/패배 상태 즉시 점검
+            // 라운드 시작 전 전멸 체크
             if (CheckAllEnemiesDead())
             {
                 yield return StartCoroutine(BattleClearRoutine());
@@ -208,6 +208,9 @@ public class TurnManager : MonoBehaviour
                 // 턴 행동 진행
                 yield return StartCoroutine(ExecuteUnitTurn(currentUnit));
 
+                // 행동 직후 빈자리가 생겼다면 대기석 아군 자동 투입
+                yield return StartCoroutine(CheckAndAutoSwapDeadAlliesRoutine());
+
                 // 1. 행동 직후 승리 조건 체크 (적 전멸)
                 if (CheckAllEnemiesDead())
                 {
@@ -215,7 +218,7 @@ public class TurnManager : MonoBehaviour
                     yield break;
                 }
 
-                // 2. 행동 직후 패배 조건 체크 (아군 전멸)
+                // 2. 행동 직후 패배 조건 체크 (필드 + 대기석 전원 사망)
                 if (CheckAllAlliesDead())
                 {
                     yield return StartCoroutine(BattleDefeatRoutine());
@@ -229,6 +232,85 @@ public class TurnManager : MonoBehaviour
         }
     }
 
+    // 사망한 필드 아군을 찾아 대기 유닛을 투입시키는 코루틴
+    private IEnumerator CheckAndAutoSwapDeadAlliesRoutine()
+    {
+        // 필드에서 사망한 아군들 추출
+        var deadFieldAllies = fieldUnits
+            .Where(u => u != null && u.Team == Team.Ally && !u.IsAlive)
+            .ToList();
+
+        foreach (var deadAlly in deadFieldAllies)
+        {
+            // 대기석에 살아있는 아군이 있는지 탐색
+            Unit subAlly = reserveUnits.FirstOrDefault(u => u != null && u.IsAlive);
+            if (subAlly == null) break; // 대기석에 더 이상 살아있는 아군이 없으면 중단
+
+            // 대기 아군 자동 투입 연출 실행
+            yield return StartCoroutine(AutoSwapInRoutine(deadAlly, subAlly));
+        }
+    }
+
+    // 실제 대기 캐릭터를 빈자리 좌표로 출전시키는 연출
+    private IEnumerator AutoSwapInRoutine(Unit deadAlly, Unit incomingAlly)
+    {
+        Vector3 spawnPos = deadAlly.originPos; // 사망한 아군의 원래 자리 기억
+
+        // 1. 리스트 교체 (필드 <-> 대기석)
+        fieldUnits.Remove(deadAlly);
+        reserveUnits.Remove(incomingAlly);
+
+        fieldUnits.Add(incomingAlly);
+        reserveUnits.Add(deadAlly);
+
+        // 2. 위치 및 상태 세팅
+        incomingAlly.transform.position = spawnPos;
+        incomingAlly.originPos = spawnPos;
+
+        // 알파(투명도) 0에서 시작하여 스르륵 나타나는 페이드인 연출
+        SpriteRenderer sr = incomingAlly.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            Color c = sr.color;
+            c.a = 0f;
+            sr.color = c;
+        }
+
+        incomingAlly.gameObject.SetActive(true);
+
+        // 머리 위 체력바 재정렬
+        UnitHealthUI healthUI = incomingAlly.GetComponentInChildren<UnitHealthUI>();
+        if (healthUI != null)
+        {
+            healthUI.gameObject.SetActive(true);
+            healthUI.AutoFitHeadPosition();
+            healthUI.UpdateHP(incomingAlly.currentHp, incomingAlly.maxHp);
+        }
+
+        Debug.Log($"<color=#38BDF8> 대기 캐릭 출전함 {deadAlly.UnitName}의 빈자리에 대기 유닛 {incomingAlly.UnitName}이(가) 참전합니다</color>");
+
+        // 3. 0.4초간 페이드인 연출
+        if (sr != null)
+        {
+            float elapsed = 0f;
+            float duration = 0.4f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                Color c = sr.color;
+                c.a = Mathf.Lerp(0f, 1f, elapsed / duration);
+                sr.color = c;
+                yield return null;
+            }
+            Color finalC = sr.color;
+            finalC.a = 1f;
+            sr.color = finalC;
+        }
+
+        yield return new WaitForSeconds(0.3f); // 등장 후 잠시 여운
+    }
+
+
     // ================= [ 승리 / 패배 판정 함수 ] =================
 
     // 적 전멸 체크
@@ -240,9 +322,7 @@ public class TurnManager : MonoBehaviour
     // 아군 전멸 체크 (필드에 싸울 수 있는 아군이 한 명도 없는지 확인)
     private bool CheckAllAlliesDead()
     {
-        // 필드에 살아있는 아군이 단 1명도 없으면 패배!
-        bool hasAliveFieldAlly = fieldUnits.Any(u => u != null && u.Team == Team.Ally && u.IsAlive);
-        return !hasAliveFieldAlly;
+        return !fieldUnits.Concat(reserveUnits).Any(u => u != null && u.Team == Team.Ally && u.IsAlive);
     }
     // ================= [ 패배 루틴 ] =================
     private IEnumerator BattleDefeatRoutine()
