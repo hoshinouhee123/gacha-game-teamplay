@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 public class MainMenuUIManager : MonoBehaviour
 {
+    [Header("메인 메뉴 UI")]
+    public TextMeshProUGUI renownText;        // 명성치 텍스트
+
     public Button stageButton;
 
     [Header("스탠딩 일러스트 UI")]
@@ -15,12 +18,17 @@ public class MainMenuUIManager : MonoBehaviour
 
     public float fadeDuration = 1.0f;   // 페이드 인, 아웃 걸리는 시간
 
+    
+
     [SerializeField] private StandingDialogue standingDialogue;
 
     private bool standingClicked;       // 스탠딩 일러스트 클릭 여부
 
     void Start()
     {
+        renownText.text = CurrencyManager.GetRenown().ToString();
+
+
         standingClicked = false;
 
         // 시작할 때 말풍선 이미지와 텍스트 둘 다 투명(0)으로 초기화
