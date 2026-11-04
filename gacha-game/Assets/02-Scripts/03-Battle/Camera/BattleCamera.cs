@@ -172,7 +172,7 @@ public class BattleCamera : MonoBehaviour
         float targetDist = defaultDistance * zoomRatio;
         Vector3 targetPos = targetWorldPos - (targetRot * Vector3.forward * targetDist);
 
-        targetPos.x += 5f; // X축으로 살짝 이동 (좌우 시점 조정)
+        targetPos.x += 7f; // X축으로 살짝 이동 (좌우 시점 조정)
 
         float targetFov = defaultSizeOrFov * zoomRatio;
         float elapsed = 0f;
