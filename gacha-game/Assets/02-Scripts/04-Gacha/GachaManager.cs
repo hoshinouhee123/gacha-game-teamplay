@@ -36,18 +36,17 @@ public class GachaManager : MonoBehaviour
     // 1회 뽑기
     public void DrawOne()
     {
-        if (isDrawing)
-            return;
+        if (isDrawing) return;
 
-        int fame = CurrencyManager.GetRenown();
-
-        if (fame < singleDrawCost)
+        if (CurrencyManager.GetRenown() < singleDrawCost)
         {
             resultText.text = "명성이 부족합니다!";
             return;
         }
 
-        // 명성 차감
+        isDrawing = true;
+        SetGachaUI(false);
+
         CurrencyManager.AddRenown(-singleDrawCost);
 
         StartCoroutine(DrawOneCoroutine());
@@ -75,18 +74,17 @@ public class GachaManager : MonoBehaviour
     // 10회 뽑기
     public void DrawTen()
     {
-        if (isDrawing)
-            return;
+        if (isDrawing) return;
 
-        int fame = CurrencyManager.GetRenown();
-
-        if (fame < tenDrawCost)
+        if (CurrencyManager.GetRenown() < tenDrawCost)
         {
             resultText.text = "명성이 부족합니다!";
             return;
         }
 
-        // 명성 차감
+        isDrawing = true;
+        SetGachaUI(false);
+
         CurrencyManager.AddRenown(-tenDrawCost);
 
         StartCoroutine(DrawTenCoroutine());
