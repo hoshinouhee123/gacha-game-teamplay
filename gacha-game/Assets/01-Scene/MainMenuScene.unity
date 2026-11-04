@@ -6339,13 +6339,13 @@ RectTransform:
   - {fileID: 1347839200}
   - {fileID: 1629175673}
   - {fileID: 408119814}
+  - {fileID: 2041793426}
   - {fileID: 1027749408}
   - {fileID: 857743756}
   - {fileID: 1232320451}
   - {fileID: 179090224}
   - {fileID: 160180012}
   - {fileID: 266105926}
-  - {fileID: 2041793426}
   m_Father: {fileID: 1904653440}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -9004,9 +9004,6 @@ MonoBehaviour:
   speechBubble: {fileID: 408119816}
   bubbleText: {fileID: 1229759136}
   fadeDuration: 1
-  playerData:
-    renown: 0
-    stageRecords: []
   standingDialogue: {fileID: 1629175676}
 --- !u!4 &1844441036
 Transform:

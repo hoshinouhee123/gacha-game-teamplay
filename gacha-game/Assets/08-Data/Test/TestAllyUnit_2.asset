@@ -16,7 +16,8 @@ MonoBehaviour:
   team: 0
   characterSprite: {fileID: 537743763, guid: 3e4b78922124d0d43b83ba6830e3086c, type: 3}
   hitSprite: {fileID: 537743763, guid: 3e4b78922124d0d43b83ba6830e3086c, type: 3}
-  maxHP: 200
+  attackSprite: {fileID: 0}
+  maxHP: 1000
   attackPower: 10
   speed: 20
   skills:
