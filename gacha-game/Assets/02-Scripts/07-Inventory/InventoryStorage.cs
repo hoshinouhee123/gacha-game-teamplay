@@ -41,16 +41,19 @@ public static class InventoryStorage
         OnInventoryChanged = null;
     }
 
+    // JSON 불러오기
     public static void Load()
     {
         if (loaded)
             return;
 
-        loaded = true;
         data = new InventorySaveData();
 
         if (!File.Exists(SavePath))
+        {
+            loaded = true;
             return;
+        }
 
         try
         {
@@ -59,8 +62,14 @@ public static class InventoryStorage
             InventorySaveData saved =
                 JsonUtility.FromJson<InventorySaveData>(json);
 
-            if (saved != null && saved.items != null)
-                data = saved;
+            if (saved == null || saved.items == null)
+            {
+                Debug.LogError("인벤토리 JSON 형식 오류");
+                return;
+            }
+
+            data = saved;
+            loaded = true;
         }
         catch (Exception e)
         {
@@ -70,25 +79,78 @@ public static class InventoryStorage
         }
     }
 
+    // 기존 AddStars 호출 호환
     public static bool AddStars(int[] stars)
     {
-        Load();
-
         if (stars == null || stars.Length == 0)
             return false;
 
-        // 저장 실패 시 복원할 데이터
+        int[] amounts = new int[stars.Length];
+
+        for (int i = 0; i < amounts.Length; i++)
+        {
+            amounts[i] = 1;
+        }
+
+        return AddRewards(stars, amounts);
+    }
+
+    // 등급과 지급 개수를 함께 저장
+    public static bool AddRewards(
+        int[] stars,
+        int[] amounts)
+    {
+        Load();
+
+        if (!loaded)
+            return false;
+
+        if (stars == null || amounts == null)
+            return false;
+
+        if (stars.Length == 0 ||
+            stars.Length != amounts.Length)
+            return false;
+
+        // 지급량을 등급별로 합산
+        long[] totals = new long[4];
+
+        for (int i = 0; i < stars.Length; i++)
+        {
+            int star = stars[i];
+            int amount = amounts[i];
+
+            if (star < 1 || star > 3 || amount <= 0)
+                return false;
+
+            totals[star] += amount;
+        }
+
+        // 원래 데이터 백업
         string backup = JsonUtility.ToJson(data);
 
-        foreach (int star in stars)
+        for (int star = 1; star <= 3; star++)
         {
-            if (star < 1 || star > 3)
-                return RestoreAndFail(backup);
+            if (totals[star] == 0)
+                continue;
 
             string id = "star_" + star;
 
             InventoryItemData item =
                 data.items.Find(x => x.itemId == id);
+
+            long currentAmount =
+                item != null ? item.amount : 0;
+
+            long newAmount =
+                currentAmount + totals[star];
+
+            // int 최대값 초과 방지
+            if (newAmount > int.MaxValue)
+            {
+                RestoreData(backup);
+                return false;
+            }
 
             if (item == null)
             {
@@ -102,35 +164,40 @@ public static class InventoryStorage
                 data.items.Add(item);
             }
 
-            if (item.amount == int.MaxValue)
-                return RestoreAndFail(backup);
-
-            item.amount++;
+            item.amount = (int)newAmount;
         }
 
+        // JSON 저장
         if (!Save())
-            return RestoreAndFail(backup);
+        {
+            RestoreData(backup);
+            return false;
+        }
 
+        // 인벤토리 UI 갱신 알림
         OnInventoryChanged?.Invoke();
 
         return true;
     }
 
-    private static bool RestoreAndFail(string backup)
+    // 데이터 복원
+    private static void RestoreData(string backup)
     {
         data = JsonUtility.FromJson<InventorySaveData>(
             backup
         );
-
-        return false;
     }
 
+    // 전체 아이템 불러오기
     public static List<InventoryItemData> GetItems()
     {
         Load();
 
         List<InventoryItemData> result =
             new List<InventoryItemData>();
+
+        if (!loaded)
+            return result;
 
         foreach (InventoryItemData item in data.items)
         {
@@ -145,27 +212,44 @@ public static class InventoryStorage
         return result;
     }
 
+    // 특정 등급 보유 수량
     public static int GetItemCount(int star)
     {
         Load();
 
-        InventoryItemData item = data.items.Find(
-            x => x.itemId == "star_" + star
-        );
+        if (!loaded)
+            return 0;
+
+        InventoryItemData item =
+            data.items.Find(
+                x => x.itemId == "star_" + star
+            );
 
         return item != null ? item.amount : 0;
     }
+
+    // JSON 파일 저장
 
     private static bool Save()
     {
         try
         {
-            string json = JsonUtility.ToJson(
-                data,
-                true
-            );
+            string json = JsonUtility.ToJson(data, true);
 
-            File.WriteAllText(SavePath, json);
+            string tempPath = SavePath + ".tmp";
+
+            // 먼저 임시 파일에 저장
+            File.WriteAllText(tempPath, json);
+
+            // 기존 파일이 있다면 교체
+            if (File.Exists(SavePath))
+            {
+                File.Replace(tempPath, SavePath, null);
+            }
+            else
+            {
+                File.Move(tempPath, SavePath);
+            }
 
             Debug.Log(
                 "인벤토리 JSON 저장 완료: " + SavePath
@@ -182,4 +266,38 @@ public static class InventoryStorage
             return false;
         }
     }
+
+    // 테스트용 인벤토리 전체 초기화
+    public static bool ClearInventory()
+    {
+        Load();
+
+        if (!loaded)
+        {
+            Debug.LogError("인벤토리 로드 실패로 초기화 취소");
+            return false;
+        }
+
+        // 기존 데이터 백업
+        string backup = JsonUtility.ToJson(data);
+
+        // 모든 아이템 삭제
+        data.items.Clear();
+
+        // JSON 저장
+        if (!Save())
+        {
+            // 저장 실패 시 데이터 복원
+            data = JsonUtility.FromJson<InventorySaveData>(backup);
+            return false;
+        }
+
+        // 인벤토리 UI 즉시 갱신
+        OnInventoryChanged?.Invoke();
+
+        Debug.Log("인벤토리 전체 삭제 완료!");
+
+        return true;
+    }
+
 }
