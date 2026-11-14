@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnit
   unitName: "\uCE90\uB9AD1"
   team: 0
+  characterId: char_001
   characterSprite: {fileID: 499897896, guid: 423904f2094644f4398e8c0d9924fbe0, type: 3}
   hitSprite: {fileID: -872936783, guid: 23adbf906a365384b955c6ac10a809d4, type: 3}
   attackSprite: {fileID: -872936783, guid: 23adbf906a365384b955c6ac10a809d4, type: 3}

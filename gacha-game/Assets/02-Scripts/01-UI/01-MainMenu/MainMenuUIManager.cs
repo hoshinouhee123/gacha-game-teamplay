@@ -48,6 +48,11 @@ public class MainMenuUIManager : MonoBehaviour
         SceneManager.LoadScene("GachaScene");
     }
 
+    public void ClickPartyBT()
+    {
+        SceneManager.LoadScene("PartyFormationScene");
+    }
+
     public void ClickStandingCharacter()
     {
         if (standingCharacter != null && !standingClicked)

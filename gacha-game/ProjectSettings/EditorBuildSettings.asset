@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/01-Scene/MainMenuScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
+    path: Assets/01-Scene/PartyFormationScene.unity
+    guid: 9898fc819d06b224181011afe0cbbb5a
+  - enabled: 1
     path: Assets/01-Scene/StageScene.unity
     guid: 934fee60b01f52149933ceef521dbc17
   - enabled: 1

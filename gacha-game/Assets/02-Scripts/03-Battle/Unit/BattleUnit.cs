@@ -12,6 +12,7 @@ public class BattleUnit : ScriptableObject
     [Header("기본 캐릭터 정보")]
     public string unitName; //유닛 이름 
     public Team team;       //진영
+    public string characterId;
 
     [Header("스프라이트 연출")]
     public Sprite characterSprite; // 기본 스프라이트

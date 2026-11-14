@@ -92,6 +92,9 @@ public class TurnManager : MonoBehaviour
         // 선택된 스테이지가 없으면 기본 스테이지 사용 (에디터 테스트용)
         currentStage = SelectedStageData != null ? SelectedStageData : defaultStageData;
 
+        BattlePartyLoader partyLoader = GetComponent<BattlePartyLoader>();
+        if (partyLoader != null) partyLoader.ApplyTo(this);
+
         // 스테이지의 적 목록을 읽어와서 필드에 자동 스폰
         SpawnStageEnemies();
 

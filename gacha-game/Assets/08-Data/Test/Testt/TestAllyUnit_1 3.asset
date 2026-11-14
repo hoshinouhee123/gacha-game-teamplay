@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 377a4c795f9d3b94a96ba4f5e4140388, type: 3}
-  m_Name: TestAllyUnit_1
+  m_Name: TestAllyUnit_1 3
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnit
-  unitName: "\uD14C\uC2A4\uD2B8_1"
+  unitName: "\uD14C\uC2A4\uD2B8_6"
   team: 0
+  characterId: char_005
   characterSprite: {fileID: 499897896, guid: 423904f2094644f4398e8c0d9924fbe0, type: 3}
   hitSprite: {fileID: -872936783, guid: 23adbf906a365384b955c6ac10a809d4, type: 3}
   attackSprite: {fileID: -872936783, guid: 23adbf906a365384b955c6ac10a809d4, type: 3}
@@ -25,5 +26,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3367b40f714dfea42842c4cc067cf2cf, type: 2}
   - {fileID: 11400000, guid: 0d063390dc119db4096af0a7879f4159, type: 2}
   - {fileID: 11400000, guid: 350fdef95b8c5c04aa3131f031427f31, type: 2}
+  passiveSkill: {fileID: 0}
   performance: 3
   mainMenuDialogue: []
