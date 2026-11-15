@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,6 +15,7 @@ public class PartyFormationUI : MonoBehaviour
     [SerializeField] private Image[] slotPortraits = new Image[5];
 
     [Header("캐릭터 선택 목록")]
+    [SerializeField] private bool showUnownedAsLocked = false;
     [SerializeField] private Transform characterListContent;
     [SerializeField] private PartyCharacterCardUI characterCardPrefab;
 
@@ -39,6 +40,13 @@ public class PartyFormationUI : MonoBehaviour
             return;
         }
 
+        if (!CurrencyManager.TryGrantStarterCharacters(roster))
+        {
+            Debug.LogError("[편성] 시작 캐릭터 저장을 확인해 주세요.");
+            enabled = false;
+            return;
+        }
+
         if (PartyFormationStorage.TryLoad(roster, out BattleUnit[] loaded))
         {
             for (int i = 0; i < members.Length; i++) members[i] = loaded[i];
@@ -56,6 +64,7 @@ public class PartyFormationUI : MonoBehaviour
 
         // 같은 SO 또는 같은 ID가 중복 등록되었다면 목록에 한 번만 표시
         var addedIds = new HashSet<string>();
+        int ownedCount = 0;
         if (roster.characters != null)
         {
             foreach (BattleUnit character in roster.characters)
@@ -64,13 +73,19 @@ public class PartyFormationUI : MonoBehaviour
                     string.IsNullOrWhiteSpace(character.characterId) ||
                     !addedIds.Add(character.characterId)) continue;
 
+                bool owned = CurrencyManager.OwnsCharacter(character.characterId);
+                if (owned) ownedCount++;
+                if (!owned && !showUnownedAsLocked) continue;
+
                 PartyCharacterCardUI card = Instantiate(
                     characterCardPrefab, characterListContent);
-                card.Bind(character, SelectCharacter);
+                card.Bind(character, SelectCharacter, owned);
             }
         }
 
         RefreshUI();
+        if (ownedCount < PartyFormationStorage.TotalCount && messageText != null)
+            messageText.text = $"보유 캐릭터 {ownedCount}/5명. 가챠에서 서로 다른 아군을 더 획득해 주세요.";
     }
 
     private string SlotLabel(int index)
@@ -89,7 +104,11 @@ public class PartyFormationUI : MonoBehaviour
 
     public void SelectCharacter(BattleUnit character)
     {
-        if (character == null) return;
+        if (character == null || !CurrencyManager.OwnsCharacter(character.characterId))
+        {
+            if (messageText != null) messageText.text = "보유하지 않은 캐릭터는 배치할 수 없어요.";
+            return;
+        }
 
         // 이미 배치된 캐릭터를 선택하면 기존 슬롯과 서로 교환
         int existingIndex = -1;
@@ -124,7 +143,7 @@ public class PartyFormationUI : MonoBehaviour
         if (messageText != null)
             messageText.text = success
                 ? "전투 3명 + 교대 2명 편성이 저장되었습니다!"
-                : "서로 다른 아군 5명을 모두 배치해야 저장할 수 있어요.";
+                : "보유한 서로 다른 아군 5명을 모두 배치해야 저장할 수 있어요.";
     }
 
     private void RefreshUI()
@@ -146,7 +165,7 @@ public class PartyFormationUI : MonoBehaviour
             selectedSlotText.text = "선택 중: " + SlotLabel(selectedSlotIndex);
     }
 
-    public void MainMenuBack()
+    public void ClickBackMainMenu()
     {
         SceneManager.LoadScene("MainMenuScene");
     }

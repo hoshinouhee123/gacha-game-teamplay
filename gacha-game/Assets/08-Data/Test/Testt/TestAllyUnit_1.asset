@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377a4c795f9d3b94a96ba4f5e4140388, type: 3}
   m_Name: TestAllyUnit_1
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnit
-  unitName: "\uD14C\uC2A4\uD2B8_3"
-  team: 0
   characterId: char_002
+  unitName: "\uD14C\uC2A4\uD2B8_3"
+  rarity: 1
+  team: 0
   characterSprite: {fileID: 499897896, guid: 423904f2094644f4398e8c0d9924fbe0, type: 3}
   hitSprite: {fileID: -872936783, guid: 23adbf906a365384b955c6ac10a809d4, type: 3}
   attackSprite: {fileID: -872936783, guid: 23adbf906a365384b955c6ac10a809d4, type: 3}
   dodgeSprite: {fileID: -872936783, guid: 23adbf906a365384b955c6ac10a809d4, type: 3}
-  maxHP: 1000
+  maxHP: 1
   attackPower: 1
   speed: 100
   skills:

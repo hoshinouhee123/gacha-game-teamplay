@@ -1,37 +1,42 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-// 1. JSON ÆÄÀÏ·Î ÀúÀåµÉ µ¥ÀÌÅÍ Å¬·¡½º (³ªÁß¿¡ °¡Ã­ Ä³¸¯ÅÍ ¸ñ·Ï µîµµ ¿©±â¿¡ Ãß°¡ÇÏ¸é µÊ)
+// 1. JSON íŒŒì¼ë¡œ ì €ì¥ë  ë°ì´í„° í´ë˜ìŠ¤ (ë‚˜ì¤‘ì— ê°€ì±  ìºë¦­í„° ëª©ë¡ ë“±ë„ ì—¬ê¸°ì— ì¶”ê°€í•˜ë©´ ë¨)
 [System.Serializable]
 public class PlayerData
 {
-    public int renown = 0; // ¸í¼º ÀçÈ­
-    // public List<string> ownedCharacters = new List<string>(); // <- ÃßÈÄ °¡Ã­ Ä³¸¯ÅÍ ÀúÀå È®Àå¿ë
+    public int renown = 0; // ëª…ì„± ì¬í™”
+    // ë³´ìœ  ìºë¦­í„° (ê°€ì±  íšë“). SO ìì²´ê°€ ì•„ë‹Œ ê³ ìœ  IDë§Œ ì €ì¥í•©ë‹ˆë‹¤.
+    public List<string> ownedCharacterIds = new List<string>();
 
-    // ½ºÅ×ÀÌÁöº° ±â·Ï ¸®½ºÆ®
+    // ë¬´ë£Œ ì‹œì‘ ìºë¦­í„° ì§€ê¸‰ ì—¬ë¶€. ê¸°ì¡´ ì €ì¥ íŒŒì¼ì—ëŠ” ì—†ìœ¼ë¯€ë¡œ falseë¡œ ì½í™ë‹ˆë‹¤.
+    public bool starterCharactersClaimed = false;
+
+    // ìŠ¤í…Œì´ì§€ë³„ ê¸°ë¡ ë¦¬ìŠ¤íŠ¸
     public List<StageRecord> stageRecords = new List<StageRecord>();
 }
 
-// 2. ½ºÅ×ÀÌÁöº° ±â·Ï µ¥ÀÌÅÍ Å¬·¡½º
+// 2. ìŠ¤í…Œì´ì§€ë³„ ê¸°ë¡ ë°ì´í„° í´ë˜ìŠ¤
 [System.Serializable]
 public class StageRecord
 {
-    public int stageId;          // ½ºÅ×ÀÌÁö ¹øÈ£ (¿¹: 1, 2, 3...)
-    public int bestStarPower;     // ±â·ÏµÈ ÃÖ°í ½ºÅ¸¼º (0~120%)
-    public bool isCleared;        // Å¬¸®¾î ¿©ºÎ
+    public int stageId;          // ìŠ¤í…Œì´ì§€ ë²ˆí˜¸ (ì˜ˆ: 1, 2, 3...)
+    public int bestStarPower;     // ê¸°ë¡ëœ ìµœê³  ìŠ¤íƒ€ì„± (0~120%)
+    public bool isCleared;        // í´ë¦¬ì–´ ì—¬ë¶€
 }
 
 
 
 public static class CurrencyManager
 {
-    // PC/¸ğ¹ÙÀÏ ¾îµğ¼­µç ¾²±â ±ÇÇÑÀÌ º¸ÀåµÇ´Â ¾ÈÀüÇÑ ÀúÀå °æ·Î
+    // PC/ëª¨ë°”ì¼ ì–´ë””ì„œë“  ì“°ê¸° ê¶Œí•œì´ ë³´ì¥ë˜ëŠ” ì•ˆì „í•œ ì €ì¥ ê²½ë¡œ
     private static string SavePath => Path.Combine(Application.persistentDataPath, "SaveData.json");
 
     private static PlayerData cachedData = null;
+    private static bool saveLoadFailed = false;
 
-    // µ¥ÀÌÅÍ ·Îµå (¸Ş¸ğ¸®¿¡ ¾øÀ¸¸é ÆÄÀÏ¿¡¼­ ÀĞ¾î¿È)
+    // ë°ì´í„° ë¡œë“œ (ë©”ëª¨ë¦¬ì— ì—†ìœ¼ë©´ íŒŒì¼ì—ì„œ ì½ì–´ì˜´)
     private static void EnsureLoaded()
     {
         if (cachedData != null) return;
@@ -42,40 +47,50 @@ public static class CurrencyManager
             {
                 string json = File.ReadAllText(SavePath);
                 cachedData = JsonUtility.FromJson<PlayerData>(json);
+                if (cachedData == null)
+                    throw new System.Exception("ì„¸ì´ë¸Œ ë°ì´í„°ê°€ ë¹„ì–´ ìˆìŠµë‹ˆë‹¤.");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[JSON ·Îµå ½ÇÆĞ] ¿À·ù: {e.Message}. »õ µ¥ÀÌÅÍ¸¦ »ı¼ºÇÕ´Ï´Ù.");
+                // ì†ìƒëœ íŒŒì¼ì„ ë¹ˆ ë°ì´í„°ë¡œ ë®ì–´ì“°ì§€ ì•Šë„ë¡ ê°€ì±  ë° ì´ˆê¸° ì§€ê¸‰ì„ ì¤‘ë‹¨í•©ë‹ˆë‹¤.
+                saveLoadFailed = true;
+                Debug.LogError($"[JSON ë¡œë“œ ì‹¤íŒ¨] ì˜¤ë¥˜: {e.Message}. SaveData.jsonì„ ë°±ì—…/ë³µêµ¬í•´ ì£¼ì„¸ìš”.");
                 cachedData = new PlayerData();
             }
         }
         else
         {
-            // ÆÄÀÏÀÌ ¾øÀ¸¸é »õ µ¥ÀÌÅÍ »ı¼º
+            // íŒŒì¼ì´ ì—†ìœ¼ë©´ ìƒˆ ë°ì´í„° ìƒì„±
             cachedData = new PlayerData();
         }
+
+        // ê¸°ì¡´ ë²„ì „ JSONì—ëŠ” ì•„ë˜ ì‹ ê·œ í•„ë“œê°€ ì—†ì„ ìˆ˜ ìˆìŠµë‹ˆë‹¤.
+        if (cachedData.ownedCharacterIds == null)
+            cachedData.ownedCharacterIds = new List<string>();
+        if (cachedData.stageRecords == null)
+            cachedData.stageRecords = new List<StageRecord>();
     }
 
-    // ÆÄÀÏ·Î ¿µ±¸ ÀúÀå
+    // íŒŒì¼ë¡œ ì˜êµ¬ ì €ì¥
     private static void SaveToFile()
     {
         if (cachedData == null) return;
 
-        // true¸¦ ³ÖÀ¸¸é ÁÙ¹Ù²Ş/µé¿©¾²±â Àû¿ëµÇ¾î ¸Ş¸ğÀåÀ¸·Î º¸±â ÆíÇØÁü
+        // trueë¥¼ ë„£ìœ¼ë©´ ì¤„ë°”ê¿ˆ/ë“¤ì—¬ì“°ê¸° ì ìš©ë˜ì–´ ë©”ëª¨ì¥ìœ¼ë¡œ ë³´ê¸° í¸í•´ì§
         string json = JsonUtility.ToJson(cachedData, true);
         File.WriteAllText(SavePath, json);
     }
 
-    // ================= [ ¿ÜºÎ È£Ãâ ÇÔ¼öµé ] =================
+    // ================= [ ì™¸ë¶€ í˜¸ì¶œ í•¨ìˆ˜ë“¤ ] =================
 
-    // ÇöÀç º¸À¯ ¸í¼º °¡Á®¿À±â
+    // í˜„ì¬ ë³´ìœ  ëª…ì„± ê°€ì ¸ì˜¤ê¸°
     public static int GetRenown()
     {
         EnsureLoaded();
         return cachedData.renown;
     }
 
-    // ¸í¼º È¹µæ
+    // ëª…ì„± íšë“
     public static void AddRenown(int amount)
     {
         if (amount <= 0) return;
@@ -84,11 +99,11 @@ public static class CurrencyManager
         cachedData.renown += amount;
         SaveToFile();
 
-        Debug.Log($"<color=#00FFFF>[JSON ÀúÀå ¿Ï·á] ¸í¼º +{amount}! (ÇöÀç º¸À¯ ¸í¼º: {cachedData.renown})</color>");
-        Debug.Log($"<color=grey>ÀúÀå °æ·Î: {SavePath}</color>");
+        Debug.Log($"<color=#00FFFF>[JSON ì €ì¥ ì™„ë£Œ] ëª…ì„± +{amount}! (í˜„ì¬ ë³´ìœ  ëª…ì„±: {cachedData.renown})</color>");
+        Debug.Log($"<color=grey>ì €ì¥ ê²½ë¡œ: {SavePath}</color>");
     }
 
-    // ¸í¼º ¼Ò¸ğ (°¡Ã­ ½Ã »ç¿ë)
+    // ëª…ì„± ì†Œëª¨ (ê°€ì±  ì‹œ ì‚¬ìš©)
     public static bool SpendRenown(int amount)
     {
         EnsureLoaded();
@@ -97,44 +112,163 @@ public static class CurrencyManager
         {
             cachedData.renown -= amount;
             SaveToFile();
-            Debug.Log($"<color=#FF69B4>[JSON ÀúÀå ¿Ï·á] ¸í¼º -{amount} »ç¿ë (³²Àº ¸í¼º: {cachedData.renown})</color>");
+            Debug.Log($"<color=#FF69B4>[JSON ì €ì¥ ì™„ë£Œ] ëª…ì„± -{amount} ì‚¬ìš© (ë‚¨ì€ ëª…ì„±: {cachedData.renown})</color>");
             return true;
         }
 
-        Debug.LogWarning("<color=red>[¸í¼º ºÎÁ·] ¸í¼ºÀÌ ºÎÁ·ÇÕ´Ï´Ù!</color>");
+        Debug.LogWarning("<color=red>[ëª…ì„± ë¶€ì¡±] ëª…ì„±ì´ ë¶€ì¡±í•©ë‹ˆë‹¤!</color>");
         return false;
     }
 
-    // (Å×½ºÆ®¿ë) µ¥ÀÌÅÍ ¸®¼Â
+    // (í…ŒìŠ¤íŠ¸ìš©) ë°ì´í„° ë¦¬ì…‹
     public static void ResetRenown()
     {
-        cachedData = new PlayerData();
+        EnsureLoaded();
+        cachedData.renown = 0; // ìºë¦­í„°ì™€ ìŠ¤í…Œì´ì§€ ê¸°ë¡ì€ ìœ ì§€í•©ë‹ˆë‹¤.
         SaveToFile();
-        Debug.Log("<color=yellow>[ÃÊ±âÈ­] JSON ÆÄÀÏÀÇ ¸í¼ºÀÌ 0À¸·Î ÃÊ±âÈ­µÇ¾ú½À´Ï´Ù.</color>");
+        Debug.Log("<color=yellow>[ì´ˆê¸°í™”] ëª…ì„±ë§Œ 0ìœ¼ë¡œ ì´ˆê¸°í™”ë˜ì—ˆìŠµë‹ˆë‹¤.</color>");
     }
 
 
-    // ½ºÅ×ÀÌÁö Å¬¸®¾î ½Ã ½ºÅ¸¼º ±â·Ï ÀúÀå (½Å±â·Ï °»½Å)
+
+    // ================= [ ìºë¦­í„° ê°€ì±  / ë³´ìœ  ê¸°ëŠ¥ ] =================
+
+    public static bool OwnsCharacter(string characterId)
+    {
+        EnsureLoaded();
+        return !string.IsNullOrWhiteSpace(characterId) &&
+               cachedData.ownedCharacterIds.Contains(characterId);
+    }
+
+    public static int GetOwnedCharacterCount()
+    {
+        EnsureLoaded();
+        return cachedData.ownedCharacterIds.Count;
+    }
+
+    /// <summary>
+    /// ê°€ì±  1íšŒ/10íšŒ ê²°ê³¼ë¥¼ ê¸°ì¡´ ëª…ì„±, ìŠ¤í…Œì´ì§€ ë°ì´í„°ì™€ ë™ì¼í•œ JSONì— ì €ì¥í•©ë‹ˆë‹¤.
+    /// ì‹¤ì œ ëª…ì„± ì°¨ê°ì•¡ë§Œ realCostë¡œ ì „ë‹¬í•˜ì„¸ìš” (í…ŒìŠ¤íŠ¸ ëª…ì„± ì°¨ê°ì•¡ì€ ì œì™¸).
+    /// ìƒˆ íšë“ ì—¬ë¶€ëŠ” ê°™ì€ 10ì—°ì°¨ ì•ˆì—ì„œ ì¤‘ë³µëœ ê²½ìš°ë„ falseì…ë‹ˆë‹¤.
+    /// </summary>
+    public static bool TrySpendAndUnlockCharacters(
+        int realCost, IList<string> drawnCharacterIds, out bool[] newlyOwned)
+    {
+        newlyOwned = null;
+        EnsureLoaded();
+        if (saveLoadFailed) return false;
+
+        if (realCost < 0 || drawnCharacterIds == null || drawnCharacterIds.Count == 0 ||
+            cachedData.renown < realCost)
+            return false;
+
+        foreach (string id in drawnCharacterIds)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                Debug.LogError("[ê°€ì± ] ìºë¦­í„° IDê°€ ë¹„ì–´ ìˆì–´ êµ¬ë§¤ë¥¼ ì·¨ì†Œí•©ë‹ˆë‹¤.");
+                return false;
+            }
+        }
+
+        int previousRenown = cachedData.renown;
+        var previousOwned = new List<string>(cachedData.ownedCharacterIds);
+        var known = new HashSet<string>(previousOwned);
+        var flags = new bool[drawnCharacterIds.Count];
+
+        for (int i = 0; i < drawnCharacterIds.Count; i++)
+        {
+            string id = drawnCharacterIds[i];
+            flags[i] = known.Add(id);
+            if (flags[i]) cachedData.ownedCharacterIds.Add(id);
+        }
+
+        cachedData.renown -= realCost;
+        try
+        {
+            SaveToFile();
+        }
+        catch (System.Exception ex)
+        {
+            cachedData.renown = previousRenown;
+            cachedData.ownedCharacterIds = previousOwned;
+            Debug.LogError("[ê°€ì± ] ì €ì¥ ì‹¤íŒ¨ë¡œ êµ¬ë§¤ë¥¼ ì·¨ì†Œí–ˆìŠµë‹ˆë‹¤: " + ex.Message);
+            return false;
+        }
+
+        newlyOwned = flags;
+        return true;
+    }
+
+    /// <summary>
+    /// ìµœì´ˆ 1íšŒë§Œ roster.starterCharactersë¥¼ ë¬´ë£Œ ì§€ê¸‰í•©ë‹ˆë‹¤.
+    /// rosterë¥¼ ì§€ì •í•˜ê¸° ì „ì— ì‹¤í–‰í•˜ë©´ ì´ˆê¸°í™”ë˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
+    /// </summary>
+    public static bool TryGrantStarterCharacters(CharacterRosterSO roster)
+    {
+        if (roster == null) return false;
+        EnsureLoaded();
+        if (saveLoadFailed) return false;
+        if (cachedData.starterCharactersClaimed) return true;
+
+        var previousOwned = new List<string>(cachedData.ownedCharacterIds);
+        var known = new HashSet<string>(previousOwned);
+        BattleUnit[] starters = roster.starterCharacters;
+
+        if (starters != null)
+        {
+            foreach (BattleUnit character in starters)
+            {
+                if (character == null) continue;
+                if (character.team != Team.Ally ||
+                    string.IsNullOrWhiteSpace(character.characterId) ||
+                    roster.FindById(character.characterId) != character)
+                {
+                    Debug.LogWarning("[ê°€ì± ] ì‹œì‘ ìºë¦­í„°ê°€ Rosterì— ì—†ê±°ë‚˜ IDê°€ ìœ íš¨í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤: " + character.name);
+                    continue;
+                }
+
+                if (known.Add(character.characterId))
+                    cachedData.ownedCharacterIds.Add(character.characterId);
+            }
+        }
+
+        cachedData.starterCharactersClaimed = true;
+        try
+        {
+            SaveToFile();
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            cachedData.ownedCharacterIds = previousOwned;
+            cachedData.starterCharactersClaimed = false;
+            Debug.LogError("[ê°€ì± ] ì‹œì‘ ìºë¦­í„° ì €ì¥ ì‹¤íŒ¨: " + ex.Message);
+            return false;
+        }
+    }
+
+    // ìŠ¤í…Œì´ì§€ í´ë¦¬ì–´ ì‹œ ìŠ¤íƒ€ì„± ê¸°ë¡ ì €ì¥ (ì‹ ê¸°ë¡ ê°±ì‹ )
     public static void SaveStageRecord(int stageId, int starPower)
     {
         EnsureLoaded();
 
-        // ±âÁ¸ ±â·ÏÀÌ ÀÖ´ÂÁö È®ÀÎ
+        // ê¸°ì¡´ ê¸°ë¡ì´ ìˆëŠ”ì§€ í™•ì¸
         StageRecord record = cachedData.stageRecords.Find(r => r.stageId == stageId);
 
         if (record == null)
         {
-            // Ã¹ Å¬¸®¾î
+            // ì²« í´ë¦¬ì–´
             record = new StageRecord { stageId = stageId, bestStarPower = starPower, isCleared = true };
             cachedData.stageRecords.Add(record);
-            Debug.Log($"<color=#00FF7F>[JSON ÀúÀå] ½ºÅ×ÀÌÁö {stageId} Ã¹ Å¬¸®¾î! ½ºÅ¸¼º: {starPower}%</color>");
+            Debug.Log($"<color=#00FF7F>[JSON ì €ì¥] ìŠ¤í…Œì´ì§€ {stageId} ì²« í´ë¦¬ì–´! ìŠ¤íƒ€ì„±: {starPower}%</color>");
         }
         else
         {
-            // ½Å±â·ÏÀÏ ¶§¸¸ ½ºÅ¸¼º °»½Å
+            // ì‹ ê¸°ë¡ì¼ ë•Œë§Œ ìŠ¤íƒ€ì„± ê°±ì‹ 
             if (starPower > record.bestStarPower)
             {
-                Debug.Log($"<color=#00FF7F>[JSON ½Å±â·Ï!] ½ºÅ×ÀÌÁö {stageId} ½ºÅ¸¼º °»½Å: {record.bestStarPower}% > {starPower}%</color>");
+                Debug.Log($"<color=#00FF7F>[JSON ì‹ ê¸°ë¡!] ìŠ¤í…Œì´ì§€ {stageId} ìŠ¤íƒ€ì„± ê°±ì‹ : {record.bestStarPower}% > {starPower}%</color>");
                 record.bestStarPower = starPower;
             }
             record.isCleared = true;
@@ -143,7 +277,7 @@ public static class CurrencyManager
         SaveToFile();
     }
 
-    // Æ¯Á¤ ½ºÅ×ÀÌÁöÀÇ ÃÖ°í ½ºÅ¸¼º ºÒ·¯¿À±â
+    // íŠ¹ì • ìŠ¤í…Œì´ì§€ì˜ ìµœê³  ìŠ¤íƒ€ì„± ë¶ˆëŸ¬ì˜¤ê¸°
     public static int GetBestStarPower(int stageId)
     {
         EnsureLoaded();

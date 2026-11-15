@@ -18,3 +18,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e0d6c2f9fd0e5eb48bb901a327ecf2a0, type: 2}
   - {fileID: 11400000, guid: 3224986bb8eef6c48ad1e00781537469, type: 2}
   - {fileID: 11400000, guid: 3e25b561dec272a43b866e66e24d8377, type: 2}
+  starterCharacters:
+  - {fileID: 11400000, guid: e8e74caecef6be046adab5b7a06f0bcf, type: 2}
+  - {fileID: 11400000, guid: a46ebed107dad0a42aa49cd6e5513d2c, type: 2}
+  - {fileID: 11400000, guid: e0d6c2f9fd0e5eb48bb901a327ecf2a0, type: 2}
+  - {fileID: 11400000, guid: 3224986bb8eef6c48ad1e00781537469, type: 2}
+  - {fileID: 11400000, guid: 3e25b561dec272a43b866e66e24d8377, type: 2}

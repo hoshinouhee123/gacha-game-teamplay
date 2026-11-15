@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(TurnManager))]
@@ -6,13 +6,22 @@ public class BattlePartyLoader : MonoBehaviour
 {
     [SerializeField] private CharacterRosterSO roster;
 
+    [Tooltip("에디터 테스트 용도. 편성 없이 씬에 설정한 기본 아군으로 전투합니다.")]
+    [SerializeField] private bool allowSceneDefaultTeamForTesting = false;
+
     // TurnManager.Start()에서 직접 호출하여 실행 순서를 보장
-    public void ApplyTo(TurnManager manager)
+    public bool ApplyTo(TurnManager manager)
     {
+        if (roster == null || !CurrencyManager.TryGrantStarterCharacters(roster))
+        {
+            Debug.LogError("[편성] BattlePartyLoader의 CharacterRosterSO를 확인하세요.");
+            return false;
+        }
+
         if (!PartyFormationStorage.TryLoad(roster, out BattleUnit[] members))
         {
-            Debug.Log("[편성] 저장된 유효한 편성이 없어서 씬의 기본 아군을 사용합니다.");
-            return;
+            Debug.LogWarning("[편성] 보유 캐릭터 5명의 저장된 편성이 없습니다.");
+            return allowSceneDefaultTeamForTesting;
         }
 
         var activeSlots = new List<Unit>();
@@ -34,7 +43,7 @@ public class BattlePartyLoader : MonoBehaviour
             reserveSlots.Count != PartyFormationStorage.ReserveCount)
         {
             Debug.LogError("[편성] TurnManager에 아군 fieldUnits 3개, reserveUnits 2개가 필요합니다.");
-            return;
+            return false;
         }
 
         for (int i = 0; i < PartyFormationStorage.ActiveCount; i++)
@@ -44,5 +53,6 @@ public class BattlePartyLoader : MonoBehaviour
             reserveSlots[i].Initialize(members[i + PartyFormationStorage.ActiveCount]);
 
         Debug.Log("[편성] 저장된 전투 3명 + 교대 2명을 적용했습니다.");
+        return true;
     }
 }

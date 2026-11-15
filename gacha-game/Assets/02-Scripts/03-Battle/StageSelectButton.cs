@@ -1,17 +1,21 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 
 public class StageSelectButton : MonoBehaviour
 {
-    [Header("ÀÌ ¹öÆ°ÀÌ ¿­¾îÁÙ ½ºÅ×ÀÌÁö SO")]
+    [Header("ì´ ë²„íŠ¼ì´ ì—´ì–´ì¤„ ìŠ¤í…Œì´ì§€ SO")]
     public StageDataSO stageData;
 
-    [Header("½ºÅ×ÀÌÁö ÀÌ¸§ ÅØ½ºÆ®")]
+    [Header("ìŠ¤í…Œì´ì§€ ì´ë¦„ í…ìŠ¤íŠ¸")]
     public TextMeshProUGUI stageNameText;
 
     public AudioClip stageBgmClip;
+
+    [Header("í¸ì„± í™•ì¸")]
+    [SerializeField] private CharacterRosterSO roster;
+    [SerializeField] private TMP_Text warningText; // ì„ íƒ ì‚¬í•­
 
     private void Start()
     {
@@ -28,7 +32,7 @@ public class StageSelectButton : MonoBehaviour
     {
         if (stageData == null) return;
 
-        // ¹öÆ°¿¡ ½ºÅ×ÀÌÁö ÀÌ¸§¸¸ Ç¥±â
+        // ë²„íŠ¼ì— ìŠ¤í…Œì´ì§€ ì´ë¦„ë§Œ í‘œê¸°
         if (stageNameText != null)
             stageNameText.text = stageData.stageName;
     }
@@ -36,12 +40,20 @@ public class StageSelectButton : MonoBehaviour
     private void OnStageClicked()
     {
         if (stageData == null) return;
+        if (roster == null || !CurrencyManager.TryGrantStarterCharacters(roster) ||
+            !PartyFormationStorage.TryLoad(roster, out BattleUnit[] _))
+        {
+            const string message = "ë³´ìœ í•œ ì•„êµ° 5ëª…ì„ í¸ì„±í•˜ê³  ì €ì¥í•œ í›„ ì „íˆ¬ì— ì…ì¥í•  ìˆ˜ ìˆì–´ìš”.";
+            Debug.LogWarning("[í¸ì„±] " + message);
+            if (warningText != null) warningText.text = message;
+            return;
+        }
 
-        // ¼±ÅÃÇÑ ½ºÅ×ÀÌÁö SO Àü´Ş
+        // ì„ íƒí•œ ìŠ¤í…Œì´ì§€ SO ì „ë‹¬
         TurnManager.SelectedStageData = stageData;
 
-        // ÀüÅõ ¾À(StageScene)À¸·Î ÀÌµ¿
-        AudioManager.Instance.PlayBGM(stageBgmClip);    //½ºÅ×ÀÌÁö Àü¿ë bgm Àç»ı
+        // ì „íˆ¬ ì”¬(StageScene)ìœ¼ë¡œ ì´ë™
+        AudioManager.Instance.PlayBGM(stageBgmClip);    //ìŠ¤í…Œì´ì§€ ì „ìš© bgm ì¬ìƒ
         SceneManager.LoadScene("BattleScene");
     }
 }

@@ -1,85 +1,85 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // TextMeshPro »ç¿ë ½Ã (ÀÏ¹İ Text¸¦ ¾´´Ù¸é UnityEngine.UI.Text »ç¿ë)
+using TMPro; // TextMeshPro ì‚¬ìš© ì‹œ (ì¼ë°˜ Textë¥¼ ì“´ë‹¤ë©´ UnityEngine.UI.Text ì‚¬ìš©)
 
 public class TurnManager : MonoBehaviour
 {
-    public static TurnManager Instance; // ÇÇ°İ µî¿¡¼­ ½±°Ô Á¢±Ù °¡´ÉÇÏµµ·Ï ½Ì±ÛÅæ Àû¿ë
+    public static TurnManager Instance; // í”¼ê²© ë“±ì—ì„œ ì‰½ê²Œ ì ‘ê·¼ ê°€ëŠ¥í•˜ë„ë¡ ì‹±ê¸€í†¤ ì ìš©
 
-    [Header("ÀüÅõ À¯´Öµé")]
-    public List<Unit> fieldUnits = new List<Unit>();       // ÇöÀç ÇÊµå¿¡ ³ª¿ÍÀÖ´Â À¯´Öµé
-    public List<Unit> reserveUnits = new List<Unit>();   // ´ë±â¼®¿¡ ÀÖ´Â À¯´Öµé (ÃÖ´ë 2¸í)
+    [Header("ì „íˆ¬ ìœ ë‹›ë“¤")]
+    public List<Unit> fieldUnits = new List<Unit>();       // í˜„ì¬ í•„ë“œì— ë‚˜ì™€ìˆëŠ” ìœ ë‹›ë“¤
+    public List<Unit> reserveUnits = new List<Unit>();   // ëŒ€ê¸°ì„ì— ìˆëŠ” ìœ ë‹›ë“¤ (ìµœëŒ€ 2ëª…)
 
-    [Header("SP ½Ã½ºÅÛ")]
-    public int currentSP = 9;   // Ã¹ ÅÏ ½ÃÀÛ ½Ã ±âº» 9
+    [Header("SP ì‹œìŠ¤í…œ")]
+    public int currentSP = 9;   // ì²« í„´ ì‹œì‘ ì‹œ ê¸°ë³¸ 9
     public int maxSP = 10;
 
-    [Header(" ½ºÅ¸¼º ½Ã½ºÅÛ")]
-    public float currentStarPower = 0f; // ³»ºÎ °è»ê¿ë (¼Ò¼öÁ¡ À¯Áö)
+    [Header(" ìŠ¤íƒ€ì„± ì‹œìŠ¤í…œ")]
+    public float currentStarPower = 0f; // ë‚´ë¶€ ê³„ì‚°ìš© (ì†Œìˆ˜ì  ìœ ì§€)
     public const float MAX_STAR_POWER = 120f;
-    public TextMeshProUGUI starPowerText; // »ó´Ü ½ºÅ¸¼º ÅØ½ºÆ®
+    public TextMeshProUGUI starPowerText; // ìƒë‹¨ ìŠ¤íƒ€ì„± í…ìŠ¤íŠ¸
 
 
-    [Header("UI ¿¬°á")]
-    public GameObject skillPanel;           // ½ºÅ³ Ä«µåµéÀ» °¨½Î´Â ÆĞ³Î
-    public Button[] skillButtons;           // 3°³ÀÇ ½ºÅ³ ¹öÆ°
-    public TextMeshProUGUI[] skillButtonTexts; // °¢ ¹öÆ°ÀÇ ÅØ½ºÆ® (TMP)
-    public TextMeshProUGUI spText;          // ÇöÀç SP Ç¥½Ã ÅØ½ºÆ®
+    [Header("UI ì—°ê²°")]
+    public GameObject skillPanel;           // ìŠ¤í‚¬ ì¹´ë“œë“¤ì„ ê°ì‹¸ëŠ” íŒ¨ë„
+    public Button[] skillButtons;           // 3ê°œì˜ ìŠ¤í‚¬ ë²„íŠ¼
+    public TextMeshProUGUI[] skillButtonTexts; // ê° ë²„íŠ¼ì˜ í…ìŠ¤íŠ¸ (TMP)
+    public TextMeshProUGUI spText;          // í˜„ì¬ SP í‘œì‹œ í…ìŠ¤íŠ¸
 
-    [Header("±³´ë UI ¿¬°á")]
-    public GameObject swapPanel;                     // ±³´ë ¼±ÅÃ ÆË¾÷Ã¢
-    public Button[] swapButtons;                     // ´ë±â À¯´Ö ¼±ÅÃ ¹öÆ° 2°³
-    public TextMeshProUGUI[] swapButtonTexts;        // ¹öÆ° À§ ÅØ½ºÆ® 2°³
+    [Header("êµëŒ€ UI ì—°ê²°")]
+    public GameObject swapPanel;                     // êµëŒ€ ì„ íƒ íŒì—…ì°½
+    public Button[] swapButtons;                     // ëŒ€ê¸° ìœ ë‹› ì„ íƒ ë²„íŠ¼ 2ê°œ
+    public TextMeshProUGUI[] swapButtonTexts;        // ë²„íŠ¼ ìœ„ í…ìŠ¤íŠ¸ 2ê°œ
 
-    [Header("ÀüÅõ °á°ú Åë°è UI ¿¬°á")]
-    public GameObject resultPanel;               // °á°úÃ¢ ÆË¾÷ ÆĞ³Î
-    public TextMeshProUGUI resultSummaryText;    // Å¬¸®¾î ÅÏ, ½ºÅ¸¼º, ¸í¼º ¿ä¾à ÅØ½ºÆ®
-    public TextMeshProUGUI statsTableText;       // Ä³¸¯ÅÍº° »ó¼¼ Åë°è ÅØ½ºÆ®
-    public Button confirmButton;                 // È®ÀÎ/´İ±â ¹öÆ°
+    [Header("ì „íˆ¬ ê²°ê³¼ í†µê³„ UI ì—°ê²°")]
+    public GameObject resultPanel;               // ê²°ê³¼ì°½ íŒì—… íŒ¨ë„
+    public TextMeshProUGUI resultSummaryText;    // í´ë¦¬ì–´ í„´, ìŠ¤íƒ€ì„±, ëª…ì„± ìš”ì•½ í…ìŠ¤íŠ¸
+    public TextMeshProUGUI statsTableText;       // ìºë¦­í„°ë³„ ìƒì„¸ í†µê³„ í…ìŠ¤íŠ¸
+    public Button confirmButton;                 // í™•ì¸/ë‹«ê¸° ë²„íŠ¼
 
-    [Header("½ºÅ³ ¿¬Ãâ ¹è³Ê UI ¿¬°á")]
-    public GameObject skillBannerPanel;              // ¹è³Ê ÀüÃ¼ ÆĞ³Î
-    public TextMeshProUGUI bannerCharacterNameText;  // Ä³¸¯ÅÍ ÀÌ¸§ ÅØ½ºÆ®
-    public TextMeshProUGUI bannerSkillNameText;      // ½ºÅ³ ÀÌ¸§ ÅØ½ºÆ®
-    public CanvasGroup bannerCanvasGroup;            // ºÎµå·¯¿î Åõ¸íµµ Á¶Àı¿ë
+    [Header("ìŠ¤í‚¬ ì—°ì¶œ ë°°ë„ˆ UI ì—°ê²°")]
+    public GameObject skillBannerPanel;              // ë°°ë„ˆ ì „ì²´ íŒ¨ë„
+    public TextMeshProUGUI bannerCharacterNameText;  // ìºë¦­í„° ì´ë¦„ í…ìŠ¤íŠ¸
+    public TextMeshProUGUI bannerSkillNameText;      // ìŠ¤í‚¬ ì´ë¦„ í…ìŠ¤íŠ¸
+    public CanvasGroup bannerCanvasGroup;            // ë¶€ë“œëŸ¬ìš´ íˆ¬ëª…ë„ ì¡°ì ˆìš©
 
-    [Header("¿¬Ãâ ¼Óµµ ¹× ÅÒ Á¶Àı (ÃÊ)")]
-    [Tooltip("Ä«¸Ş¶ó°¡ ÁÜÀÎµÇ¸ç ½ÃÀüÀÚ¸¦ ºñÃß´Â ½Ã°£")]
+    [Header("ì—°ì¶œ ì†ë„ ë° í…€ ì¡°ì ˆ (ì´ˆ)")]
+    [Tooltip("ì¹´ë©”ë¼ê°€ ì¤Œì¸ë˜ë©° ì‹œì „ìë¥¼ ë¹„ì¶”ëŠ” ì‹œê°„")]
     public float zoomTime = 0.4f;
 
-    [Tooltip("Ä«¸Ş¶ó ÁÜ ¿Ï·á ÈÄ µ¹ÁøÇÏ±â Àü ¶ä µéÀÌ´Â ½Ã°£ (±â ¸ğÀ¸±â)")]
+    [Tooltip("ì¹´ë©”ë¼ ì¤Œ ì™„ë£Œ í›„ ëŒì§„í•˜ê¸° ì „ ëœ¸ ë“¤ì´ëŠ” ì‹œê°„ (ê¸° ëª¨ìœ¼ê¸°)")]
     public float preDashDelay = 0.25f;
 
-    [Tooltip("Àû ¾ÕÀ¸·Î µ¹ÁøÇØ ´Ù°¡°¡´Â ½Ã°£")]
+    [Tooltip("ì  ì•ìœ¼ë¡œ ëŒì§„í•´ ë‹¤ê°€ê°€ëŠ” ì‹œê°„")]
     public float dashTime = 0.45f;
 
-    [Tooltip("°ø°İ Å¸°İ ÈÄ ±× ÀÚ¸®¿¡¼­ Æû Àâ°í ¸Ó¹«´Â ½Ã°£ (¿©¿î/ÈÄµô)")]
+    [Tooltip("ê³µê²© íƒ€ê²© í›„ ê·¸ ìë¦¬ì—ì„œ í¼ ì¡ê³  ë¨¸ë¬´ëŠ” ì‹œê°„ (ì—¬ìš´/í›„ë”œ)")]
     public float postAttackWait = 0.35f;
 
-    [Tooltip("¿ø·¡ ÀÚ±â ÀÚ¸®·Î º¹±ÍÇÏ´Â ½Ã°£")]
+    [Tooltip("ì›ë˜ ìê¸° ìë¦¬ë¡œ ë³µê·€í•˜ëŠ” ì‹œê°„")]
     public float returnTime = 0.4f;
 
-    [Tooltip("ÇÑ ÅÏÀÌ ¿ÏÀüÈ÷ ³¡³ª°í ´ÙÀ½ ÅÏÀ¸·Î ³Ñ¾î°¡±â Àü ÈŞ½Ä ÅÒ")]
+    [Tooltip("í•œ í„´ì´ ì™„ì „íˆ ëë‚˜ê³  ë‹¤ìŒ í„´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ì „ íœ´ì‹ í…€")]
     public float postTurnDelay = 0.5f;
 
-    // ´Ù¸¥ ¾ÀÀÌ³ª UI¿¡¼­ ³Ñ°Ü¹ŞÀ» Á¤Àû º¯¼ö (¼±ÅÃµÈ ½ºÅ×ÀÌÁö)
+    // ë‹¤ë¥¸ ì”¬ì´ë‚˜ UIì—ì„œ ë„˜ê²¨ë°›ì„ ì •ì  ë³€ìˆ˜ (ì„ íƒëœ ìŠ¤í…Œì´ì§€)
     public static StageDataSO SelectedStageData = null;
 
-    [Header("½ºÅ×ÀÌÁö ¼¼ÆÃ")]
-    public StageDataSO defaultStageData;         // ¿¡µğÅÍ¿¡¼­ ¹Ù·Î Àç»ıÇÒ ¶§ ¾µ ±âº» ½ºÅ×ÀÌÁö
-    public GameObject enemyBasePrefab;           // Àû °ø¿ë ÇÁ¸®ÆÕ (Unit, SpriteRenderer, Collider µîÀÌ ºÙÀº ÇÁ¸®ÆÕ)
-    public Transform[] enemySpawnPoints;         // ÀûµéÀÌ ¼­ ÀÖÀ» À§Ä¡ (¿¹: 1~3¹ø ÀÚ¸®)
+    [Header("ìŠ¤í…Œì´ì§€ ì„¸íŒ…")]
+    public StageDataSO defaultStageData;         // ì—ë””í„°ì—ì„œ ë°”ë¡œ ì¬ìƒí•  ë•Œ ì“¸ ê¸°ë³¸ ìŠ¤í…Œì´ì§€
+    public GameObject enemyBasePrefab;           // ì  ê³µìš© í”„ë¦¬íŒ¹ (Unit, SpriteRenderer, Collider ë“±ì´ ë¶™ì€ í”„ë¦¬íŒ¹)
+    public Transform[] enemySpawnPoints;         // ì ë“¤ì´ ì„œ ìˆì„ ìœ„ì¹˜ (ì˜ˆ: 1~3ë²ˆ ìë¦¬)
 
 
-    [Header("»ç¿îµåµé")]
-    public AudioClip hitSFX;                // ½ºÅ³ Å¸°İ È¿°úÀ½
+    [Header("ì‚¬ìš´ë“œë“¤")]
+    public AudioClip hitSFX;                // ìŠ¤í‚¬ íƒ€ê²© íš¨ê³¼ìŒ
 
     private Queue<Unit> turnQueue = new Queue<Unit>();
-    private SkillDataSO selectedSkill = null; // ÇÃ·¹ÀÌ¾î°¡ ¼±ÅÃÇÑ ½ºÅ³ ÀÓ½Ã ÀúÀå
-    private Unit selectedSwapUnit = null;            // ÇÃ·¹ÀÌ¾î°¡ °í¸¥ ±³´ë À¯´Ö
+    private SkillDataSO selectedSkill = null; // í”Œë ˆì´ì–´ê°€ ì„ íƒí•œ ìŠ¤í‚¬ ì„ì‹œ ì €ì¥
+    private Unit selectedSwapUnit = null;            // í”Œë ˆì´ì–´ê°€ ê³ ë¥¸ êµëŒ€ ìœ ë‹›
     private int currentRound = 0;
     private bool isBattleCleared = false;
 
@@ -89,24 +89,30 @@ public class TurnManager : MonoBehaviour
 
     private void Start()
     {
-        // ¼±ÅÃµÈ ½ºÅ×ÀÌÁö°¡ ¾øÀ¸¸é ±âº» ½ºÅ×ÀÌÁö »ç¿ë (¿¡µğÅÍ Å×½ºÆ®¿ë)
+        // ì„ íƒëœ ìŠ¤í…Œì´ì§€ê°€ ì—†ìœ¼ë©´ ê¸°ë³¸ ìŠ¤í…Œì´ì§€ ì‚¬ìš© (ì—ë””í„° í…ŒìŠ¤íŠ¸ìš©)
         currentStage = SelectedStageData != null ? SelectedStageData : defaultStageData;
 
+        // í¸ì„± ì €ì¥ ë°ì´í„°ë¥¼ ì ìš©í•˜ê³ , ë¬´íš¨í•˜ë©´ ì „íˆ¬ë¥¼ ì‹œì‘í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
         BattlePartyLoader partyLoader = GetComponent<BattlePartyLoader>();
-        if (partyLoader != null) partyLoader.ApplyTo(this);
+        if (partyLoader != null && !partyLoader.ApplyTo(this))
+        {
+            Debug.LogWarning("[ì „íˆ¬] ìœ íš¨í•œ í¸ì„±ì´ ì—†ì–´ ì „íˆ¬ë¥¼ ì‹œì‘í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
+            enabled = false;
+            return;
+        }
 
-        // ½ºÅ×ÀÌÁöÀÇ Àû ¸ñ·ÏÀ» ÀĞ¾î¿Í¼­ ÇÊµå¿¡ ÀÚµ¿ ½ºÆù
+        // ìŠ¤í…Œì´ì§€ì˜ ì  ëª©ë¡ì„ ì½ì–´ì™€ì„œ í•„ë“œì— ìë™ ìŠ¤í°
         SpawnStageEnemies();
 
         if (skillPanel != null) skillPanel.SetActive(false);
         if (swapPanel != null) swapPanel.SetActive(false);
-        if (resultPanel != null) resultPanel.SetActive(false); // °á°úÃ¢ ¼û±è
+        if (resultPanel != null) resultPanel.SetActive(false); // ê²°ê³¼ì°½ ìˆ¨ê¹€
 
-        // ½ÃÀÛ ½Ã ½ºÅ³ UI´Â ¼û±è
+        // ì‹œì‘ ì‹œ ìŠ¤í‚¬ UIëŠ” ìˆ¨ê¹€
         if (skillPanel != null) skillPanel.SetActive(false);
         if (swapPanel != null) swapPanel.SetActive(false);
 
-        // ´ë±â À¯´ÖµéÀº °ÔÀÓ ½ÃÀÛ ½Ã È­¸é¿¡¼­ ¼û°ÜµÒ
+        // ëŒ€ê¸° ìœ ë‹›ë“¤ì€ ê²Œì„ ì‹œì‘ ì‹œ í™”ë©´ì—ì„œ ìˆ¨ê²¨ë‘ 
         foreach (var unit in reserveUnits)
         {
             if (unit != null) unit.gameObject.SetActive(false);
@@ -118,12 +124,12 @@ public class TurnManager : MonoBehaviour
         StartCoroutine(BattleRoutine());
     }
 
-    // Àû ÀÚµ¿ ½ºÆù ÇÔ¼ö
+    // ì  ìë™ ìŠ¤í° í•¨ìˆ˜
     private void SpawnStageEnemies()
     {
         if (currentStage == null || enemyBasePrefab == null) return;
 
-        // ±âÁ¸¿¡ ¾À¿¡ ³²¾ÆÀÖ´ø Àû(Enemy) Á¦°Å
+        // ê¸°ì¡´ì— ì”¬ì— ë‚¨ì•„ìˆë˜ ì (Enemy) ì œê±°
         fieldUnits.RemoveAll(u => u == null || u.Team == Team.Enemy);
 
         for (int i = 0; i < currentStage.enemies.Count; i++)
@@ -133,7 +139,7 @@ public class TurnManager : MonoBehaviour
             BattleUnit enemyData = currentStage.enemies[i];
             if (enemyData == null) continue;
 
-            // ½ºÆù À§Ä¡¿¡ Àû »ı¼º
+            // ìŠ¤í° ìœ„ì¹˜ì— ì  ìƒì„±
             GameObject enemyObj = Instantiate(enemyBasePrefab, enemySpawnPoints[i].position, Quaternion.identity);
             Unit enemyUnit = enemyObj.GetComponent<Unit>();
 
@@ -141,19 +147,19 @@ public class TurnManager : MonoBehaviour
             {
                 enemyUnit.Initialize(enemyData);
                 enemyUnit.originPos = enemySpawnPoints[i].position;
-                fieldUnits.Add(enemyUnit); // ÀüÅõ ¸ñ·Ï¿¡ Ãß°¡
+                fieldUnits.Add(enemyUnit); // ì „íˆ¬ ëª©ë¡ì— ì¶”ê°€
             }
         }
     }
 
-    // ================= [ ½ºÅ¸¼º °ü¸® ÇÔ¼ö ] =================
+    // ================= [ ìŠ¤íƒ€ì„± ê´€ë¦¬ í•¨ìˆ˜ ] =================
     public void AddStarPower(float amount, string reason = "")
     {
         currentStarPower += amount;
-        currentStarPower = Mathf.Clamp(currentStarPower, 0f, MAX_STAR_POWER); // 0% ~ 120% Á¦ÇÑ
+        currentStarPower = Mathf.Clamp(currentStarPower, 0f, MAX_STAR_POWER); // 0% ~ 120% ì œí•œ
 
         string sign = amount >= 0 ? $"+{amount:F1}%" : $"{amount:F1}%";
-        Debug.Log($"<color=#FFD700>[½ºÅ¸¼º {sign}] {reason} (ÇöÀç: {(int)currentStarPower}%)</color>");
+        Debug.Log($"<color=#FFD700>[ìŠ¤íƒ€ì„± {sign}] {reason} (í˜„ì¬: {(int)currentStarPower}%)</color>");
 
         UpdateStarPowerUI();
     }
@@ -162,8 +168,8 @@ public class TurnManager : MonoBehaviour
     {
         if (starPowerText != null)
         {
-            // ¼Ò¼öÁ¡Àº Á¦¿ÜÇÏ°í Á¤¼ö·Î¸¸ Ç¥½Ã
-            starPowerText.text = $"½ºÅ¸¼º : {(int)currentStarPower}%";
+            // ì†Œìˆ˜ì ì€ ì œì™¸í•˜ê³  ì •ìˆ˜ë¡œë§Œ í‘œì‹œ
+            starPowerText.text = $"ìŠ¤íƒ€ì„± : {(int)currentStarPower}%";
         }
     }
 
@@ -179,7 +185,7 @@ public class TurnManager : MonoBehaviour
     {
         while (true)
         {
-            // ¶ó¿îµå ½ÃÀÛ Àü Àü¸ê Ã¼Å©
+            // ë¼ìš´ë“œ ì‹œì‘ ì „ ì „ë©¸ ì²´í¬
             if (CheckAllEnemiesDead())
             {
                 yield return StartCoroutine(BattleClearRoutine());
@@ -193,7 +199,7 @@ public class TurnManager : MonoBehaviour
 
             currentRound++;
 
-            // ½ºÇÇµå ¼ø Á¤·Ä
+            // ìŠ¤í”¼ë“œ ìˆœ ì •ë ¬
             var sortedList = fieldUnits
                 .Where(u => u.IsAlive)
                 .OrderByDescending(u => u.currentSpeed)
@@ -208,20 +214,20 @@ public class TurnManager : MonoBehaviour
                 Unit currentUnit = turnQueue.Dequeue();
                 if (!currentUnit.IsAlive) continue;
 
-                // ÅÏ Çàµ¿ ÁøÇà
+                // í„´ í–‰ë™ ì§„í–‰
                 yield return StartCoroutine(ExecuteUnitTurn(currentUnit));
 
-                // Çàµ¿ Á÷ÈÄ ºóÀÚ¸®°¡ »ı°å´Ù¸é ´ë±â¼® ¾Æ±º ÀÚµ¿ ÅõÀÔ
+                // í–‰ë™ ì§í›„ ë¹ˆìë¦¬ê°€ ìƒê²¼ë‹¤ë©´ ëŒ€ê¸°ì„ ì•„êµ° ìë™ íˆ¬ì…
                 yield return StartCoroutine(CheckAndAutoSwapDeadAlliesRoutine());
 
-                // 1. Çàµ¿ Á÷ÈÄ ½Â¸® Á¶°Ç Ã¼Å© (Àû Àü¸ê)
+                // 1. í–‰ë™ ì§í›„ ìŠ¹ë¦¬ ì¡°ê±´ ì²´í¬ (ì  ì „ë©¸)
                 if (CheckAllEnemiesDead())
                 {
                     yield return StartCoroutine(BattleClearRoutine());
                     yield break;
                 }
 
-                // 2. Çàµ¿ Á÷ÈÄ ÆĞ¹è Á¶°Ç Ã¼Å© (ÇÊµå + ´ë±â¼® Àü¿ø »ç¸Á)
+                // 2. í–‰ë™ ì§í›„ íŒ¨ë°° ì¡°ê±´ ì²´í¬ (í•„ë“œ + ëŒ€ê¸°ì„ ì „ì› ì‚¬ë§)
                 if (CheckAllAlliesDead())
                 {
                     yield return StartCoroutine(BattleDefeatRoutine());
@@ -235,42 +241,42 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    // »ç¸ÁÇÑ ÇÊµå ¾Æ±ºÀ» Ã£¾Æ ´ë±â À¯´ÖÀ» ÅõÀÔ½ÃÅ°´Â ÄÚ·çÆ¾
+    // ì‚¬ë§í•œ í•„ë“œ ì•„êµ°ì„ ì°¾ì•„ ëŒ€ê¸° ìœ ë‹›ì„ íˆ¬ì…ì‹œí‚¤ëŠ” ì½”ë£¨í‹´
     private IEnumerator CheckAndAutoSwapDeadAlliesRoutine()
     {
-        // ÇÊµå¿¡¼­ »ç¸ÁÇÑ ¾Æ±ºµé ÃßÃâ
+        // í•„ë“œì—ì„œ ì‚¬ë§í•œ ì•„êµ°ë“¤ ì¶”ì¶œ
         var deadFieldAllies = fieldUnits
             .Where(u => u != null && u.Team == Team.Ally && !u.IsAlive)
             .ToList();
 
         foreach (var deadAlly in deadFieldAllies)
         {
-            // ´ë±â¼®¿¡ »ì¾ÆÀÖ´Â ¾Æ±ºÀÌ ÀÖ´ÂÁö Å½»ö
+            // ëŒ€ê¸°ì„ì— ì‚´ì•„ìˆëŠ” ì•„êµ°ì´ ìˆëŠ”ì§€ íƒìƒ‰
             Unit subAlly = reserveUnits.FirstOrDefault(u => u != null && u.IsAlive);
-            if (subAlly == null) break; // ´ë±â¼®¿¡ ´õ ÀÌ»ó »ì¾ÆÀÖ´Â ¾Æ±ºÀÌ ¾øÀ¸¸é Áß´Ü
+            if (subAlly == null) break; // ëŒ€ê¸°ì„ì— ë” ì´ìƒ ì‚´ì•„ìˆëŠ” ì•„êµ°ì´ ì—†ìœ¼ë©´ ì¤‘ë‹¨
 
-            // ´ë±â ¾Æ±º ÀÚµ¿ ÅõÀÔ ¿¬Ãâ ½ÇÇà
+            // ëŒ€ê¸° ì•„êµ° ìë™ íˆ¬ì… ì—°ì¶œ ì‹¤í–‰
             yield return StartCoroutine(AutoSwapInRoutine(deadAlly, subAlly));
         }
     }
 
-    // ½ÇÁ¦ ´ë±â Ä³¸¯ÅÍ¸¦ ºóÀÚ¸® ÁÂÇ¥·Î ÃâÀü½ÃÅ°´Â ¿¬Ãâ
+    // ì‹¤ì œ ëŒ€ê¸° ìºë¦­í„°ë¥¼ ë¹ˆìë¦¬ ì¢Œí‘œë¡œ ì¶œì „ì‹œí‚¤ëŠ” ì—°ì¶œ
     private IEnumerator AutoSwapInRoutine(Unit deadAlly, Unit incomingAlly)
     {
-        Vector3 spawnPos = deadAlly.originPos; // »ç¸ÁÇÑ ¾Æ±ºÀÇ ¿ø·¡ ÀÚ¸® ±â¾ï
+        Vector3 spawnPos = deadAlly.originPos; // ì‚¬ë§í•œ ì•„êµ°ì˜ ì›ë˜ ìë¦¬ ê¸°ì–µ
 
-        // 1. ¸®½ºÆ® ±³Ã¼ (ÇÊµå <-> ´ë±â¼®)
+        // 1. ë¦¬ìŠ¤íŠ¸ êµì²´ (í•„ë“œ <-> ëŒ€ê¸°ì„)
         fieldUnits.Remove(deadAlly);
         reserveUnits.Remove(incomingAlly);
 
         fieldUnits.Add(incomingAlly);
         reserveUnits.Add(deadAlly);
 
-        // 2. À§Ä¡ ¹× »óÅÂ ¼¼ÆÃ
+        // 2. ìœ„ì¹˜ ë° ìƒíƒœ ì„¸íŒ…
         incomingAlly.transform.position = spawnPos;
         incomingAlly.originPos = spawnPos;
 
-        // ¾ËÆÄ(Åõ¸íµµ) 0¿¡¼­ ½ÃÀÛÇÏ¿© ½º¸£¸¤ ³ªÅ¸³ª´Â ÆäÀÌµåÀÎ ¿¬Ãâ
+        // ì•ŒíŒŒ(íˆ¬ëª…ë„) 0ì—ì„œ ì‹œì‘í•˜ì—¬ ìŠ¤ë¥´ë¥µ ë‚˜íƒ€ë‚˜ëŠ” í˜ì´ë“œì¸ ì—°ì¶œ
         SpriteRenderer sr = incomingAlly.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
@@ -281,7 +287,7 @@ public class TurnManager : MonoBehaviour
 
         incomingAlly.gameObject.SetActive(true);
 
-        // ¸Ó¸® À§ Ã¼·Â¹Ù ÀçÁ¤·Ä
+        // ë¨¸ë¦¬ ìœ„ ì²´ë ¥ë°” ì¬ì •ë ¬
         UnitHealthUI healthUI = incomingAlly.GetComponentInChildren<UnitHealthUI>();
         if (healthUI != null)
         {
@@ -290,9 +296,9 @@ public class TurnManager : MonoBehaviour
             healthUI.UpdateHP(incomingAlly.currentHp, incomingAlly.maxHp);
         }
 
-        Debug.Log($"<color=#38BDF8> ´ë±â Ä³¸¯ ÃâÀüÇÔ {deadAlly.UnitName}ÀÇ ºóÀÚ¸®¿¡ ´ë±â À¯´Ö {incomingAlly.UnitName}ÀÌ(°¡) ÂüÀüÇÕ´Ï´Ù</color>");
+        Debug.Log($"<color=#38BDF8> ëŒ€ê¸° ìºë¦­ ì¶œì „í•¨ {deadAlly.UnitName}ì˜ ë¹ˆìë¦¬ì— ëŒ€ê¸° ìœ ë‹› {incomingAlly.UnitName}ì´(ê°€) ì°¸ì „í•©ë‹ˆë‹¤</color>");
 
-        // 3. 0.4ÃÊ°£ ÆäÀÌµåÀÎ ¿¬Ãâ
+        // 3. 0.4ì´ˆê°„ í˜ì´ë“œì¸ ì—°ì¶œ
         if (sr != null)
         {
             float elapsed = 0f;
@@ -310,31 +316,31 @@ public class TurnManager : MonoBehaviour
             sr.color = finalC;
         }
 
-        yield return new WaitForSeconds(0.3f); // µîÀå ÈÄ Àá½Ã ¿©¿î
+        yield return new WaitForSeconds(0.3f); // ë“±ì¥ í›„ ì ì‹œ ì—¬ìš´
     }
 
 
-    // ================= [ ½Â¸® / ÆĞ¹è ÆÇÁ¤ ÇÔ¼ö ] =================
+    // ================= [ ìŠ¹ë¦¬ / íŒ¨ë°° íŒì • í•¨ìˆ˜ ] =================
 
-    // Àû Àü¸ê Ã¼Å©
+    // ì  ì „ë©¸ ì²´í¬
     private bool CheckAllEnemiesDead()
     {
         return !fieldUnits.Any(u => u.Team == Team.Enemy && u.IsAlive);
     }
 
-    // ¾Æ±º Àü¸ê Ã¼Å© (ÇÊµå¿¡ ½Î¿ï ¼ö ÀÖ´Â ¾Æ±ºÀÌ ÇÑ ¸íµµ ¾ø´ÂÁö È®ÀÎ)
+    // ì•„êµ° ì „ë©¸ ì²´í¬ (í•„ë“œì— ì‹¸ìš¸ ìˆ˜ ìˆëŠ” ì•„êµ°ì´ í•œ ëª…ë„ ì—†ëŠ”ì§€ í™•ì¸)
     private bool CheckAllAlliesDead()
     {
         return !fieldUnits.Concat(reserveUnits).Any(u => u != null && u.Team == Team.Ally && u.IsAlive);
     }
-    // ================= [ ÆĞ¹è ·çÆ¾ ] =================
+    // ================= [ íŒ¨ë°° ë£¨í‹´ ] =================
     private IEnumerator BattleDefeatRoutine()
     {
-        Debug.Log("<color=red>================ DEFEAT (Àü¸ê) ================</color>");
+        Debug.Log("<color=red>================ DEFEAT (ì „ë©¸) ================</color>");
         yield return new WaitForSeconds(0.8f);
 
-        // ÆĞ¹è ½Ã¿¡´Â Å¬¸®¾î º¸³Ê½º³ª ¸í¼º ÀçÈ­ ÀúÀåÀ» ÁøÇàÇÏÁö ¾Ê°í,
-        // ÇöÀç±îÁö ½×ÀÎ Åë°èÇ¥¸¸ °á°úÃ¢À¸·Î ¶ç¿öÁÜ
+        // íŒ¨ë°° ì‹œì—ëŠ” í´ë¦¬ì–´ ë³´ë„ˆìŠ¤ë‚˜ ëª…ì„± ì¬í™” ì €ì¥ì„ ì§„í–‰í•˜ì§€ ì•Šê³ ,
+        // í˜„ì¬ê¹Œì§€ ìŒ“ì¸ í†µê³„í‘œë§Œ ê²°ê³¼ì°½ìœ¼ë¡œ ë„ì›Œì¤Œ
         ShowBattleResultUI(isVictory: false, starPower: (int)currentStarPower, renown: 0);
     }
 
@@ -343,8 +349,8 @@ public class TurnManager : MonoBehaviour
     {
         if (actor.Team == Team.Ally)
         {
-            // ================= 1. ÇÃ·¹ÀÌ¾î ÅÏ =================
-            Debug.Log($"<color=yellow>[ÇÃ·¹ÀÌ¾î] {actor.UnitName}ÀÇ ÅÏ!</color>");
+            // ================= 1. í”Œë ˆì´ì–´ í„´ =================
+            Debug.Log($"<color=yellow>[í”Œë ˆì´ì–´] {actor.UnitName}ì˜ í„´!</color>");
             selectedSkill = null;
 
             OpenSkillUI(actor);
@@ -374,23 +380,23 @@ public class TurnManager : MonoBehaviour
                 if (unit.Team == Team.Ally && unit != actor) unit.SetDimmed(false);
             }
 
-            // SP Á¤»ê
+            // SP ì •ì‚°
             currentSP += selectedSkill.spGain;
             currentSP -= selectedSkill.spCost;
             currentSP = Mathf.Clamp(currentSP, 0, maxSP);
             UpdateSPUI();
 
-            // ÆĞ½Ãºê: Àû Ã³Ä¡ °¡´É ¿©ºÎ ÁúÀÇ
+            // íŒ¨ì‹œë¸Œ: ì  ì²˜ì¹˜ ê°€ëŠ¥ ì—¬ë¶€ ì§ˆì˜
             bool canKill = (actor.Passive != null) ? actor.Passive.CanKillEnemy(actor, selectedSkill) : true;
             bool isSkill3 = (selectedSkill.specialType == SkillSpecialType.PermissionToFire);
             string displayName = !string.IsNullOrEmpty(selectedSkill.skillName) ? selectedSkill.skillName : selectedSkill.name;
 
             actor.skillUseCount++;
 
-            // ¡Ú ½ºÅ³ Æ¯¼ö Å¸ÀÔ ºĞ±â
+            // â˜… ìŠ¤í‚¬ íŠ¹ìˆ˜ íƒ€ì… ë¶„ê¸°
             switch (selectedSkill.specialType)
             {
-                // [1½ºÅ³] ¿µÀå ÁıÇà: ´ë»ó ¿µÀå ºÎ¿©(ÀÌ¼Ó 1) + 40% ÇÇÇØ
+                // [1ìŠ¤í‚¬] ì˜ì¥ ì§‘í–‰: ëŒ€ìƒ ì˜ì¥ ë¶€ì—¬(ì´ì† 1) + 40% í”¼í•´
                 case SkillSpecialType.WarrantExecution:
                     target.ApplyWarrant();
                     int dmg1 = Mathf.RoundToInt(actor.BaseAttack * selectedSkill.damageMultiplier);
@@ -398,7 +404,7 @@ public class TurnManager : MonoBehaviour
                     actor.totalDamageDealt += dmg1;
                     break;
 
-                // [2½ºÅ³] ÀáÀÔ¼ö»ç, ±Ş½À: ¿µÀå ÀÖÀ¸¸é ¿µÀå Á¦°Å ÈÄ ¸ğµç Àû 100% °üÅë(È¸ÇÇºÒ°¡), ¾øÀ¸¸é 50% ´ÜÀÏ
+                // [2ìŠ¤í‚¬] ì ì…ìˆ˜ì‚¬, ê¸‰ìŠµ: ì˜ì¥ ìˆìœ¼ë©´ ì˜ì¥ ì œê±° í›„ ëª¨ë“  ì  100% ê´€í†µ(íšŒí”¼ë¶ˆê°€), ì—†ìœ¼ë©´ 50% ë‹¨ì¼
                 case SkillSpecialType.SurpriseRaid:
                     if (target.hasWarrant)
                     {
@@ -419,15 +425,15 @@ public class TurnManager : MonoBehaviour
                     }
                     break;
 
-                // [3½ºÅ³] ¹ßÆ÷ Çã°¡: 50%¾¿ 5¹ø ¿¬Å¸ (ÃÑ 250%) + Ã³Ä¡ °¡´É
+                // [3ìŠ¤í‚¬] ë°œí¬ í—ˆê°€: 50%ì”© 5ë²ˆ ì—°íƒ€ (ì´ 250%) + ì²˜ì¹˜ ê°€ëŠ¥
                 case SkillSpecialType.PermissionToFire:
-                    int perHitDmg = Mathf.RoundToInt(actor.BaseAttack * selectedSkill.damageMultiplier); // SO °è¼ö¸¦ 0.5·Î ¼³Á¤
+                    int perHitDmg = Mathf.RoundToInt(actor.BaseAttack * selectedSkill.damageMultiplier); // SO ê³„ìˆ˜ë¥¼ 0.5ë¡œ ì„¤ì •
                     int hits = selectedSkill.hitCount > 0 ? selectedSkill.hitCount : 5;
                     yield return StartCoroutine(PerformMultiHitSequence(actor, target, perHitDmg, hits, displayName, canKill));
                     actor.totalDamageDealt += (perHitDmg * hits);
                     break;
 
-                // ÀÏ¹İ ½ºÅ³
+                // ì¼ë°˜ ìŠ¤í‚¬
                 default:
                     int normalDmg = Mathf.RoundToInt(actor.BaseAttack * selectedSkill.damageMultiplier);
                     yield return StartCoroutine(PerformAttackSequence(actor, target, normalDmg, isSkill3, displayName, canKill, false));
@@ -435,13 +441,13 @@ public class TurnManager : MonoBehaviour
                     break;
             }
 
-            // ½ºÅ¸¼º Àû¸³
-            if (isSkill3) AddStarPower(10f, "3½ºÅ³ »ç¿ë");
-            else AddStarPower(5f, $"{actor.UnitName} ½ºÅ³ »ç¿ë");
+            // ìŠ¤íƒ€ì„± ì ë¦½
+            if (isSkill3) AddStarPower(10f, "3ìŠ¤í‚¬ ì‚¬ìš©");
+            else AddStarPower(5f, $"{actor.UnitName} ìŠ¤í‚¬ ì‚¬ìš©");
 
             yield return new WaitForSeconds(0.5f);
 
-            // ±³´ë Ã³¸®
+            // êµëŒ€ ì²˜ë¦¬
             bool isAllEnemiesDead = CheckAllEnemiesDead();
             bool hasAliveReserves = reserveUnits.Any(u => u != null && u.IsAlive);
             if (isSkill3 && hasAliveReserves && !isAllEnemiesDead)
@@ -451,16 +457,16 @@ public class TurnManager : MonoBehaviour
         }
         else
         {
-            // ================= 2. Àû(Enemy) ÅÏ =================
+            // ================= 2. ì (Enemy) í„´ =================
             var aliveAllies = fieldUnits.Where(u => u.Team == Team.Ally && u.IsAlive).ToList();
             if (aliveAllies.Count == 0) yield break;
 
-            Debug.Log($"<color=red>[Àû] {actor.UnitName}ÀÇ ÅÏ!</color>");
+            Debug.Log($"<color=red>[ì ] {actor.UnitName}ì˜ í„´!</color>");
             yield return new WaitForSeconds(0.4f);
 
             var availableSkills = actor.unitData.skills.Where(s => s != null).ToList();
             float multiplier = availableSkills.Count > 0 ? availableSkills[Random.Range(0, availableSkills.Count)].damageMultiplier : 1.0f;
-            string skillName = availableSkills.Count > 0 ? availableSkills[0].skillName : "ÀÏ¹İ °ø°İ";
+            string skillName = availableSkills.Count > 0 ? availableSkills[0].skillName : "ì¼ë°˜ ê³µê²©";
 
             int damage = Mathf.RoundToInt(actor.unitData.attackPower * multiplier);
             Unit target = aliveAllies[Random.Range(0, aliveAllies.Count)];
@@ -475,10 +481,10 @@ public class TurnManager : MonoBehaviour
 
                 if (attackHit)
                 {
-                    if (target.hitCount >= 3) AddStarPower(-2f, $"{target.UnitName} ´©Àû ÇÇ°İ °¨Á¡");
-                    else AddStarPower(1f, $"{target.UnitName} ÇÇ°İ È¹µæ");
+                    if (target.hitCount >= 3) AddStarPower(-2f, $"{target.UnitName} ëˆ„ì  í”¼ê²© ê°ì ");
+                    else AddStarPower(1f, $"{target.UnitName} í”¼ê²© íšë“");
 
-                    if (!target.IsAlive) AddStarPower(-8f, $"{target.UnitName} »ç¸Á °¨Á¡");
+                    if (!target.IsAlive) AddStarPower(-8f, $"{target.UnitName} ì‚¬ë§ ê°ì ");
                 }
             }
 
@@ -486,7 +492,7 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    // ================= [ Å¬¸®¾î ÆÇÁ¤ ¹× º¸³Ê½º Á¤»ê ] =================
+    // ================= [ í´ë¦¬ì–´ íŒì • ë° ë³´ë„ˆìŠ¤ ì •ì‚° ] =================
 
     private IEnumerator BattleClearRoutine()
     {
@@ -494,54 +500,54 @@ public class TurnManager : MonoBehaviour
         Debug.Log("<color=green>================ STAGE CLEAR! ================</color>");
         yield return new WaitForSeconds(0.5f);
 
-        // 1. ÅÏ ¼ö(¶ó¿îµå) º¸³Ê½º
+        // 1. í„´ ìˆ˜(ë¼ìš´ë“œ) ë³´ë„ˆìŠ¤
         if (currentRound <= 3)
         {
-            AddStarPower(20f, $"3ÅÏ ÀÌ³» Å¬¸®¾î º¸³Ê½º ({currentRound}ÅÏ)");
+            AddStarPower(20f, $"3í„´ ì´ë‚´ í´ë¦¬ì–´ ë³´ë„ˆìŠ¤ ({currentRound}í„´)");
         }
         else if (currentRound <= 10)
         {
-            AddStarPower(5f, $"10ÅÏ ÀÌ³» Å¬¸®¾î º¸³Ê½º ({currentRound}ÅÏ)");
+            AddStarPower(5f, $"10í„´ ì´ë‚´ í´ë¦¬ì–´ ë³´ë„ˆìŠ¤ ({currentRound}í„´)");
         }
         else if (currentRound >= 15)
         {
-            AddStarPower(-5f, $"15ÅÏ ÀÌ»ó Áö¿¬ Å¬¸®¾î °¨Á¡ ({currentRound}ÅÏ)");
+            AddStarPower(-5f, $"15í„´ ì´ìƒ ì§€ì—° í´ë¦¬ì–´ ê°ì  ({currentRound}í„´)");
         }
 
-        // 2. ´Ü 1¸í¸¸ »ıÁ¸ º¸³Ê½º
-        // ÇÊµå¿Í ´ë±â¼®À» ÇÕÃÄ¼­ »ì¾ÆÀÖ´Â ¾Æ±º ¼ö Ä«¿îÆ®
+        // 2. ë‹¨ 1ëª…ë§Œ ìƒì¡´ ë³´ë„ˆìŠ¤
+        // í•„ë“œì™€ ëŒ€ê¸°ì„ì„ í•©ì³ì„œ ì‚´ì•„ìˆëŠ” ì•„êµ° ìˆ˜ ì¹´ìš´íŠ¸
         int aliveAlliesCount = fieldUnits.Concat(reserveUnits).Count(u => u != null && u.Team == Team.Ally && u.IsAlive);
         if (aliveAlliesCount == 1)
         {
-            AddStarPower(25f, "¿ÜÁÙÅ¸±â ½Â¸®! (»ıÁ¸ ¾Æ±º 1¸í º¸³Ê½º)");
+            AddStarPower(25f, "ì™¸ì¤„íƒ€ê¸° ìŠ¹ë¦¬! (ìƒì¡´ ì•„êµ° 1ëª… ë³´ë„ˆìŠ¤)");
         }
 
-        // 3. ÆÛÆ÷¸Õ½º °ª ÃÑÇÕ º¸³Ê½º
-        // ÀüÅõ¿¡ Âü¿©ÇÑ ¸ğµç ¾Æ±º Ä³¸¯ÅÍ(ÇÊµå + ´ë±â)ÀÇ ÆÛÆ÷¸Õ½º ÇÕ»ê
+        // 3. í¼í¬ë¨¼ìŠ¤ ê°’ ì´í•© ë³´ë„ˆìŠ¤
+        // ì „íˆ¬ì— ì°¸ì—¬í•œ ëª¨ë“  ì•„êµ° ìºë¦­í„°(í•„ë“œ + ëŒ€ê¸°)ì˜ í¼í¬ë¨¼ìŠ¤ í•©ì‚°
         int totalPerformance = fieldUnits.Concat(reserveUnits)
             .Where(u => u != null && u.Team == Team.Ally)
             .Sum(u => u.Performance);
 
-        AddStarPower(totalPerformance, $"¾Æ±º ÀüÃ¼ ÆÛÆ÷¸Õ½º ½ºÅÈ ÇÕ»ê º¸³Ê½º (+{totalPerformance}%)");
+        AddStarPower(totalPerformance, $"ì•„êµ° ì „ì²´ í¼í¬ë¨¼ìŠ¤ ìŠ¤íƒ¯ í•©ì‚° ë³´ë„ˆìŠ¤ (+{totalPerformance}%)");
 
-        Debug.Log($"<color=cyan> ÃÖÁ¾ Å¬¸®¾î ½ºÅ¸¼º: {(int)currentStarPower}% </color>");
+        Debug.Log($"<color=cyan> ìµœì¢… í´ë¦¬ì–´ ìŠ¤íƒ€ì„±: {(int)currentStarPower}% </color>");
 
-        // ================= [ 4. ¸í¼º ÀçÈ­ Á¤»ê ¹× ÀúÀå ] =================
-        int finalStarPower = (int)currentStarPower; // ¼Ò¼öÁ¡ Á¦¿Ü ÃÖÁ¾ ½ºÅ¸¼º
+        // ================= [ 4. ëª…ì„± ì¬í™” ì •ì‚° ë° ì €ì¥ ] =================
+        int finalStarPower = (int)currentStarPower; // ì†Œìˆ˜ì  ì œì™¸ ìµœì¢… ìŠ¤íƒ€ì„±
 
-        // ½ºÅ¸¼º x 3À» ÇÏµÇ, ÃÖ´ë 300±îÁö¸¸ È¹µæÇÏµµ·Ï Á¦ÇÑ (100% ÃÊ°úÇØµµ 300 °íÁ¤)
+        // ìŠ¤íƒ€ì„± x 3ì„ í•˜ë˜, ìµœëŒ€ 300ê¹Œì§€ë§Œ íšë“í•˜ë„ë¡ ì œí•œ (100% ì´ˆê³¼í•´ë„ 300 ê³ ì •)
         int earnedRenown = Mathf.Min(finalStarPower * 3, 300);
 
-        // ¸í¼º Áö±Ş ¹× PlayerPrefs ¿µ±¸ ÀúÀå
+        // ëª…ì„± ì§€ê¸‰ ë° PlayerPrefs ì˜êµ¬ ì €ì¥
         CurrencyManager.AddRenown(earnedRenown);
 
         Debug.Log($"<color=#FFD700>==================================================</color>");
-        Debug.Log($"<color=#FFD700>ÃÖÁ¾ ½ºÅ¸¼º: {finalStarPower}%</color>");
-        Debug.Log($"<color=#00FFFF>È¹µæ ¸í¼º: {finalStarPower} x 3 = +{earnedRenown}</color>");
-        Debug.Log($"<color=#00FFFF>´©Àû ÃÑ º¸À¯ ¸í¼º: {CurrencyManager.GetRenown()}</color>");
+        Debug.Log($"<color=#FFD700>ìµœì¢… ìŠ¤íƒ€ì„±: {finalStarPower}%</color>");
+        Debug.Log($"<color=#00FFFF>íšë“ ëª…ì„±: {finalStarPower} x 3 = +{earnedRenown}</color>");
+        Debug.Log($"<color=#00FFFF>ëˆ„ì  ì´ ë³´ìœ  ëª…ì„±: {CurrencyManager.GetRenown()}</color>");
         Debug.Log($"<color=#FFD700>==================================================</color>");
 
-        // ÇöÀç ½ºÅ×ÀÌÁöÀÇ ½ºÅ¸¼º ½Å±â·ÏÀ» JSON¿¡ ÀúÀå
+        // í˜„ì¬ ìŠ¤í…Œì´ì§€ì˜ ìŠ¤íƒ€ì„± ì‹ ê¸°ë¡ì„ JSONì— ì €ì¥
         if (currentStage != null)
         {
             CurrencyManager.SaveStageRecord(currentStage.stageId, finalStarPower);
@@ -549,39 +555,39 @@ public class TurnManager : MonoBehaviour
 
         yield return new WaitForSeconds(1.0f);
 
-        // 5. ÀüÅõ Åë°èÇ¥ È­¸é¿¡ Ç¥½Ã (isVictory: true Àü´Ş)
+        // 5. ì „íˆ¬ í†µê³„í‘œ í™”ë©´ì— í‘œì‹œ (isVictory: true ì „ë‹¬)
         ShowBattleResultUI(isVictory: true, starPower: finalStarPower, renown: earnedRenown);
     }
 
-    // Åë°èÃ¢ UI ¿ÀÇÂ ¹× ÅØ½ºÆ® ÀÛ¼º ÇÔ¼ö
+    // í†µê³„ì°½ UI ì˜¤í”ˆ ë° í…ìŠ¤íŠ¸ ì‘ì„± í•¨ìˆ˜
     private void ShowBattleResultUI(bool isVictory, int starPower, int renown)
     {
         if (resultPanel == null) return;
 
         resultPanel.SetActive(true);
 
-        // ÁÂÃø ÇÏ´Ü¿¡¼­ Áß¾ÓÀ¸·Î ½º¸£¸¤ ³ª¿À´Â ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà
+        // ì¢Œì¸¡ í•˜ë‹¨ì—ì„œ ì¤‘ì•™ìœ¼ë¡œ ìŠ¤ë¥´ë¥µ ë‚˜ì˜¤ëŠ” ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰
         StartCoroutine(SlideInResultPanelRoutine());
 
-        // 1. »ó´Ü ¿ä¾à Á¤º¸ (½Â¸® / ÆĞ¹è¿¡ µû¶ó ¹®±¸ º¯°æ)
+        // 1. ìƒë‹¨ ìš”ì•½ ì •ë³´ (ìŠ¹ë¦¬ / íŒ¨ë°°ì— ë”°ë¼ ë¬¸êµ¬ ë³€ê²½)
         if (resultSummaryText != null)
         {
             if (isVictory)
             {
                 resultSummaryText.text = $"<b><color=#16A34A>[ STAGE CLEAR ]</color></b>\n" +
-                                         $"¼Ò¿ä ÅÏ: <color=#D97706>{currentRound}ÅÏ</color> | " +
-                                         $"ÃÖÁ¾ ½ºÅ¸¼º: <color=#B45309>{starPower}%</color> | " +
-                                         $"È¹µæ ¸í¼º: <color=#0284C7>+{renown}</color>";
+                                         $"ì†Œìš” í„´: <color=#D97706>{currentRound}í„´</color> | " +
+                                         $"ìµœì¢… ìŠ¤íƒ€ì„±: <color=#B45309>{starPower}%</color> | " +
+                                         $"íšë“ ëª…ì„±: <color=#0284C7>+{renown}</color>";
             }
             else
             {
                 resultSummaryText.text = $"<b><color=#DC2626>[ STAGE DEFEAT ]</color></b>\n" +
-                                         $"ÁøÇà ÅÏ: <color=#D97706>{currentRound}ÅÏ</color> | " +
-                                         $"<color=#6B7280>¸ğµç ¾Æ±ºÀÌ ¾²·¯Á³½À´Ï´Ù.</color>";
+                                         $"ì§„í–‰ í„´: <color=#D97706>{currentRound}í„´</color> | " +
+                                         $"<color=#6B7280>ëª¨ë“  ì•„êµ°ì´ ì“°ëŸ¬ì¡ŒìŠµë‹ˆë‹¤.</color>";
             }
         }
 
-        // 2. Ä³¸¯ÅÍº° »ó¼¼ Åë°èÇ¥ (½Â¸®/ÆĞ¹è »ó°ü¾øÀÌ µô·®/¹ŞÀºÇÇÇØ/Èú·® µ¿ÀÏ Ãâ·Â)
+        // 2. ìºë¦­í„°ë³„ ìƒì„¸ í†µê³„í‘œ (ìŠ¹ë¦¬/íŒ¨ë°° ìƒê´€ì—†ì´ ë”œëŸ‰/ë°›ì€í”¼í•´/íëŸ‰ ë™ì¼ ì¶œë ¥)
         if (statsTableText != null)
         {
             var allAllies = fieldUnits.Concat(reserveUnits)
@@ -593,22 +599,22 @@ public class TurnManager : MonoBehaviour
 
             foreach (var ally in allAllies)
             {
-                string status = ally.IsAlive ? "" : " <color=red>(»ç¸Á)</color>";
+                string status = ally.IsAlive ? "" : " <color=red>(ì‚¬ë§)</color>";
 
-                // Ä³¸¯ÅÍ ÀÌ¸§
+                // ìºë¦­í„° ì´ë¦„
                 sb.AppendLine($"<b><color=#222222>{ally.UnitName}</color></b>{status}");
 
-                // »ó¼¼ ¼öÄ¡
-                sb.AppendLine($"   <color=#DC2626>ÀÔÈù ÇÇÇØ: {ally.totalDamageDealt}</color>  |  " +
-                              $"<color=#2563EB>¹ŞÀº ÇÇÇØ: {ally.totalDamageTaken}</color>  |  " +
-                              $"<color=#16A34A>È¸º¹·®: {ally.totalHealing}</color>");
+                // ìƒì„¸ ìˆ˜ì¹˜
+                sb.AppendLine($"   <color=#DC2626>ì…íŒ í”¼í•´: {ally.totalDamageDealt}</color>  |  " +
+                              $"<color=#2563EB>ë°›ì€ í”¼í•´: {ally.totalDamageTaken}</color>  |  " +
+                              $"<color=#16A34A>íšŒë³µëŸ‰: {ally.totalHealing}</color>");
                 sb.AppendLine();
             }
 
             statsTableText.text = sb.ToString();
         }
 
-        // È®ÀÎ ¹öÆ°
+        // í™•ì¸ ë²„íŠ¼
         if (confirmButton != null)
         {
             confirmButton.onClick.RemoveAllListeners();
@@ -618,20 +624,20 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    // ÁÂÃø »ó´Ü -> Áß¾ÓÀ¸·Î ½º¸£¸¤ ½½¶óÀÌµåµÇ´Â ¾Ö´Ï¸ŞÀÌ¼Ç
+    // ì¢Œì¸¡ ìƒë‹¨ -> ì¤‘ì•™ìœ¼ë¡œ ìŠ¤ë¥´ë¥µ ìŠ¬ë¼ì´ë“œë˜ëŠ” ì• ë‹ˆë©”ì´ì…˜
     private IEnumerator SlideInResultPanelRoutine()
     {
         RectTransform rect = resultPanel.GetComponent<RectTransform>();
         if (rect == null) yield break;
 
-        // 800x1000 ÆĞ³ÎÀÌ È­¸é ¹Û ÁÂÃø ÇÏ´Ü¿¡ ¿ÏÀüÈ÷ ¼û°ÜÁø ½ÃÀÛ À§Ä¡
+        // 800x1000 íŒ¨ë„ì´ í™”ë©´ ë°– ì¢Œì¸¡ í•˜ë‹¨ì— ì™„ì „íˆ ìˆ¨ê²¨ì§„ ì‹œì‘ ìœ„ì¹˜
         Vector2 startPos = new Vector2(-1500f, -1200f);
-        Vector2 targetPos = Vector2.zero; // È­¸é Á¤Áß¾Ó (Pos X: 0, Pos Y: 0)
+        Vector2 targetPos = Vector2.zero; // í™”ë©´ ì •ì¤‘ì•™ (Pos X: 0, Pos Y: 0)
 
-        float duration = 1f; // ½º¸£¸¤ µé¾î¿À´Â ½Ã°£ (1ÃÊ)
+        float duration = 1f; // ìŠ¤ë¥´ë¥µ ë“¤ì–´ì˜¤ëŠ” ì‹œê°„ (1ì´ˆ)
         float elapsed = 0f;
 
-        // ½ÃÀÛ À§Ä¡·Î ¸ÕÀú ÀÌµ¿
+        // ì‹œì‘ ìœ„ì¹˜ë¡œ ë¨¼ì € ì´ë™
         rect.anchoredPosition = startPos;
 
         while (elapsed < duration)
@@ -639,59 +645,59 @@ public class TurnManager : MonoBehaviour
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
 
-            // Ease-Out Cubic: Ã³À½¿¡ ºü¸£°Ô ³ª¿À´Ù°¡ ³¡¿¡¼­ ºÎµå·´°Ô °¨¼Ó
+            // Ease-Out Cubic: ì²˜ìŒì— ë¹ ë¥´ê²Œ ë‚˜ì˜¤ë‹¤ê°€ ëì—ì„œ ë¶€ë“œëŸ½ê²Œ ê°ì†
             float ease = 1f - Mathf.Pow(1f - t, 3f);
 
             rect.anchoredPosition = Vector2.Lerp(startPos, targetPos, ease);
             yield return null;
         }
 
-        // ¸¶Áö¸· ¿ÀÂ÷ ¹æÁö¿ëÀ¸·Î Á¤È®È÷ Áß¾Ó ¹èÄ¡
+        // ë§ˆì§€ë§‰ ì˜¤ì°¨ ë°©ì§€ìš©ìœ¼ë¡œ ì •í™•íˆ ì¤‘ì•™ ë°°ì¹˜
         rect.anchoredPosition = targetPos;
     }
 
 
-    // ================= [ ±³´ë ¹× UI °ü·Ã ] =================
+    // ================= [ êµëŒ€ ë° UI ê´€ë ¨ ] =================
 
-    // ±³´ë Ã³¸® ÄÚ·çÆ¾
+    // êµëŒ€ ì²˜ë¦¬ ì½”ë£¨í‹´
     private IEnumerator SwapProcessRoutine(Unit currentActor)
     {
-        Debug.Log("<color=yellow>3½ºÅ³ ¹ßµ¿! ±³´ëÇÒ ´ë±â Ä³¸¯ÅÍ¸¦ ¼±ÅÃÇÏ¼¼¿ä.</color>");
+        Debug.Log("<color=yellow>3ìŠ¤í‚¬ ë°œë™! êµëŒ€í•  ëŒ€ê¸° ìºë¦­í„°ë¥¼ ì„ íƒí•˜ì„¸ìš”.</color>");
         selectedSwapUnit = null;
 
-        // ±³´ë UI ¿­±â
+        // êµëŒ€ UI ì—´ê¸°
         OpenSwapUI();
 
-        // ÇÃ·¹ÀÌ¾î°¡ ±³´ë ¹öÆ°À» ´©¸¦ ¶§±îÁö ´ë±â
+        // í”Œë ˆì´ì–´ê°€ êµëŒ€ ë²„íŠ¼ì„ ëˆ„ë¥¼ ë•Œê¹Œì§€ ëŒ€ê¸°
         yield return new WaitUntil(() => selectedSwapUnit != null);
 
-        // ±³´ë UI ´İ±â
+        // êµëŒ€ UI ë‹«ê¸°
         swapPanel.SetActive(false);
 
-        // 1. À§Ä¡ ¸Â¹Ù²Ù±â
+        // 1. ìœ„ì¹˜ ë§ë°”ê¾¸ê¸°
         Vector3 fieldPos = currentActor.transform.position;
         selectedSwapUnit.transform.position = fieldPos;
 
-        // µé¾î¿Â Ä³¸¯ÅÍÀÇ ¿ø·¡ ÀÚ¸®(originPos)¸¦ ÀÌ ÇÊµå ÀÚ¸®·Î »õ·Î ±â¾ï½ÃÅµ´Ï´Ù!
+        // ë“¤ì–´ì˜¨ ìºë¦­í„°ì˜ ì›ë˜ ìë¦¬(originPos)ë¥¼ ì´ í•„ë“œ ìë¦¬ë¡œ ìƒˆë¡œ ê¸°ì–µì‹œí‚µë‹ˆë‹¤!
         selectedSwapUnit.originPos = fieldPos;
 
-        // 2. ¿ÀºêÁ§Æ® ÄÑ°í ²ô±â
+        // 2. ì˜¤ë¸Œì íŠ¸ ì¼œê³  ë„ê¸°
         currentActor.gameObject.SetActive(false);
         selectedSwapUnit.gameObject.SetActive(true);
 
-        // 3. ¸®½ºÆ® ½º¿Ò (ÇÊµå <-> ´ë±â¼®)
+        // 3. ë¦¬ìŠ¤íŠ¸ ìŠ¤ì™‘ (í•„ë“œ <-> ëŒ€ê¸°ì„)
         fieldUnits.Remove(currentActor);
         reserveUnits.Remove(selectedSwapUnit);
 
         fieldUnits.Add(selectedSwapUnit);
         reserveUnits.Add(currentActor);
 
-        Debug.Log($"<color=green> [{currentActor.UnitName}] À» [{selectedSwapUnit.UnitName}] À¸·Î ±³´ë ¿Ï·á! </color>");
+        Debug.Log($"<color=green> [{currentActor.UnitName}] ì„ [{selectedSwapUnit.UnitName}] ìœ¼ë¡œ êµëŒ€ ì™„ë£Œ! </color>");
 
         yield return new WaitForSeconds(0.8f);
     }
 
-    // ±³´ë UI Ã¢ ¼¼ÆÃ
+    // êµëŒ€ UI ì°½ ì„¸íŒ…
     private void OpenSwapUI()
     {
         swapPanel.SetActive(true);
@@ -704,7 +710,7 @@ public class TurnManager : MonoBehaviour
                 swapButtons[i].gameObject.SetActive(true);
                 swapButtonTexts[i].text = $"{reserveUnit.UnitName}\n(HP: {reserveUnit.currentHp}/{reserveUnit.maxHp})";
 
-                // Á×Àº ´ë±â Ä³¸¯ÅÍ´Â ¼±ÅÃ ºÒ°¡
+                // ì£½ì€ ëŒ€ê¸° ìºë¦­í„°ëŠ” ì„ íƒ ë¶ˆê°€
                 swapButtons[i].interactable = reserveUnit.IsAlive;
 
                 swapButtons[i].onClick.RemoveAllListeners();
@@ -722,12 +728,12 @@ public class TurnManager : MonoBehaviour
         selectedSwapUnit = chosenUnit;
     }
 
-    // Ä³¸¯ÅÍÀÇ ½ºÅ³ 3°³¸¦ UI ¹öÆ°¿¡ ÁÖÀÔ
+    // ìºë¦­í„°ì˜ ìŠ¤í‚¬ 3ê°œë¥¼ UI ë²„íŠ¼ì— ì£¼ì…
     private void OpenSkillUI(Unit actor)
     {
         if (skillPanel == null)
         {
-            Debug.LogError("<color=red>[¿À·ù] TurnManager¿¡ SkillPanelÀÌ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù!</color>");
+            Debug.LogError("<color=red>[ì˜¤ë¥˜] TurnManagerì— SkillPanelì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!</color>");
             return;
         }
 
@@ -735,14 +741,14 @@ public class TurnManager : MonoBehaviour
 
         for (int i = 0; i < 3; i++)
         {
-            // ÀÎ½ºÆåÅÍ¿¡ ¹öÆ°ÀÌ³ª ÅØ½ºÆ®°¡ ¾È ²ÈÇô ÀÖÀ¸¸é °æ°í Ãâ·Â
+            // ì¸ìŠ¤í™í„°ì— ë²„íŠ¼ì´ë‚˜ í…ìŠ¤íŠ¸ê°€ ì•ˆ ê½‚í˜€ ìˆìœ¼ë©´ ê²½ê³  ì¶œë ¥
             if (i >= skillButtons.Length || skillButtons[i] == null)
             {
-                Debug.LogError($"<color=red>[¿À·ù] Skill ButtonsÀÇ {i}¹ø ½½·ÔÀÌ ºñ¾îÀÖ½À´Ï´Ù!</color>");
+                Debug.LogError($"<color=red>[ì˜¤ë¥˜] Skill Buttonsì˜ {i}ë²ˆ ìŠ¬ë¡¯ì´ ë¹„ì–´ìˆìŠµë‹ˆë‹¤!</color>");
                 continue;
             }
 
-            // ÇØ´ç Ä³¸¯ÅÍÀÇ ½ºÅ³ ½½·Ô È®ÀÎ
+            // í•´ë‹¹ ìºë¦­í„°ì˜ ìŠ¤í‚¬ ìŠ¬ë¡¯ í™•ì¸
             SkillDataSO skill = (actor.unitData != null && i < actor.unitData.skills.Length)
                                 ? actor.unitData.skills[i]
                                 : null;
@@ -751,37 +757,37 @@ public class TurnManager : MonoBehaviour
             {
                 skillButtons[i].gameObject.SetActive(true);
 
-                // ÅØ½ºÆ® ÄÄÆ÷³ÍÆ®°¡ ¿¬°áµÇ¾î ÀÖÀ» ¶§¸¸ ÅØ½ºÆ® º¯°æ
+                // í…ìŠ¤íŠ¸ ì»´í¬ë„ŒíŠ¸ê°€ ì—°ê²°ë˜ì–´ ìˆì„ ë•Œë§Œ í…ìŠ¤íŠ¸ ë³€ê²½
                 if (i < skillButtonTexts.Length && skillButtonTexts[i] != null)
                 {
                     string spInfo = skill.spGain > 0 ? $"(+SP {skill.spGain})" : $"(-SP {skill.spCost})";
                     skillButtonTexts[i].text = $"{skill.skillName}\n{spInfo}";
                 }
 
-                // SP Á¶°Ç Ã¼Å©
+                // SP ì¡°ê±´ ì²´í¬
                 bool canUse = (currentSP >= skill.spCost);
                 skillButtons[i].interactable = canUse;
 
-                // Å¬¸¯ ÀÌº¥Æ® µî·Ï
+                // í´ë¦­ ì´ë²¤íŠ¸ ë“±ë¡
                 skillButtons[i].onClick.RemoveAllListeners();
                 skillButtons[i].onClick.AddListener(() => OnSkillSelected(skill));
             }
             else
             {
-                // ½ºÅ³ÀÌ µî·Ï ¾È µÈ ¹öÆ°Àº ¼û±è Ã³¸®
+                // ìŠ¤í‚¬ì´ ë“±ë¡ ì•ˆ ëœ ë²„íŠ¼ì€ ìˆ¨ê¹€ ì²˜ë¦¬
                 skillButtons[i].gameObject.SetActive(false);
             }
         }
     }
     private void OnSkillSelected(SkillDataSO skill)
     {
-        selectedSkill = skill; // ·çÇÁÀÇ WaitUntil Á¶°ÇÀ» ¸¸Á·½ÃÅ´
+        selectedSkill = skill; // ë£¨í”„ì˜ WaitUntil ì¡°ê±´ì„ ë§Œì¡±ì‹œí‚´
     }
 
-    // ¿©À¯·Ó°í ¹¬Á÷ÇÑ ÅÛÆ÷°¡ Àû¿ëµÈ ¿¬Ãâ ½ÃÄö½º
-    // PerformAttackSequence ¸Å°³º¯¼ö¿¡ string skillName Ãß°¡
-    // ¿©À¯·Ó°í ¹¬Á÷ÇÑ ÅÛÆ÷°¡ Àû¿ëµÈ ¿¬Ãâ ½ÃÄö½º
-    // ´ÜÀÏ °ø°İ ½ÃÄö½º
+    // ì—¬ìœ ë¡­ê³  ë¬µì§í•œ í…œí¬ê°€ ì ìš©ëœ ì—°ì¶œ ì‹œí€€ìŠ¤
+    // PerformAttackSequence ë§¤ê°œë³€ìˆ˜ì— string skillName ì¶”ê°€
+    // ì—¬ìœ ë¡­ê³  ë¬µì§í•œ í…œí¬ê°€ ì ìš©ëœ ì—°ì¶œ ì‹œí€€ìŠ¤
+    // ë‹¨ì¼ ê³µê²© ì‹œí€€ìŠ¤
     private IEnumerator PerformAttackSequence(
         Unit attacker, Unit target, int damage, bool isSkill3, string skillName,
         bool canKill = true, bool ignoreDodge = false, System.Action<bool> onAttackResolved = null)
@@ -825,7 +831,7 @@ public class TurnManager : MonoBehaviour
         yield return new WaitForSeconds(postTurnDelay);
     }
 
-    // 5¿¬Å¸ Àü¿ë ½ÃÄö½º
+    // 5ì—°íƒ€ ì „ìš© ì‹œí€€ìŠ¤
     private IEnumerator PerformMultiHitSequence(Unit attacker, Unit target, int perHitDmg, int hitCount, string skillName, bool canKill)
     {
         UnitAnimator attackerAnim = attacker.GetComponent<UnitAnimator>();
@@ -856,21 +862,21 @@ public class TurnManager : MonoBehaviour
 
 
     /// <summary>
-    /// ¹æ¾îÀÚ ÀÌ¼ÓÀÌ °ø°İÀÚº¸´Ù ³ôÀº Â÷ÀÌÀÇ Àı¹İ(%)À¸·Î È¸ÇÇ ÆÇÁ¤
-    /// ¿¹: ¹æ¾îÀÚ ÀÌ¼ÓÀÌ 10 ³ôÀ¸¸é È¸ÇÇÀ² 5%
+    /// ë°©ì–´ì ì´ì†ì´ ê³µê²©ìë³´ë‹¤ ë†’ì€ ì°¨ì´ì˜ ì ˆë°˜(%)ìœ¼ë¡œ íšŒí”¼ íŒì •
+    /// ì˜ˆ: ë°©ì–´ì ì´ì†ì´ 10 ë†’ìœ¼ë©´ íšŒí”¼ìœ¨ 5%
     /// </summary>
-    // ¸íÁß/È¸ÇÇ ¹× ÆĞ½Ãºê ¹İ»ç
+    // ëª…ì¤‘/íšŒí”¼ ë° íŒ¨ì‹œë¸Œ ë°˜ì‚¬
     private bool TryResolveAttack(Unit attacker, Unit defender, int damage, bool canKill = true, bool ignoreDodge = false)
     {
         bool dodged = false;
 
         if (!ignoreDodge)
         {
-            // ¼öºñÀÚ ÆĞ½ÃºêÀÇ È®Á¤ È¸ÇÇ ÁúÀÇ
+            // ìˆ˜ë¹„ì íŒ¨ì‹œë¸Œì˜ í™•ì • íšŒí”¼ ì§ˆì˜
             if (defender.Passive != null && defender.Passive.CheckForceDodge(defender, attacker))
             {
                 dodged = true;
-                Debug.Log($"<color=#38BDF8>[ÆĞ½Ãºê] {defender.UnitName} Ã¹ ÇÇ°İ È®Á¤ È¸ÇÇ!</color>");
+                Debug.Log($"<color=#38BDF8>[íŒ¨ì‹œë¸Œ] {defender.UnitName} ì²« í”¼ê²© í™•ì • íšŒí”¼!</color>");
             }
             else
             {
@@ -886,7 +892,7 @@ public class TurnManager : MonoBehaviour
             UnitAnimator defenderAnim = defender.GetComponent<UnitAnimator>();
             if (defenderAnim != null) defenderAnim.PlayDodge();
 
-            // ÆĞ½Ãºê È¸ÇÇ ¼º°ø ÈÅ È£Ãâ (20% ¹İ»ç µ¥¹ÌÁö ½ÇÇà)
+            // íŒ¨ì‹œë¸Œ íšŒí”¼ ì„±ê³µ í›… í˜¸ì¶œ (20% ë°˜ì‚¬ ë°ë¯¸ì§€ ì‹¤í–‰)
             if (defender.Passive != null)
             {
                 defender.Passive.OnDodgeSuccess(defender, attacker, damage);
@@ -895,7 +901,7 @@ public class TurnManager : MonoBehaviour
             return false;
         }
 
-        // µ¥¹ÌÁö Àû¿ë
+        // ë°ë¯¸ì§€ ì ìš©
         defender.TakeDamage(damage, canKill);
 
         if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(hitSFX);
@@ -904,7 +910,7 @@ public class TurnManager : MonoBehaviour
         return true;
     }
 
-    // °¡¼Ó/°¨¼Ó(Ease-In-Out)ÀÌ Àû¿ëµÈ ºÎµå·¯¿î À§Ä¡ ÀÌµ¿ º¸Á¶ ÄÚ·çÆ¾
+    // ê°€ì†/ê°ì†(Ease-In-Out)ì´ ì ìš©ëœ ë¶€ë“œëŸ¬ìš´ ìœ„ì¹˜ ì´ë™ ë³´ì¡° ì½”ë£¨í‹´
     private IEnumerator MoveToPositionRoutine(Transform targetTransform, Vector3 endPos, float duration)
     {
         Vector3 startPos = targetTransform.position;
@@ -915,7 +921,7 @@ public class TurnManager : MonoBehaviour
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
 
-            // Ease-In-Out Cubic: ÃµÃµÈ÷ ºÎµå·´°Ô Ãâ¹ß -> Áß°£¿¡¼­ °¡¼Ó -> ³¡¿¡¼­ ½º¸£¸¤ °¨¼Ó
+            // Ease-In-Out Cubic: ì²œì²œíˆ ë¶€ë“œëŸ½ê²Œ ì¶œë°œ -> ì¤‘ê°„ì—ì„œ ê°€ì† -> ëì—ì„œ ìŠ¤ë¥´ë¥µ ê°ì†
             float ease = t < 0.5f ? 4f * t * t * t : 1f - Mathf.Pow(-2f * t + 2f, 3f) / 2f;
 
             targetTransform.position = Vector3.Lerp(startPos, endPos, ease);
@@ -924,7 +930,7 @@ public class TurnManager : MonoBehaviour
         targetTransform.position = endPos;
     }
 
-    // ½ºÅ³ ¹è³Ê Ç¥½Ã (ÆäÀÌµåÀÎ)
+    // ìŠ¤í‚¬ ë°°ë„ˆ í‘œì‹œ (í˜ì´ë“œì¸)
     public void ShowSkillBanner(string charName, string skillName)
     {
         if (skillBannerPanel == null) return;
@@ -934,10 +940,10 @@ public class TurnManager : MonoBehaviour
 
         skillBannerPanel.SetActive(true);
         StopCoroutine("FadeBannerRoutine");
-        StartCoroutine(FadeBannerRoutine(1f, 0.15f)); // 0.15ÃÊ ¸¸¿¡ ¼±¸íÇÏ°Ô ÆäÀÌµåÀÎ
+        StartCoroutine(FadeBannerRoutine(1f, 0.15f)); // 0.15ì´ˆ ë§Œì— ì„ ëª…í•˜ê²Œ í˜ì´ë“œì¸
     }
 
-    // ½ºÅ³ ¹è³Ê ¼û±è (ÆäÀÌµå¾Æ¿ô)
+    // ìŠ¤í‚¬ ë°°ë„ˆ ìˆ¨ê¹€ (í˜ì´ë“œì•„ì›ƒ)
     public void HideSkillBanner()
     {
         if (skillBannerPanel == null || !skillBannerPanel.activeSelf) return;
@@ -968,12 +974,12 @@ public class TurnManager : MonoBehaviour
         onComplete?.Invoke();
     }
 
-    // ÇÃ·¹ÀÌ¾î°¡ ¸¶¿ì½º·Î ÀûÀ» Å¬¸¯ÇÒ ¶§±îÁö ´ë±âÇÏ´Â ÄÚ·çÆ¾
+    // í”Œë ˆì´ì–´ê°€ ë§ˆìš°ìŠ¤ë¡œ ì ì„ í´ë¦­í•  ë•Œê¹Œì§€ ëŒ€ê¸°í•˜ëŠ” ì½”ë£¨í‹´
     private IEnumerator WaitForTargetSelection(List<Unit> enemies, System.Action<Unit> onTargetSelected)
     {
-        Debug.Log("<color=yellow>¢º °ø°İÇÒ ÀûÀ» ¸¶¿ì½º·Î Å¬¸¯ÇÏ¼¼¿ä!</color>");
+        Debug.Log("<color=yellow>â–¶ ê³µê²©í•  ì ì„ ë§ˆìš°ìŠ¤ë¡œ í´ë¦­í•˜ì„¸ìš”!</color>");
 
-        // »ì¾ÆÀÖ´Â ¸ğµç Àû¿¡°Ô Å¸°ÙÆÃ ¸ğµå ÄÑ±â (¸¶¿ì½º ¿Ã¸®¸é ºÓ°Ô ¹İÀÀ)
+        // ì‚´ì•„ìˆëŠ” ëª¨ë“  ì ì—ê²Œ íƒ€ê²ŸíŒ… ëª¨ë“œ ì¼œê¸° (ë§ˆìš°ìŠ¤ ì˜¬ë¦¬ë©´ ë¶‰ê²Œ ë°˜ì‘)
         foreach (var enemy in enemies)
         {
             enemy.SetTargetable(true);
@@ -983,12 +989,12 @@ public class TurnManager : MonoBehaviour
 
         while (selectedUnit == null)
         {
-            // ¸¶¿ì½º ÁÂÅ¬¸¯ °¨Áö
+            // ë§ˆìš°ìŠ¤ ì¢Œí´ë¦­ ê°ì§€
             if (Input.GetMouseButtonDown(0))
             {
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-                // 1. 3D ·¹ÀÌÄ³½ºÆ® °Ë»ç (BoxCollider µî)
+                // 1. 3D ë ˆì´ìºìŠ¤íŠ¸ ê²€ì‚¬ (BoxCollider ë“±)
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
                     Unit hitUnit = hit.collider.GetComponentInParent<Unit>();
@@ -998,7 +1004,7 @@ public class TurnManager : MonoBehaviour
                     }
                 }
 
-                // 2. 2D ·¹ÀÌÄ³½ºÆ® °Ë»ç (BoxCollider2D ´ëºñ)
+                // 2. 2D ë ˆì´ìºìŠ¤íŠ¸ ê²€ì‚¬ (BoxCollider2D ëŒ€ë¹„)
                 if (selectedUnit == null)
                 {
                     RaycastHit2D hit2D = Physics2D.GetRayIntersection(ray);
@@ -1016,7 +1022,7 @@ public class TurnManager : MonoBehaviour
             yield return null;
         }
 
-        // Å¸°Ù ¼±ÅÃ ¿Ï·á -> ¸ğµç Àû Å¸°ÙÆÃ ¸ğµå ÇØÁ¦
+        // íƒ€ê²Ÿ ì„ íƒ ì™„ë£Œ -> ëª¨ë“  ì  íƒ€ê²ŸíŒ… ëª¨ë“œ í•´ì œ
         foreach (var enemy in enemies)
         {
             enemy.SetTargetable(false);

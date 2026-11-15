@@ -12,19 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377a4c795f9d3b94a96ba4f5e4140388, type: 3}
   m_Name: TestAllyUnit_5
   m_EditorClassIdentifier: Assembly-CSharp::BattleUnit
+  characterId: 
   unitName: "\uD14C\uC2A4\uD2B8_5"
+  rarity: 1
   team: 0
   characterSprite: {fileID: -1426425775, guid: 87ec039278d2641438e5ed71d7c23a80, type: 3}
   hitSprite: {fileID: -1426425775, guid: 87ec039278d2641438e5ed71d7c23a80, type: 3}
   attackSprite: {fileID: 0}
   dodgeSprite: {fileID: 0}
-  maxHP: 1000
+  maxHP: 1
   attackPower: 15
   speed: 100
   skills:
   - {fileID: 11400000, guid: 3367b40f714dfea42842c4cc067cf2cf, type: 2}
   - {fileID: 11400000, guid: 0d063390dc119db4096af0a7879f4159, type: 2}
   - {fileID: 11400000, guid: 350fdef95b8c5c04aa3131f031427f31, type: 2}
+  passiveSkill: {fileID: 0}
   performance: 1
   mainMenuDialogue:
   - "\uC544\uC9C1 \uC544\uD2B8 \uB9AC\uC18C\uC2A4\uAC00 \uC548\uC640\uC11C \uC784\uC2DC\uB85C

@@ -1887,7 +1887,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1412998585}
         m_TargetAssemblyTypeName: PartyFormationUI, Assembly-CSharp
-        m_MethodName: MainMenuBack
+        m_MethodName: ClickBackMainMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2406,6 +2406,7 @@ MonoBehaviour:
   - {fileID: 1801487282}
   - {fileID: 2131232487}
   - {fileID: 1489650382}
+  showUnownedAsLocked: 0
   characterListContent: {fileID: 1544543236}
   characterCardPrefab: {fileID: 8653542558766577194, guid: 3591a6e4b4ef4954c8b0f45b761b3a58, type: 3}
   selectedSlotText: {fileID: 1114038326}

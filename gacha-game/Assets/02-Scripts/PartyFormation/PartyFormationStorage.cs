@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,7 +20,7 @@ public static class PartyFormationStorage
     {
         if (!IsValidMembers(roster, members))
         {
-            Debug.LogWarning("[편성] 서로 다른 아군 캐릭터 5명을 배치해야 저장할 수 있습니다.");
+            Debug.LogWarning("[편성] 보유 중인 서로 다른 아군 캐릭터 5명을 배치해야 저장할 수 있습니다.");
             return false;
         }
 
@@ -75,6 +75,7 @@ public static class PartyFormationStorage
             if (unit == null || unit.team != Team.Ally ||
                 string.IsNullOrWhiteSpace(unit.characterId) ||
                 roster.FindById(unit.characterId) != unit ||
+                !CurrencyManager.OwnsCharacter(unit.characterId) ||
                 !usedIds.Add(unit.characterId))
                 return false;
         }

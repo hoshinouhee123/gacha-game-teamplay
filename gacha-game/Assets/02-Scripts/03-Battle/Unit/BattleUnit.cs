@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public enum Team
 {
@@ -9,31 +9,33 @@ public enum Team
 [CreateAssetMenu(fileName = "NewUnitData", menuName = "TurnSystem/Unit Data")]
 public class BattleUnit : ScriptableObject
 {
-    [Header("±âº» Ä³¸¯ÅÍ Á¤º¸")]
-    public string unitName; //À¯´Ö ÀÌ¸§ 
-    public Team team;       //Áø¿µ
+    [Header("ê¸°ë³¸ ìºë¦­í„° ì •ë³´")]
+    [Tooltip("ì¤‘ë³µë˜ì§€ ì•ŠëŠ” ê³ ìœ  ID. ì¶œì‹œ í›„ ë³€ê²½í•˜ë©´ ë³´ìœ /í¸ì„± ì €ì¥ ë°ì´í„°ë¥¼ ì°¾ì§€ ëª»í•©ë‹ˆë‹¤.")]
     public string characterId;
+    public string unitName; //ìœ ë‹› ì´ë¦„
+    [Range(1, 3)] public int rarity = 1; // ê°€ì±  ë“±ê¸‰ 1~3ì„± 
+    public Team team;       //ì§„ì˜
 
-    [Header("½ºÇÁ¶óÀÌÆ® ¿¬Ãâ")]
-    public Sprite characterSprite; // ±âº» ½ºÇÁ¶óÀÌÆ®
-    public Sprite hitSprite;       // ÇÇ°İ ½Ã ±³Ã¼µÉ ½ºÇÁ¶óÀÌÆ®
-    public Sprite attackSprite;    // °ø°İ ½Ã ±³Ã¼µÉ ½ºÇÁ¶óÀÌÆ®
-    public Sprite dodgeSprite;     // È¸ÇÇ ½Ã ±³Ã¼µÉ ½ºÇÁ¶óÀÌÆ®
+    [Header("ìŠ¤í”„ë¼ì´íŠ¸ ì—°ì¶œ")]
+    public Sprite characterSprite; // ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸
+    public Sprite hitSprite;       // í”¼ê²© ì‹œ êµì²´ë  ìŠ¤í”„ë¼ì´íŠ¸
+    public Sprite attackSprite;    // ê³µê²© ì‹œ êµì²´ë  ìŠ¤í”„ë¼ì´íŠ¸
+    public Sprite dodgeSprite;     // íšŒí”¼ ì‹œ êµì²´ë  ìŠ¤í”„ë¼ì´íŠ¸
 
-    [Header("±âº» ½ºÅÈ")]
-    public int maxHP = 100;       //ÃÖ´ë HP
-    public int attackPower = 10; //°ø°İ·Â
-    public int speed = 10;       //½ºÇÇµå (ÅÏ ¼ø¼­ ¿ë)
+    [Header("ê¸°ë³¸ ìŠ¤íƒ¯")]
+    public int maxHP = 100;       //ìµœëŒ€ HP
+    public int attackPower = 10; //ê³µê²©ë ¥
+    public int speed = 10;       //ìŠ¤í”¼ë“œ (í„´ ìˆœì„œ ìš©)
 
-    [Header("½ºÅ³ ¸ñ·Ï (ÃÑ 3°³)")]
-    public SkillDataSO[] skills = new SkillDataSO[3]; // ½ºÅ³ 1, 2, 3
+    [Header("ìŠ¤í‚¬ ëª©ë¡ (ì´ 3ê°œ)")]
+    public SkillDataSO[] skills = new SkillDataSO[3]; // ìŠ¤í‚¬ 1, 2, 3
 
-    [Header("ÆĞ½Ãºê ½ºÅ³")]
-    public PassiveSkillSO passiveSkill; // ÀÎ½ºÆåÅÍ¿¡ ¿¬°áÇÒ ÆĞ½Ãºê SO
+    [Header("íŒ¨ì‹œë¸Œ ìŠ¤í‚¬")]
+    public PassiveSkillSO passiveSkill; // ì¸ìŠ¤í™í„°ì— ì—°ê²°í•  íŒ¨ì‹œë¸Œ SO
 
-    [Header("½ºÅ¸¼º ÆÛÆ÷¸Õ½º (1~5)")]
-    [Range(1, 5)] public int performance = 3; // Å¬¸®¾î ½Ã ÇÕ»êµÉ ±âº» ÆÛÆ÷¸Õ½º Á¡¼ö
+    [Header("ìŠ¤íƒ€ì„± í¼í¬ë¨¼ìŠ¤ (1~5)")]
+    [Range(1, 5)] public int performance = 3; // í´ë¦¬ì–´ ì‹œ í•©ì‚°ë  ê¸°ë³¸ í¼í¬ë¨¼ìŠ¤ ì ìˆ˜
 
-    [Header("´ë»ç ¸ñ·Ï")]
+    [Header("ëŒ€ì‚¬ ëª©ë¡")]
     public string[] mainMenuDialogue;
 }

@@ -1,59 +1,82 @@
-
-using UnityEngine;
+ï»¿using System.Collections;
+using System.Collections.Generic;
+using System.Text;
 using TMPro;
-using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
+/// <summary>
+/// ìºë¦­í„° ê°€ì± : 1íšŒ / 10íšŒ, 1ì„± 70% / 2ì„± 25% / 3ì„± 5%.
+/// í•´ë‹¹ ë“±ê¸‰ ìºë¦­í„°ê°€ ì—†ìœ¼ë©´ ì¡´ì¬í•˜ëŠ” ë“±ê¸‰ë¼ë¦¬ ë¹„ìœ¨ì„ ì¬ì •ê·œí™”í•©ë‹ˆë‹¤.
+/// ê²°ê³¼ëŠ” CurrencyManager.SaveData.jsonì˜ ownedCharacterIdsë¡œ ì €ì¥í•©ë‹ˆë‹¤.
+/// </summary>
 public class GachaManager : MonoBehaviour
 {
-    [Header("°¡Ã­ °¡°İ")]
+    [Header("ìºë¦­í„° ëª©ë¡")]
+    [SerializeField] private CharacterRosterSO roster;
+
+    [Header("ê°€ì±  ê°€ê²©")]
     [Min(1)] public int singleDrawCost = 120;
     [Min(1)] public int tenDrawCost = 1200;
 
-    [Header("1¼º Áö±Ş ¹üÀ§")]
-    [Min(1)] public int oneStarMin = 30;
-    [Min(1)] public int oneStarMax = 40;
-
-    [Header("2¼º Áö±Ş ¹üÀ§")]
-    [Min(1)] public int twoStarMin = 50;
-    [Min(1)] public int twoStarMax = 70;
-
-    [Header("3¼º Áö±Ş ¹üÀ§")]
-    [Min(1)] public int threeStarMin = 70;
-    [Min(1)] public int threeStarMax = 100;
-
-    [Header("°¡Ã­ ¿¬Ãâ")]
+    [Header("ì—°ì¶œ ì†ë„")]
     [Min(0f)] public float drawDelay = 0.7f;
     [Min(0f)] public float nextDrawDelay = 0.15f;
 
-    [Header("°¡Ã­ ¹öÆ°")]
+    [Header("ê¸°ì¡´ ê°€ì±  ë²„íŠ¼")]
     public GameObject singleDrawButton;
     public GameObject tenDrawButton;
 
-    [Header("°¡Ã­ °¡°İ UI")]
+    [Header("ê¸°ì¡´ ê°€ê²© UI")]
     public GameObject singlePriceText;
     public GameObject tenPriceText;
 
-    [Header("UI")]
+    [Header("í…ìŠ¤íŠ¸ UI")]
     public TMP_Text fameText;
     public TMP_Text resultText;
+    [SerializeField] private TMP_Text ownedCountText; // ì„ íƒ ì‚¬í•­
 
-    [Header("Å×½ºÆ® ±â´É")]
-    public int testRewardAmount = 1200;
+    [Header("íšë“ ìºë¦­í„° ì´ˆìƒí™” (ì„ íƒ ì‚¬í•­)")]
+    [SerializeField] private Image resultPortrait;
 
-    private int testRenown = 0;
-    private bool isDrawing = false;
+    [Header("í…ŒìŠ¤íŠ¸ ê¸°ëŠ¥")]
+    [Min(0)] public int testRewardAmount = 1200;
+
+    private readonly List<BattleUnit> oneStar = new List<BattleUnit>();
+    private readonly List<BattleUnit> twoStar = new List<BattleUnit>();
+    private readonly List<BattleUnit> threeStar = new List<BattleUnit>();
+
+    private int testRenown;
+    private bool isDrawing;
+    private bool initialized;
     private Coroutine drawCoroutine;
     private int lastDisplayedRenown = -1;
+    private int lastDisplayedOwned = -1;
 
     private void Start()
     {
-        InventoryStorage.Load();
-
         testRenown = 0;
         isDrawing = false;
-
         SetGachaUI(true);
         SetResult("");
+        if (resultPortrait != null) resultPortrait.enabled = false;
+
+        if (roster == null)
+        {
+            SetResult("GachaManagerì˜ Rosterë¥¼ ì§€ì •í•´ ì£¼ì„¸ìš”.");
+            Debug.LogError("[ê°€ì± ] CharacterRosterSO ì—°ê²° ëˆ„ë½");
+            return;
+        }
+
+        if (!CurrencyManager.TryGrantStarterCharacters(roster))
+        {
+            SetResult("ìºë¦­í„° ë°ì´í„° ì €ì¥ ì˜¤ë¥˜");
+            return;
+        }
+
+        BuildPools();
+        initialized = true;
         UpdateUI(true);
     }
 
@@ -62,307 +85,240 @@ public class GachaManager : MonoBehaviour
         UpdateUI();
     }
 
-    // ½ÇÁ¦ ¸í¼º + Å×½ºÆ® ¸í¼º
-    public int GetTotalRenown()
+    private void BuildPools()
     {
-        int real = Mathf.Max(
-            0,
-            CurrencyManager.GetRenown()
-        );
+        oneStar.Clear();
+        twoStar.Clear();
+        threeStar.Clear();
 
-        long total = (long)real + testRenown;
+        if (roster == null || roster.characters == null) return;
 
-        return (int)Mathf.Min(total, int.MaxValue);
+        var seenIds = new HashSet<string>();
+        foreach (BattleUnit character in roster.characters)
+        {
+            if (character == null || character.team != Team.Ally ||
+                string.IsNullOrWhiteSpace(character.characterId))
+                continue;
+
+            if (!seenIds.Add(character.characterId))
+            {
+                Debug.LogWarning("[ê°€ì± ] ì¤‘ë³µ characterId: " + character.characterId);
+                continue;
+            }
+
+            switch (character.rarity)
+            {
+                case 1: oneStar.Add(character); break;
+                case 2: twoStar.Add(character); break;
+                case 3: threeStar.Add(character); break;
+                default:
+                    Debug.LogWarning("[ê°€ì± ] ë“±ê¸‰ì€ 1~3ì´ì–´ì•¼ í•©ë‹ˆë‹¤: " + character.unitName);
+                    break;
+            }
+        }
+
+        Debug.Log($"[ê°€ì± ] ìºë¦­í„° í’€: 1ì„± {oneStar.Count}, 2ì„± {twoStar.Count}, 3ì„± {threeStar.Count}");
     }
 
-    // Å×½ºÆ® ¸í¼º Ãß°¡
+    public int GetTotalRenown()
+    {
+        int real = Mathf.Max(0, CurrencyManager.GetRenown());
+        long combined = (long)real + testRenown;
+        return (int)System.Math.Min(combined, int.MaxValue);
+    }
+
     public void AddTestRenown()
     {
-        if (isDrawing || testRewardAmount <= 0)
-            return;
-
-        if (testRenown > int.MaxValue - testRewardAmount)
-            return;
-
+        if (isDrawing || testRewardAmount <= 0) return;
+        if (testRenown > int.MaxValue - testRewardAmount) return;
         testRenown += testRewardAmount;
-
         UpdateUI(true);
     }
 
-    // 1È¸ »Ì±â
     public void DrawOne()
     {
         StartDraw(1, singleDrawCost);
     }
 
-    // 10È¸ »Ì±â
     public void DrawTen()
     {
         StartDraw(10, tenDrawCost);
     }
 
-    // °¡Ã­ ½ÃÀÛ
-    private void StartDraw(int count, int cost)
+    // ì„ íƒ ì‚¬í•­: ê°€ì±  í™”ë©´ì˜ "í¸ì„±ìœ¼ë¡œ ì´ë™" ë²„íŠ¼ì— ì—°ê²°í•˜ì„¸ìš”.
+    public void OpenFormationScene()
     {
-        if (isDrawing)
-            return;
+        if (isDrawing) return;
+        SceneManager.LoadScene("PartyFormationScene");
+    }
 
-        if (cost <= 0)
-            return;
-
-        if (GetTotalRenown() < cost)
+    private void StartDraw(int count, int price)
+    {
+        if (isDrawing) return;
+        if (!initialized)
         {
-            SetResult("¸í¼ºÀÌ ºÎÁ·ÇÕ´Ï´Ù!");
+            SetResult("ê°€ì±  ì´ˆê¸°í™” ì‹¤íŒ¨: Roster ë˜ëŠ” ì €ì¥ íŒŒì¼ì„ í™•ì¸í•´ ì£¼ì„¸ìš”.");
+            return;
+        }
+        if (roster == null || price <= 0)
+        {
+            SetResult("ìºë¦­í„° ëª©ë¡ ë˜ëŠ” ê°€ì±  ê°€ê²©ì„ í™•ì¸í•´ ì£¼ì„¸ìš”.");
             return;
         }
 
-        // Áßº¹ ½ÇÇà ¹æÁö
-        isDrawing = true;
+        if (oneStar.Count + twoStar.Count + threeStar.Count == 0)
+        {
+            SetResult("ê°€ì± ì— ë“±ë¡ëœ ì•„êµ° ìºë¦­í„°ê°€ ì—†ì–´ìš”.");
+            return;
+        }
 
-        // °¡Ã­ ¹öÆ°°ú °¡°İ ¼û±â±â
+        if (GetTotalRenown() < price)
+        {
+            SetResult("ëª…ì„±ì´ ë¶€ì¡±í•©ë‹ˆë‹¤!");
+            return;
+        }
+
+        isDrawing = true;
         SetGachaUI(false);
 
-        // µî±Ş°ú Áö±Ş ¼ö·® ÀúÀå
-        int[] stars = new int[count];
-        int[] amounts = new int[count];
+        BattleUnit[] results = new BattleUnit[count];
+        string[] ids = new string[count];
 
         for (int i = 0; i < count; i++)
         {
-            int star = GetRandomStar();
-
-            stars[i] = star;
-            amounts[i] = GetRewardAmount(star);
-        }
-
-        // Å×½ºÆ® ¸í¼º ¿ì¼± Â÷°¨
-        int useTest = Mathf.Min(testRenown, cost);
-        int useReal = cost - useTest;
-
-        if (useReal > 0)
-        {
-            if (!RenownControl.Spend(useReal))
+            if (!TryPickCharacter(out BattleUnit character))
             {
-                CancelDraw("¸í¼º Â÷°¨ ½ÇÆĞ!");
+                CancelDraw("ê°€ì± ì— ë“±ë¡ëœ ìºë¦­í„°ê°€ ì—†ìŠµë‹ˆë‹¤.");
                 return;
             }
+            results[i] = character;
+            ids[i] = character.characterId;
         }
 
-        testRenown -= useTest;
+        // í…ŒìŠ¤íŠ¸ ëª…ì„± ì‚¬ìš© í›„ ë¶€ì¡±í•œ ê¸ˆì•¡ë§Œ ì‹¤ì œ ëª…ì„±ìœ¼ë¡œ ê²°ì œ
+        int testSpend = Mathf.Min(testRenown, price);
+        int realSpend = price - testSpend;
 
-        // JSON ÀÎº¥Åä¸®¿¡ Áö±Ş·® ÀúÀå
-        if (!InventoryStorage.AddRewards(stars, amounts))
+        if (!CurrencyManager.TrySpendAndUnlockCharacters(realSpend, ids, out bool[] newlyOwned))
         {
-            testRenown += useTest;
-
-            // ½ÇÁ¦ ¸í¼º È¯ºÒ ½Ãµµ
-            if (useReal > 0)
-            {
-                int before = CurrencyManager.GetRenown();
-
-                CurrencyManager.AddRenown(useReal);
-
-                int after = CurrencyManager.GetRenown();
-
-                if ((long)after != (long)before + useReal)
-                {
-                    Debug.LogError(
-                        "°¡Ã­ ÀúÀå ½ÇÆĞ ÈÄ ¸í¼º È¯ºÒµµ ½ÇÆĞÇß½À´Ï´Ù."
-                    );
-                }
-            }
-
-            CancelDraw("ÀÎº¥Åä¸® ÀúÀå ½ÇÆĞ!");
+            CancelDraw("ëª…ì„± ì°¨ê° ë˜ëŠ” ìºë¦­í„° ì €ì¥ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.");
             return;
         }
 
+        // ì €ì¥ ì„±ê³µ ì´í›„ì— í…ŒìŠ¤íŠ¸ ëª…ì„± í™•ì • ì°¨ê°
+        testRenown -= testSpend;
         UpdateUI(true);
-
-        // °¡Ã­ ¿¬Ãâ ½ÃÀÛ
-        drawCoroutine = StartCoroutine(
-            DrawCoroutine(stars, amounts)
-        );
+        drawCoroutine = StartCoroutine(DrawCoroutine(results, newlyOwned));
     }
 
-    // µî±Şº° ·£´ı Áö±Ş ¼ö·®
-    private int GetRewardAmount(int star)
+    private bool TryPickCharacter(out BattleUnit character)
     {
-        int min;
-        int max;
+        character = null;
+        int weight1 = oneStar.Count > 0 ? 70 : 0;
+        int weight2 = twoStar.Count > 0 ? 25 : 0;
+        int weight3 = threeStar.Count > 0 ? 5 : 0;
+        int totalWeight = weight1 + weight2 + weight3;
+        if (totalWeight <= 0) return false;
 
-        switch (star)
-        {
-            case 1:
-                min = oneStarMin;
-                max = oneStarMax;
-                break;
+        int roll = Random.Range(0, totalWeight);
+        List<BattleUnit> pool;
+        if (roll < weight1) pool = oneStar;
+        else if (roll < weight1 + weight2) pool = twoStar;
+        else pool = threeStar;
 
-            case 2:
-                min = twoStarMin;
-                max = twoStarMax;
-                break;
-
-            case 3:
-                min = threeStarMin;
-                max = threeStarMax;
-                break;
-
-            default:
-                return 1;
-        }
-
-        min = Mathf.Max(1, min);
-        max = Mathf.Max(min, max);
-
-        // int Random.RangeÀÇ ÃÖ´ë°ªÀº ¹ÌÆ÷ÇÔ
-        // max + 1·Î ÃÖ´ë Áö±Ş·®µµ Æ÷ÇÔ
-        return Random.Range(min, max + 1);
+        character = pool[Random.Range(0, pool.Count)];
+        return character != null;
     }
 
-    // °¡Ã­ ¿¬Ãâ
-    private IEnumerator DrawCoroutine(
-        int[] stars,
-        int[] amounts)
+    private IEnumerator DrawCoroutine(BattleUnit[] results, bool[] newlyOwned)
     {
-        SetResult("");
+        int newCount = 0;
+        int duplicateCount = 0;
+        var summary = new StringBuilder();
 
-        long oneTotal = 0;
-        long twoTotal = 0;
-        long threeTotal = 0;
-
-        for (int i = 0; i < stars.Length; i++)
+        for (int i = 0; i < results.Length; i++)
         {
-            int star = stars[i];
-            int amount = amounts[i];
+            BattleUnit unit = results[i];
+            bool isNew = newlyOwned[i];
+            if (isNew) newCount++;
+            else duplicateCount++;
 
-            switch (star)
+            SetResult($"{unit.rarity}ì„± ìºë¦­í„° íšë“!\n{unit.unitName}\n" +
+                      (isNew ? "NEW! í¸ì„±ì—ì„œ ì‚¬ìš©í•  ìˆ˜ ìˆì–´ìš”." : "ì´ë¯¸ ë³´ìœ  ì¤‘ì¸ ì¤‘ë³µ ìºë¦­í„°"));
+
+            if (resultPortrait != null)
             {
-                case 1:
-                    oneTotal += amount;
-                    break;
-
-                case 2:
-                    twoTotal += amount;
-                    break;
-
-                case 3:
-                    threeTotal += amount;
-                    break;
+                resultPortrait.sprite = unit.characterSprite;
+                resultPortrait.enabled = unit.characterSprite != null;
             }
 
-            // ÇöÀç »Ì±â °á°ú¿Í Áö±Ş ¼ö·® Ç¥½Ã
-            SetResult(
-                star + "¼º È¹µæ!\n" +
-                "È¹µæ °³¼ö: " + amount + "°³"
-            );
+            summary.AppendLine($"{i + 1}. {unit.rarity}ì„± {unit.unitName} " +
+                               (isNew ? "[NEW]" : "[ì¤‘ë³µ]"));
 
-            yield return new WaitForSecondsRealtime(
-                drawDelay
-            );
-
-            if (i < stars.Length - 1)
+            yield return new WaitForSecondsRealtime(drawDelay);
+            if (i < results.Length - 1)
             {
                 SetResult("");
-
-                yield return new WaitForSecondsRealtime(
-                    nextDrawDelay
-                );
+                yield return new WaitForSecondsRealtime(nextDrawDelay);
             }
         }
 
-        // 10È¸ »Ì±â °á°ú ¿ä¾à
-        if (stars.Length > 1)
+        if (results.Length > 1)
         {
-            SetResult(
-                "10È¸ »Ì±â ¿Ï·á!\n" +
-                "1¼º: " + oneTotal + "°³\n" +
-                "2¼º: " + twoTotal + "°³\n" +
-                "3¼º: " + threeTotal + "°³"
-            );
+            SetResult($"10íšŒ ë½‘ê¸° ì™„ë£Œ!  ì‹ ê·œ {newCount} / ì¤‘ë³µ {duplicateCount}\n" +
+                      summary.ToString());
         }
 
         FinishDraw();
     }
 
-    // °¡Ã­ Ãë¼Ò
     private void CancelDraw(string message)
     {
         drawCoroutine = null;
         isDrawing = false;
-
         SetGachaUI(true);
         SetResult(message);
         UpdateUI(true);
     }
 
-    // °¡Ã­ Á¾·á
     private void FinishDraw()
     {
         drawCoroutine = null;
         isDrawing = false;
-
         SetGachaUI(true);
         UpdateUI(true);
     }
 
-    // ¹öÆ° ¹× °¡°İ Ç¥½Ã
     private void SetGachaUI(bool show)
     {
-        if (singleDrawButton != null)
-            singleDrawButton.SetActive(show);
-
-        if (tenDrawButton != null)
-            tenDrawButton.SetActive(show);
-
-        if (singlePriceText != null)
-            singlePriceText.SetActive(show);
-
-        if (tenPriceText != null)
-            tenPriceText.SetActive(show);
+        if (singleDrawButton != null) singleDrawButton.SetActive(show);
+        if (tenDrawButton != null) tenDrawButton.SetActive(show);
+        if (singlePriceText != null) singlePriceText.SetActive(show);
+        if (tenPriceText != null) tenPriceText.SetActive(show);
     }
 
-    // °¡Ã­ È®·ü
-    private int GetRandomStar()
-    {
-        float random = Random.Range(0f, 100f);
-
-        // 3¼º 5%
-        if (random < 5f)
-            return 3;
-
-        // 2¼º 25%
-        if (random < 30f)
-            return 2;
-
-        // 1¼º 70%
-        return 1;
-    }
-
-    // °á°ú ÅØ½ºÆ®
     private void SetResult(string message)
     {
-        if (resultText != null)
-        {
-            resultText.text = message;
-        }
+        if (resultText != null) resultText.text = message;
     }
 
-    // ¸í¼º UI °»½Å
     private void UpdateUI(bool force = false)
     {
-        int current = GetTotalRenown();
-
-        if (!force && current == lastDisplayedRenown)
-            return;
-
-        lastDisplayedRenown = current;
-
-        if (fameText != null)
+        int renown = GetTotalRenown();
+        if (force || lastDisplayedRenown != renown)
         {
-            fameText.text = "¸í¼º : " + current;
+            lastDisplayedRenown = renown;
+            if (fameText != null) fameText.text = "ëª…ì„± : " + renown;
+        }
+
+        int owned = CurrencyManager.GetOwnedCharacterCount();
+        if (force || lastDisplayedOwned != owned)
+        {
+            lastDisplayedOwned = owned;
+            if (ownedCountText != null) ownedCountText.text = "ë³´ìœ  ìºë¦­í„° : " + owned + "ëª…";
         }
     }
 
-    // ¿ÀºêÁ§Æ® ºñÈ°¼ºÈ­ ½Ã Ã³¸®
     private void OnDisable()
     {
         if (drawCoroutine != null)
@@ -370,7 +326,7 @@ public class GachaManager : MonoBehaviour
             StopCoroutine(drawCoroutine);
             drawCoroutine = null;
         }
-
         isDrawing = false;
+        SetGachaUI(true);
     }
 }
