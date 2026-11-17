@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -228,8 +227,6 @@ public static class InventoryStorage
         return item != null ? item.amount : 0;
     }
 
-    // JSON 파일 저장
-
     private static bool Save()
     {
         try
@@ -299,5 +296,4 @@ public static class InventoryStorage
 
         return true;
     }
-
 }

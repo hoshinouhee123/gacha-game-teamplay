@@ -1,82 +1,74 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Text;
+﻿using UnityEngine;
 using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
+using System.Collections;
 
-/// <summary>
-/// 캐릭터 가챠: 1회 / 10회, 1성 70% / 2성 25% / 3성 5%.
-/// 해당 등급 캐릭터가 없으면 존재하는 등급끼리 비율을 재정규화합니다.
-/// 결과는 CurrencyManager.SaveData.json의 ownedCharacterIds로 저장합니다.
-/// </summary>
 public class GachaManager : MonoBehaviour
 {
-    [Header("캐릭터 목록")]
-    [SerializeField] private CharacterRosterSO roster;
-
     [Header("가챠 가격")]
     [Min(1)] public int singleDrawCost = 120;
     [Min(1)] public int tenDrawCost = 1200;
 
-    [Header("연출 속도")]
+    [Header("1성 지급 범위")]
+    [Min(1)] public int oneStarMin = 80;
+    [Min(1)] public int oneStarMax = 100;
+
+    [Header("2성 지급 범위")]
+    [Min(1)] public int twoStarMin = 50;
+    [Min(1)] public int twoStarMax = 70;
+
+    [Header("3성 지급 범위")]
+    [Min(1)] public int threeStarMin = 20;
+    [Min(1)] public int threeStarMax = 40;
+
+    [Header("가챠 연출")]
     [Min(0f)] public float drawDelay = 0.7f;
     [Min(0f)] public float nextDrawDelay = 0.15f;
 
-    [Header("기존 가챠 버튼")]
+    [Header("가챠 버튼")]
     public GameObject singleDrawButton;
     public GameObject tenDrawButton;
 
-    [Header("기존 가격 UI")]
+    [Header("가챠 가격 UI")]
     public GameObject singlePriceText;
     public GameObject tenPriceText;
 
-    [Header("텍스트 UI")]
+    [Header("UI")]
     public TMP_Text fameText;
     public TMP_Text resultText;
-    [SerializeField] private TMP_Text ownedCountText; // 선택 사항
 
-    [Header("획득 캐릭터 초상화 (선택 사항)")]
-    [SerializeField] private Image resultPortrait;
+    [Header("가챠 결과 패널")]
+    public GameObject resultPanel;
+    public TMP_Text skipButtonText;
+
+    private int[] pendingStars;
+    private int[] pendingAmounts;
+    private bool isShowingSummary;
 
     [Header("테스트 기능")]
-    [Min(0)] public int testRewardAmount = 1200;
+    public int testRewardAmount = 1200;
 
-    private readonly List<BattleUnit> oneStar = new List<BattleUnit>();
-    private readonly List<BattleUnit> twoStar = new List<BattleUnit>();
-    private readonly List<BattleUnit> threeStar = new List<BattleUnit>();
-
-    private int testRenown;
-    private bool isDrawing;
-    private bool initialized;
+    private int testRenown = 0;
+    private bool isDrawing = false;
     private Coroutine drawCoroutine;
     private int lastDisplayedRenown = -1;
-    private int lastDisplayedOwned = -1;
+
+    private void OnEnable()
+    {
+        if (resultPanel != null)
+            resultPanel.SetActive(false);
+
+        SetGachaUI(true);
+    }
 
     private void Start()
     {
+        InventoryStorage.Load();
+
         testRenown = 0;
         isDrawing = false;
+
         SetGachaUI(true);
         SetResult("");
-        if (resultPortrait != null) resultPortrait.enabled = false;
-
-        if (roster == null)
-        {
-            SetResult("GachaManager의 Roster를 지정해 주세요.");
-            Debug.LogError("[가챠] CharacterRosterSO 연결 누락");
-            return;
-        }
-
-        if (!CurrencyManager.TryGrantStarterCharacters(roster))
-        {
-            SetResult("캐릭터 데이터 저장 오류");
-            return;
-        }
-
-        BuildPools();
-        initialized = true;
         UpdateUI(true);
     }
 
@@ -85,240 +77,350 @@ public class GachaManager : MonoBehaviour
         UpdateUI();
     }
 
-    private void BuildPools()
-    {
-        oneStar.Clear();
-        twoStar.Clear();
-        threeStar.Clear();
-
-        if (roster == null || roster.characters == null) return;
-
-        var seenIds = new HashSet<string>();
-        foreach (BattleUnit character in roster.characters)
-        {
-            if (character == null || character.team != Team.Ally ||
-                string.IsNullOrWhiteSpace(character.characterId))
-                continue;
-
-            if (!seenIds.Add(character.characterId))
-            {
-                Debug.LogWarning("[가챠] 중복 characterId: " + character.characterId);
-                continue;
-            }
-
-            switch (character.rarity)
-            {
-                case 1: oneStar.Add(character); break;
-                case 2: twoStar.Add(character); break;
-                case 3: threeStar.Add(character); break;
-                default:
-                    Debug.LogWarning("[가챠] 등급은 1~3이어야 합니다: " + character.unitName);
-                    break;
-            }
-        }
-
-        Debug.Log($"[가챠] 캐릭터 풀: 1성 {oneStar.Count}, 2성 {twoStar.Count}, 3성 {threeStar.Count}");
-    }
-
+    // 실제 명성 + 테스트 명성
     public int GetTotalRenown()
     {
-        int real = Mathf.Max(0, CurrencyManager.GetRenown());
-        long combined = (long)real + testRenown;
-        return (int)System.Math.Min(combined, int.MaxValue);
+        int real = Mathf.Max(
+            0,
+            CurrencyManager.GetRenown()
+        );
+
+        long total = (long)real + testRenown;
+
+        return (int)Mathf.Min(total, int.MaxValue);
     }
 
+    // 테스트 명성 추가
     public void AddTestRenown()
     {
-        if (isDrawing || testRewardAmount <= 0) return;
-        if (testRenown > int.MaxValue - testRewardAmount) return;
+        if (isDrawing || testRewardAmount <= 0)
+            return;
+
+        if (testRenown > int.MaxValue - testRewardAmount)
+            return;
+
         testRenown += testRewardAmount;
+
         UpdateUI(true);
     }
 
+    // 1회 뽑기
     public void DrawOne()
     {
         StartDraw(1, singleDrawCost);
     }
 
+    // 10회 뽑기
     public void DrawTen()
     {
         StartDraw(10, tenDrawCost);
     }
 
-    // 선택 사항: 가챠 화면의 "편성으로 이동" 버튼에 연결하세요.
-    public void OpenFormationScene()
+    // 가챠 시작
+    private void StartDraw(int count, int cost)
     {
-        if (isDrawing) return;
-        SceneManager.LoadScene("PartyFormationScene");
-    }
-
-    private void StartDraw(int count, int price)
-    {
-        if (isDrawing) return;
-        if (!initialized)
-        {
-            SetResult("가챠 초기화 실패: Roster 또는 저장 파일을 확인해 주세요.");
+        if (isDrawing)
             return;
-        }
-        if (roster == null || price <= 0)
-        {
-            SetResult("캐릭터 목록 또는 가챠 가격을 확인해 주세요.");
-            return;
-        }
 
-        if (oneStar.Count + twoStar.Count + threeStar.Count == 0)
-        {
-            SetResult("가챠에 등록된 아군 캐릭터가 없어요.");
+        if (cost <= 0)
             return;
-        }
 
-        if (GetTotalRenown() < price)
+        if (GetTotalRenown() < cost)
         {
             SetResult("명성이 부족합니다!");
             return;
         }
 
+        // 중복 실행 방지
         isDrawing = true;
+
+        // 가챠 버튼과 가격 숨기기
         SetGachaUI(false);
 
-        BattleUnit[] results = new BattleUnit[count];
-        string[] ids = new string[count];
+        // 등급과 지급 수량 저장
+        int[] stars = new int[count];
+        int[] amounts = new int[count];
 
         for (int i = 0; i < count; i++)
         {
-            if (!TryPickCharacter(out BattleUnit character))
-            {
-                CancelDraw("가챠에 등록된 캐릭터가 없습니다.");
-                return;
-            }
-            results[i] = character;
-            ids[i] = character.characterId;
+            int star = GetRandomStar();
+
+            stars[i] = star;
+            amounts[i] = GetRewardAmount(star);
         }
 
-        // 테스트 명성 사용 후 부족한 금액만 실제 명성으로 결제
-        int testSpend = Mathf.Min(testRenown, price);
-        int realSpend = price - testSpend;
+        // 테스트 명성 우선 차감
+        int useTest = Mathf.Min(testRenown, cost);
+        int useReal = cost - useTest;
 
-        if (!CurrencyManager.TrySpendAndUnlockCharacters(realSpend, ids, out bool[] newlyOwned))
+        if (useReal > 0)
         {
-            CancelDraw("명성 차감 또는 캐릭터 저장에 실패했습니다.");
+            if (!RenownControl.Spend(useReal))
+            {
+                CancelDraw("명성 차감 실패!");
+                return;
+            }
+        }
+
+        testRenown -= useTest;
+
+        // JSON 인벤토리에 지급량 저장
+        if (!InventoryStorage.AddRewards(stars, amounts))
+        {
+            testRenown += useTest;
+
+            // 실제 명성 환불 시도
+            if (useReal > 0)
+            {
+                int before = CurrencyManager.GetRenown();
+
+                CurrencyManager.AddRenown(useReal);
+
+                int after = CurrencyManager.GetRenown();
+
+                if ((long)after != (long)before + useReal)
+                {
+                    Debug.LogError(
+                        "가챠 저장 실패 후 명성 환불도 실패했습니다."
+                    );
+                }
+            }
+
+            CancelDraw("인벤토리 저장 실패!");
             return;
         }
 
-        // 저장 성공 이후에 테스트 명성 확정 차감
-        testRenown -= testSpend;
         UpdateUI(true);
-        drawCoroutine = StartCoroutine(DrawCoroutine(results, newlyOwned));
+
+        // 저장한 뽑기 결과를 스킵 버튼에서도 사용
+        pendingStars = stars;
+        pendingAmounts = amounts;
+        isShowingSummary = false;
+
+        if (skipButtonText != null)
+            skipButtonText.text = "스킵";
+
+        if (resultPanel != null)
+            resultPanel.SetActive(true);
+
+        // 가챠 연출 시작
+        drawCoroutine = StartCoroutine(
+            DrawCoroutine(stars, amounts)
+        );
     }
 
-    private bool TryPickCharacter(out BattleUnit character)
+    // 등급별 랜덤 지급 수량
+    private int GetRewardAmount(int star)
     {
-        character = null;
-        int weight1 = oneStar.Count > 0 ? 70 : 0;
-        int weight2 = twoStar.Count > 0 ? 25 : 0;
-        int weight3 = threeStar.Count > 0 ? 5 : 0;
-        int totalWeight = weight1 + weight2 + weight3;
-        if (totalWeight <= 0) return false;
+        int min;
+        int max;
 
-        int roll = Random.Range(0, totalWeight);
-        List<BattleUnit> pool;
-        if (roll < weight1) pool = oneStar;
-        else if (roll < weight1 + weight2) pool = twoStar;
-        else pool = threeStar;
-
-        character = pool[Random.Range(0, pool.Count)];
-        return character != null;
-    }
-
-    private IEnumerator DrawCoroutine(BattleUnit[] results, bool[] newlyOwned)
-    {
-        int newCount = 0;
-        int duplicateCount = 0;
-        var summary = new StringBuilder();
-
-        for (int i = 0; i < results.Length; i++)
+        switch (star)
         {
-            BattleUnit unit = results[i];
-            bool isNew = newlyOwned[i];
-            if (isNew) newCount++;
-            else duplicateCount++;
+            case 1:
+                min = oneStarMin;
+                max = oneStarMax;
+                break;
 
-            SetResult($"{unit.rarity}성 캐릭터 획득!\n{unit.unitName}\n" +
-                      (isNew ? "NEW! 편성에서 사용할 수 있어요." : "이미 보유 중인 중복 캐릭터"));
+            case 2:
+                min = twoStarMin;
+                max = twoStarMax;
+                break;
 
-            if (resultPortrait != null)
-            {
-                resultPortrait.sprite = unit.characterSprite;
-                resultPortrait.enabled = unit.characterSprite != null;
-            }
+            case 3:
+                min = threeStarMin;
+                max = threeStarMax;
+                break;
 
-            summary.AppendLine($"{i + 1}. {unit.rarity}성 {unit.unitName} " +
-                               (isNew ? "[NEW]" : "[중복]"));
+            default:
+                return 1;
+        }
 
-            yield return new WaitForSecondsRealtime(drawDelay);
-            if (i < results.Length - 1)
+        min = Mathf.Max(1, min);
+        max = Mathf.Max(min, max);
+
+        // int Random.Range의 최대값은 미포함
+        // max + 1로 최대 지급량도 포함
+        return Random.Range(min, max + 1);
+    }
+
+    // 가챠 연출
+    private IEnumerator DrawCoroutine(
+        int[] stars,
+        int[] amounts)
+    {
+        SetResult("");
+
+        for (int i = 0; i < stars.Length; i++)
+        {
+            int star = stars[i];
+            int amount = amounts[i];
+
+            SetResult(
+                star + "성 획득!\n" +
+                "획득 개수: " + amount + "개"
+            );
+
+            yield return new WaitForSecondsRealtime(
+                drawDelay
+            );
+
+            if (i < stars.Length - 1)
             {
                 SetResult("");
-                yield return new WaitForSecondsRealtime(nextDrawDelay);
+
+                yield return new WaitForSecondsRealtime(
+                    nextDrawDelay
+                );
             }
         }
 
-        if (results.Length > 1)
-        {
-            SetResult($"10회 뽑기 완료!  신규 {newCount} / 중복 {duplicateCount}\n" +
-                      summary.ToString());
-        }
+        drawCoroutine = null;
+        ShowDrawSummary();
 
-        FinishDraw();
+        // 패널이 연결된 경우 닫기 버튼을 누를 때까지 결과 표시
+        if (resultPanel == null || !resultPanel.activeInHierarchy)
+            FinishDraw();
     }
 
+    // 결과 패널 안 버튼의 On Click()에 연결
+    public void SkipOrCloseResult()
+    {
+        if (!isDrawing || pendingStars == null)
+            return;
+
+        if (isShowingSummary)
+        {
+            if (resultPanel != null)
+                resultPanel.SetActive(false);
+
+            FinishDraw();
+            return;
+        }
+
+        if (drawCoroutine != null)
+        {
+            StopCoroutine(drawCoroutine);
+            drawCoroutine = null;
+        }
+
+        ShowDrawSummary();
+    }
+
+    private void ShowDrawSummary()
+    {
+        if (pendingStars.Length == 1)
+        {
+            SetResult(
+                pendingStars[0] + "성 획득!\n" +
+                "획득 개수: " + pendingAmounts[0] + "개"
+            );
+        }
+        else
+        {
+            long[] totals = new long[4];
+
+            for (int i = 0; i < pendingStars.Length; i++)
+                totals[pendingStars[i]] += pendingAmounts[i];
+
+            SetResult(
+                pendingStars.Length + "회 뽑기 완료!\n" +
+                "1성: " + totals[1] + "개\n" +
+                "2성: " + totals[2] + "개\n" +
+                "3성: " + totals[3] + "개"
+            );
+        }
+
+        isShowingSummary = true;
+
+        if (skipButtonText != null)
+            skipButtonText.text = "닫기";
+    }
+
+    // 가챠 취소
     private void CancelDraw(string message)
     {
         drawCoroutine = null;
         isDrawing = false;
+
         SetGachaUI(true);
         SetResult(message);
         UpdateUI(true);
     }
 
+    // 가챠 종료
     private void FinishDraw()
     {
         drawCoroutine = null;
         isDrawing = false;
+
+        pendingStars = null;
+        pendingAmounts = null;
+        isShowingSummary = false;
+
         SetGachaUI(true);
         UpdateUI(true);
     }
 
+    // 버튼 및 가격 표시
     private void SetGachaUI(bool show)
     {
-        if (singleDrawButton != null) singleDrawButton.SetActive(show);
-        if (tenDrawButton != null) tenDrawButton.SetActive(show);
-        if (singlePriceText != null) singlePriceText.SetActive(show);
-        if (tenPriceText != null) tenPriceText.SetActive(show);
+        if (singleDrawButton != null)
+            singleDrawButton.SetActive(show);
+
+        if (tenDrawButton != null)
+            tenDrawButton.SetActive(show);
+
+        if (singlePriceText != null)
+            singlePriceText.SetActive(show);
+
+        if (tenPriceText != null)
+            tenPriceText.SetActive(show);
     }
 
+    // 가챠 확률
+    private int GetRandomStar()
+    {
+        float random = Random.Range(0f, 100f);
+
+        // 3성 5%
+        if (random < 5f)
+            return 3;
+
+        // 2성 25%
+        if (random < 30f)
+            return 2;
+
+        // 1성 70%
+        return 1;
+    }
+
+    // 결과 텍스트
     private void SetResult(string message)
     {
-        if (resultText != null) resultText.text = message;
+        if (resultText != null)
+        {
+            resultText.text = message;
+        }
     }
 
+    // 명성 UI 갱신
     private void UpdateUI(bool force = false)
     {
-        int renown = GetTotalRenown();
-        if (force || lastDisplayedRenown != renown)
-        {
-            lastDisplayedRenown = renown;
-            if (fameText != null) fameText.text = "명성 : " + renown;
-        }
+        int current = GetTotalRenown();
 
-        int owned = CurrencyManager.GetOwnedCharacterCount();
-        if (force || lastDisplayedOwned != owned)
+        if (!force && current == lastDisplayedRenown)
+            return;
+
+        lastDisplayedRenown = current;
+
+        if (fameText != null)
         {
-            lastDisplayedOwned = owned;
-            if (ownedCountText != null) ownedCountText.text = "보유 캐릭터 : " + owned + "명";
+            fameText.text = "명성 : " + current;
         }
     }
 
+    // 오브젝트 비활성화 시 처리
     private void OnDisable()
     {
         if (drawCoroutine != null)
@@ -326,7 +428,13 @@ public class GachaManager : MonoBehaviour
             StopCoroutine(drawCoroutine);
             drawCoroutine = null;
         }
+
+        pendingStars = null;
+        pendingAmounts = null;
+        isShowingSummary = false;
         isDrawing = false;
-        SetGachaUI(true);
+
+        if (resultPanel != null)
+            resultPanel.SetActive(false);
     }
 }
