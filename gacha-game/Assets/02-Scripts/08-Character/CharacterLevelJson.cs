@@ -38,13 +38,21 @@ public static class CharacterLevelJson
                 if (saved == null || saved.characterId != characterId)
                     continue;
 
-                snapshot.level = Mathf.Max(1, saved.level);
-                snapshot.experience = snapshot.level == int.MaxValue
+                snapshot.level = Mathf.Clamp(
+                    saved.level,
+                    1,
+                    InventoryStorage.MaxCharacterLevel
+                );
+
+                int requiredMaterials =
+                    InventoryStorage.GetRequiredMaterials(snapshot.level);
+
+                snapshot.experience = requiredMaterials == 0
                     ? 0
                     : Mathf.Clamp(
                         saved.experience,
                         0,
-                        InventoryStorage.ExperiencePerLevel - 1
+                        requiredMaterials * InventoryStorage.ExperiencePerMaterial - 1
                     );
 
                 break;

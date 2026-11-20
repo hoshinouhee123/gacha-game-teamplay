@@ -84,12 +84,12 @@ public class CharacterUpgradeUI : MonoBehaviour
 
         int index = star - 1;
         int owned = InventoryStorage.GetItemCount(star);
+        int remaining = InventoryStorage.GetRemainingMaterialsToMaxLevel(
+            selectedCharacterId
+        );
 
-        if (selectedAmounts[index] >= owned ||
-            InventoryStorage.GetCharacterLevel(selectedCharacterId) == int.MaxValue)
-        {
+        if (selectedAmounts[index] >= owned || GetTotalSelected() >= remaining)
             return;
-        }
 
         selectedAmounts[index]++;
         SetMessage("");
@@ -113,13 +113,8 @@ public class CharacterUpgradeUI : MonoBehaviour
 
     public void UpgradeSelectedCharacter()
     {
-        if (selectedCharacterId == 0 ||
-            (selectedAmounts[0] == 0 &&
-             selectedAmounts[1] == 0 &&
-             selectedAmounts[2] == 0))
-        {
+        if (selectedCharacterId == 0 || GetTotalSelected() == 0)
             return;
-        }
 
         if (!InventoryStorage.TryUpgradeWithMaterials(
                 selectedCharacterId, selectedAmounts))
@@ -139,13 +134,26 @@ public class CharacterUpgradeUI : MonoBehaviour
         if (selectedCharacterId == 0)
             return;
 
+        int oneStarOwned = Mathf.Max(0, InventoryStorage.GetItemCount(1));
+        int twoStarOwned = Mathf.Max(0, InventoryStorage.GetItemCount(2));
+        int threeStarOwned = Mathf.Max(0, InventoryStorage.GetItemCount(3));
+
+        selectedAmounts[0] = Mathf.Min(selectedAmounts[0], oneStarOwned);
+        selectedAmounts[1] = Mathf.Min(selectedAmounts[1], twoStarOwned);
+        selectedAmounts[2] = Mathf.Min(selectedAmounts[2], threeStarOwned);
+
+        int totalSelected = GetTotalSelected();
+        int remaining = InventoryStorage.GetRemainingMaterialsToMaxLevel(
+            selectedCharacterId
+        );
+        bool canAddMore = totalSelected < remaining;
+
+        RefreshSlot(oneStarSlot, oneStarOwned, selectedAmounts[0], canAddMore);
+        RefreshSlot(twoStarSlot, twoStarOwned, selectedAmounts[1], canAddMore);
+        RefreshSlot(threeStarSlot, threeStarOwned, selectedAmounts[2], canAddMore);
+
         int level = InventoryStorage.GetCharacterLevel(selectedCharacterId);
         int experience = InventoryStorage.GetCharacterExperience(selectedCharacterId);
-        bool canUpgrade = level < int.MaxValue;
-
-        RefreshSlot(oneStarSlot, 1, canUpgrade);
-        RefreshSlot(twoStarSlot, 2, canUpgrade);
-        RefreshSlot(threeStarSlot, 3, canUpgrade);
 
         InventoryStorage.GetMaterialUpgradePreview(
             selectedCharacterId,
@@ -158,30 +166,26 @@ public class CharacterUpgradeUI : MonoBehaviour
         if (characterText != null)
         {
             characterText.text =
-                $"{GetCharacterName()}\n현재 Lv. {level} · " +
-                $"{experience}/{InventoryStorage.ExperiencePerLevel} EXP";
+                $"{GetCharacterName()}\n현재 {FormatLevelProgress(level, experience)}";
         }
 
         if (materialsText != null)
         {
             materialsText.text =
-                $"획득 예정 +{gainedExperience} EXP\n" +
-                $"강화 후 Lv. {nextLevel} · " +
-                $"{nextExperience}/{InventoryStorage.ExperiencePerLevel} EXP";
+                $"사용 예정 교보재 {totalSelected}개\n" +
+                $"강화 후 {FormatLevelProgress(nextLevel, nextExperience)}";
         }
 
         if (upgradeButton != null)
-            upgradeButton.interactable = canUpgrade && gainedExperience > 0;
+            upgradeButton.interactable = gainedExperience > 0;
     }
 
-    private void RefreshSlot(MaterialSlot slot, int star, bool canUpgrade)
+    private void RefreshSlot(
+        MaterialSlot slot,
+        int owned,
+        int selected,
+        bool canAddMore)
     {
-        int index = star - 1;
-        int owned = Mathf.Max(0, InventoryStorage.GetItemCount(star));
-
-        selectedAmounts[index] = Mathf.Min(selectedAmounts[index], owned);
-        int selected = selectedAmounts[index];
-
         if (slot.slotRoot != null)
             slot.slotRoot.SetActive(owned > 0);
 
@@ -192,17 +196,34 @@ public class CharacterUpgradeUI : MonoBehaviour
             slot.selectedText.text = $"담은 재료 {selected}개";
 
         if (slot.addButton != null)
-            slot.addButton.interactable = canUpgrade && selected < owned;
+            slot.addButton.interactable = canAddMore && selected < owned;
 
         if (slot.removeButton != null)
             slot.removeButton.interactable = selected > 0;
+    }
+
+    private int GetTotalSelected()
+    {
+        return selectedAmounts[0] + selectedAmounts[1] + selectedAmounts[2];
+    }
+
+    private string FormatLevelProgress(int level, int experience)
+    {
+        int required = InventoryStorage.GetRequiredMaterials(level);
+
+        if (required == 0)
+            return $"Lv. {level} · 최대 레벨";
+
+        int progress = experience / InventoryStorage.ExperiencePerMaterial;
+        return $"Lv. {level} · 교보재 {progress} / {required}개";
     }
 
     private string GetCharacterName()
     {
         int index = selectedCharacterId - 1;
 
-        if (characterNames != null && index < characterNames.Length &&
+        if (characterNames != null && index >= 0 &&
+            index < characterNames.Length &&
             !string.IsNullOrWhiteSpace(characterNames[index]))
         {
             return characterNames[index];

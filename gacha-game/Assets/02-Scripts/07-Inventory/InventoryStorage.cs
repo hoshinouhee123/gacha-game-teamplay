@@ -29,10 +29,14 @@ public class InventorySaveData
 public static class InventoryStorage
 {
     public const int CharacterCount = 5;
+    public const int MaxCharacterLevel = 22;
+    public const int ExperiencePerMaterial = 5;
+
+    // 기존 레벨 표시 스크립트에서 참조하는 Lv. 1 기준 EXP
     public const int ExperiencePerLevel = 100;
 
-    // 1성, 2성, 3성 재료 한 개당 경험치
-    private static readonly int[] MaterialExperience = { 10, 25, 50 };
+    private const int MaterialTypeCount = 3;
+    private const int MaterialsPerLevelStep = 20;
 
     private static InventorySaveData data;
     private static bool loaded;
@@ -55,10 +59,12 @@ public static class InventoryStorage
         if (loaded)
             return;
 
+        string path = SavePath;
+        InventorySaveData saved;
+
         try
         {
-            string path = SavePath;
-            InventorySaveData saved = File.Exists(path)
+            saved = File.Exists(path)
                 ? JsonUtility.FromJson<InventorySaveData>(File.ReadAllText(path))
                 : new InventorySaveData();
 
@@ -67,18 +73,20 @@ public static class InventoryStorage
                 Debug.LogError("인벤토리 JSON 형식 오류");
                 return;
             }
-
-            if (saved.characterLevels == null)
-                saved.characterLevels = new List<CharacterLevelData>();
-
-            data = saved;
-            loaded = true;
-            CharacterLevelJson.Sync(data.characterLevels);
         }
         catch (Exception exception)
         {
             Debug.LogError("인벤토리 로드 실패: " + exception.Message);
+            return;
         }
+
+        if (saved.characterLevels == null)
+            saved.characterLevels = new List<CharacterLevelData>();
+
+        data = saved;
+        loaded = true;
+
+        CharacterLevelJson.Sync(data.characterLevels);
     }
 
     public static bool AddStars(int[] stars)
@@ -102,13 +110,13 @@ public static class InventoryStorage
             return false;
         }
 
-        long[] totals = new long[MaterialExperience.Length];
+        long[] totals = new long[MaterialTypeCount];
 
         for (int i = 0; i < stars.Length; i++)
         {
             int star = stars[i];
 
-            if (star < 1 || star > totals.Length || amounts[i] <= 0)
+            if (star < 1 || star > MaterialTypeCount || amounts[i] <= 0)
                 return false;
 
             totals[star - 1] += amounts[i];
@@ -210,25 +218,54 @@ public static class InventoryStorage
             return 1;
 
         CharacterLevelData character = FindCharacter(data, characterId);
-        return character != null ? Mathf.Max(1, character.level) : 1;
+
+        return character == null
+            ? 1
+            : Mathf.Clamp(character.level, 1, MaxCharacterLevel);
+    }
+
+    public static int GetRequiredMaterials(int level)
+    {
+        if (level < 1 || level >= MaxCharacterLevel)
+            return 0;
+
+        return level * MaterialsPerLevelStep;
     }
 
     public static int GetCharacterExperience(int characterId)
     {
-        if (characterId < 1 || characterId > CharacterCount)
-            return 0;
+        int level = GetCharacterLevel(characterId);
+        int requiredMaterials = GetRequiredMaterials(level);
 
-        Load();
-
-        if (!loaded)
+        if (!loaded || requiredMaterials == 0)
             return 0;
 
         CharacterLevelData character = FindCharacter(data, characterId);
 
-        if (character == null || character.level == int.MaxValue)
+        if (character == null)
             return 0;
 
-        return Mathf.Clamp(character.experience, 0, ExperiencePerLevel - 1);
+        int requiredExperience = requiredMaterials * ExperiencePerMaterial;
+        return Mathf.Clamp(character.experience, 0, requiredExperience - 1);
+    }
+
+    public static int GetRemainingMaterialsToMaxLevel(int characterId)
+    {
+        int level = GetCharacterLevel(characterId);
+
+        if (level < 1 || level >= MaxCharacterLevel)
+            return 0;
+
+        int remainingExperience = -GetCharacterExperience(characterId);
+
+        for (int currentLevel = level; currentLevel < MaxCharacterLevel; currentLevel++)
+        {
+            remainingExperience +=
+                GetRequiredMaterials(currentLevel) * ExperiencePerMaterial;
+        }
+
+        return (remainingExperience + ExperiencePerMaterial - 1)
+            / ExperiencePerMaterial;
     }
 
     public static void GetMaterialUpgradePreview(
@@ -238,34 +275,47 @@ public static class InventoryStorage
         out int nextLevel,
         out int nextExperience)
     {
-        gainedExperience = 0;
         nextLevel = GetCharacterLevel(characterId);
         nextExperience = GetCharacterExperience(characterId);
+        gainedExperience = 0;
 
-        if (nextLevel == 0 || nextLevel == int.MaxValue ||
-            amounts == null || amounts.Length != MaterialExperience.Length)
+        if (nextLevel < 1 || nextLevel >= MaxCharacterLevel ||
+            amounts == null || amounts.Length != MaterialTypeCount)
         {
             return;
         }
 
-        long selectedExperience = 0;
+        long materialCount = 0;
 
-        for (int i = 0; i < amounts.Length; i++)
+        foreach (int amount in amounts)
         {
-            if (amounts[i] < 0)
+            if (amount < 0)
                 return;
 
-            selectedExperience += (long)amounts[i] * MaterialExperience[i];
+            materialCount += amount;
         }
 
-        long remainingExperience =
-            (long)(int.MaxValue - nextLevel) * ExperiencePerLevel - nextExperience;
+        if (materialCount > GetRemainingMaterialsToMaxLevel(characterId))
+            return;
 
-        gainedExperience = Math.Min(selectedExperience, remainingExperience);
-
+        gainedExperience = materialCount * ExperiencePerMaterial;
         long totalExperience = nextExperience + gainedExperience;
-        nextLevel += (int)(totalExperience / ExperiencePerLevel);
-        nextExperience = (int)(totalExperience % ExperiencePerLevel);
+
+        while (nextLevel < MaxCharacterLevel)
+        {
+            int requiredExperience =
+                GetRequiredMaterials(nextLevel) * ExperiencePerMaterial;
+
+            if (totalExperience < requiredExperience)
+                break;
+
+            totalExperience -= requiredExperience;
+            nextLevel++;
+        }
+
+        nextExperience = nextLevel == MaxCharacterLevel
+            ? 0
+            : (int)totalExperience;
     }
 
     public static bool TryUpgradeWithMaterials(int characterId, int[] amounts)
@@ -293,7 +343,7 @@ public static class InventoryStorage
         return Save(updated);
     }
 
-    // 기존 고정 비용 강화 코드에서 사용하던 함수
+    // 기존 고정 비용 강화 호출과의 호환용
     public static bool TryUpgradeCharacter(
         int characterId,
         int oneStarCost,
@@ -308,7 +358,7 @@ public static class InventoryStorage
 
         int currentLevel = GetCharacterLevel(characterId);
 
-        if (!loaded || currentLevel == int.MaxValue)
+        if (!loaded || currentLevel >= MaxCharacterLevel)
             return false;
 
         InventorySaveData updated = CopyData();
@@ -320,7 +370,7 @@ public static class InventoryStorage
         CharacterLevelData character = GetOrAddCharacter(updated, characterId);
         character.level = currentLevel + 1;
 
-        if (character.level == int.MaxValue)
+        if (character.level == MaxCharacterLevel)
             character.experience = 0;
 
         return Save(updated);
