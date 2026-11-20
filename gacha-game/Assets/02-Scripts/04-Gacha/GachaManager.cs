@@ -188,6 +188,8 @@ public class GachaManager : MonoBehaviour
 
             CancelDraw("인벤토리 저장 실패!");
             return;
+
+            QuestManager.RecordGacha(stars);
         }
 
         UpdateUI(true);

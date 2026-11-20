@@ -116,13 +116,18 @@ public class CharacterUpgradeUI : MonoBehaviour
         if (selectedCharacterId == 0 || GetTotalSelected() == 0)
             return;
 
-        if (!InventoryStorage.TryUpgradeWithMaterials(
-                selectedCharacterId, selectedAmounts))
+        int characterId = selectedCharacterId;
+        int oldLevel = InventoryStorage.GetCharacterLevel(characterId);
+
+        if (!InventoryStorage.TryUpgradeWithMaterials(characterId, selectedAmounts))
         {
             RefreshPanel();
             SetMessage("강화에 실패했습니다. 재료 수량과 Console을 확인해 주세요.");
             return;
         }
+
+        int newLevel = InventoryStorage.GetCharacterLevel(characterId);
+        QuestManager.RecordCharacterUpgrade(characterId, oldLevel, newLevel);
 
         Array.Clear(selectedAmounts, 0, selectedAmounts.Length);
         RefreshPanel();
